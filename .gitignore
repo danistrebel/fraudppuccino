@@ -1,0 +1,16 @@
+
+*.snapshot
+
+.DS_Store
+
+.cache
+
+.classpath
+
+.project
+
+bin/*
+
+project/target/*
+
+target/*
