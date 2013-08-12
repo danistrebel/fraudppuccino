@@ -33,6 +33,7 @@ trait JsonElement extends Dynamic{ self =>
   def selectDynamic(field: String) : JsonElement = EmptyElement
   def applyDynamic(field: String)(i: Int) : JsonElement = EmptyElement
   def toList : List[JsonElement] = sys.error(s"$this is not a list.")
+  def asInt : Int = sys.error(s"$this has no numeric representation.")
   def asString: String = sys.error(s"$this has no string representation.")
   def length$ : Int = sys.error(s"$this has no length")
 }
@@ -68,6 +69,7 @@ object JsonElement{
  
 case class PrimitiveElement(x: Any) extends JsonElement{
   override def asString = x.toString
+  override def asInt = JsonElement.toInt(this) 
 }
  
 case object EmptyElement extends JsonElement{

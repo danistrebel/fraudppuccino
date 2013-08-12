@@ -23,7 +23,7 @@ object VisualizationProto extends App {
   val pa2 = new PublicAddress(2)
   val pa3 = new PublicAddress(3)
 
-  val tr1 = new Transaction(1001)
+  val tr1 = new Transaction("1001")
   
   graph.addVertex(pa1)
   graph.addVertex(pa2)
