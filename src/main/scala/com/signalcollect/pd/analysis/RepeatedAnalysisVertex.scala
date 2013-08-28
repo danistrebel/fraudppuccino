@@ -32,10 +32,12 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
   /**
    * Pluggable Algorithm definition
    */
-  var algorithm: VertexAlgorithm = null
+  var algorithm: VertexAlgorithm = new DummyVertexAlgorithm
   def setAlgorithmImplementation(algorithmFactory: (RepeatedAnalysisVertex[Id]) => VertexAlgorithm) {
     algorithm = algorithmFactory.apply(this)
   }
+  
+  def removeAlgorithmImplementation = new DummyVertexAlgorithm
 
   /**
    * Holds results from previous computations and makes them available
@@ -43,18 +45,25 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
   var results: collection.mutable.Map[String, Any] = new java.util.HashMap[String, Any](0)
 
   /**
-   * Store the current computational state to make it available to
+   * Store the current computational state to make it available to subsequent computations
    * 
    * @param key unique key to store states on this vertex
    */
   def retainState(key: String) { results.put(key, algorithm.getState) }
 
   /**
+   * Store some computational state to make it available to subsequent computations
+   * 
+   * @param key unique key to store states on this vertex
+   */
+  def storeAttribute(key: String, value: Any) {results.put(key, value)}
+  
+  /**
    * Returns the results from previous computations
    * 
    * @param key Identifier of the state that should be retrieved
    */ 
-  def getResult(key: String): Any = { results.get(key) }
+  def getResult(key: String): Option[Any] = { results.get(key) }
 
   /**
    * Deletes the stored state with the specified key
