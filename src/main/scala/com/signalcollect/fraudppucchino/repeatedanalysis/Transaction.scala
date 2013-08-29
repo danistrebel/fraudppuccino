@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuchino.repeatedanalysis
+package com.signalcollect.fraudppucchino.repeatedanalysis
 
 import com.signalcollect._
 import com.signalcollect.interfaces._

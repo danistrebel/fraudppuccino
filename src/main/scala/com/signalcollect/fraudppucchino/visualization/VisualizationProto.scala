@@ -2,14 +2,10 @@ package com.signalcollect.fraudppucchino.visualization
 
 import com.signalcollect.configuration.GraphConfiguration
 import com.signalcollect.console.ConsoleServer
-import com.signalcollect.GraphBuilder
-import com.signalcollect.DefaultEdge
-import com.signalcollect.StateForwarderEdge
-import com.signalcollect.ExecutionConfiguration
+import com.signalcollect._
 import com.signalcollect.configuration.ExecutionMode
-import com.signalcollect.examples.PageRankVertex
-import com.signalcollect.examples.PageRankEdge 
-import com.signalcollect.fraudppuchino.repeatedanalysis.RepeatedAnalysisVertex
+import com.signalcollect.examples._ 
+import com.signalcollect.fraudppucchino.repeatedanalysis.RepeatedAnalysisVertex
 
 object VisualizationProto extends App {
 

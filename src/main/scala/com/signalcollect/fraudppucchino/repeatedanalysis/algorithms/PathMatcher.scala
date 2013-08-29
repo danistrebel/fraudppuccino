@@ -1,7 +1,7 @@
-package com.signalcollect.fraudppuchino.repeatedanalysis.algorithms
+package com.signalcollect.fraudppucchino.repeatedanalysis.algorithms
 
 import com.signalcollect._
-import com.signalcollect.fraudppuchino.repeatedanalysis._
+import com.signalcollect.fraudppucchino.repeatedanalysis._
 
 class PathMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 

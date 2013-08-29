@@ -1,8 +1,7 @@
-package com.signalcollect.fraudppuchino.repeatedanalysis.algorithms
+package com.signalcollect.fraudppucchino.repeatedanalysis.algorithms
 
 import com.signalcollect._
-import com.signalcollect.fraudppuchino.repeatedanalysis.VertexAlgorithm
-import com.signalcollect.fraudppuchino.repeatedanalysis.RepeatedAnalysisVertex
+import com.signalcollect.fraudppucchino.repeatedanalysis._
 
 class SSSPAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 

@@ -16,7 +16,7 @@
  *  limitations under the License.
  *
  */
-package com.signalcollect.fraudppuchino.repeatedanalysis
+package com.signalcollect.fraudppucchino.repeatedanalysis
 
 import com.signalcollect.Vertex
 import com.signalcollect.GraphEditor

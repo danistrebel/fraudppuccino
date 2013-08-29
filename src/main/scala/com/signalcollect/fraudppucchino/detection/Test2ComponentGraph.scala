@@ -5,8 +5,8 @@ import com.signalcollect.GraphBuilder
 import scala.io.Source
 import com.signalcollect.Vertex
 import scala.collection.mutable.Map
-import com.signalcollect.fraudppuchino.repeatedanalysis.VertexAlgorithm
-import com.signalcollect.fraudppuchino.repeatedanalysis.RepeatedAnalysisVertex
+import com.signalcollect.fraudppucchino.repeatedanalysis.VertexAlgorithm
+import com.signalcollect.fraudppucchino.repeatedanalysis.RepeatedAnalysisVertex
 
 object Test2ComponentGraph extends App {
 
