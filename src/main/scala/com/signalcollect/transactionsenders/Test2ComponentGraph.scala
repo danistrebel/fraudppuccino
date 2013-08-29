@@ -25,20 +25,23 @@ object Test2ComponentGraph extends App {
     graph.addVertex(account)
   }
 
+  //loadTransactions("datasets/demoGraphInput1.txt")
   loadTransactions("datasets/gnutella.input")
 
+  
   // Step 1: Link Transactions iff they belong together in some way
   accounts.values.foreach(_.setAlgorithmImplementation(signalMultiplexig))
   transactions.values.foreach(_.setAlgorithmImplementation(transactionLinking))
+  graph.recalculateScores
 
   println(graph.execute)
+  //transactions.foreach(println(_))
 
   // Step 2: Find Interlinked Patterns 
   // Maybe one could use the idea of pattern matching here..
   accounts.values.foreach(_.removeAlgorithmImplementation)
   transactions.values.foreach(_.setAlgorithmImplementation(chainfinder))
-  
-  graph.recalculateScores
+
   graph.execute
 
   // IO Utility function
