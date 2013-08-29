@@ -1,7 +1,7 @@
-package com.signalcollect.transactionsenders
+package com.signalcollect.fraudppucchino.detection
 
 import com.signalcollect.DataGraphVertex
-import com.signalcollect.pd.analysis.VertexAlgorithm
+import com.signalcollect.fraudppuchino.repeatedanalysis.VertexAlgorithm
 import com.signalcollect._
 import java.util.HashSet
 

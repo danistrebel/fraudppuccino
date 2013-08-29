@@ -1,10 +1,12 @@
-package com.signalcollect.transactionsenders
+package com.signalcollect.fraudppucchino.detection
 
-import com.signalcollect.pd.analysis._
+import com.signalcollect.fraudppuchino.repeatedanalysis._
 import com.signalcollect.GraphBuilder
 import scala.io.Source
 import com.signalcollect.Vertex
 import scala.collection.mutable.Map
+import com.signalcollect.fraudppuchino.repeatedanalysis.VertexAlgorithm
+import com.signalcollect.fraudppuchino.repeatedanalysis.RepeatedAnalysisVertex
 
 object Test2ComponentGraph extends App {
 

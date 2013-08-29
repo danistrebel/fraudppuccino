@@ -1,4 +1,4 @@
-package com.signalcollect.transactionsenders
+package com.signalcollect.fraudppucchino.detection
 
 import com.signalcollect.DefaultEdge
 

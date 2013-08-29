@@ -1,10 +1,7 @@
-package com.signalcollect.pd.algorithms
+package com.signalcollect.fraudppuchino.repeatedanalysis.algorithms
 
-import com.signalcollect.pd.analysis.RepeatedAnalysisVertex
-import com.signalcollect.pd.analysis.VertexAlgorithm
-import com.signalcollect.GraphEditor
-import com.signalcollect.Edge
-import com.signalcollect.Vertex
+import com.signalcollect._
+import com.signalcollect.fraudppuchino.repeatedanalysis._
 
 class PathMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 

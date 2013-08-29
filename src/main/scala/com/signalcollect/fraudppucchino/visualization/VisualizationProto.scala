@@ -1,16 +1,15 @@
-package com.signalcollect.btc.visualization
+package com.signalcollect.fraudppucchino.visualization
 
 import com.signalcollect.configuration.GraphConfiguration
 import com.signalcollect.console.ConsoleServer
 import com.signalcollect.GraphBuilder
-import com.signalcollect.btc.transactiongraph.PublicAddress
-import com.signalcollect.btc.transactiongraph.Transaction
 import com.signalcollect.DefaultEdge
 import com.signalcollect.StateForwarderEdge
 import com.signalcollect.ExecutionConfiguration
 import com.signalcollect.configuration.ExecutionMode
 import com.signalcollect.examples.PageRankVertex
 import com.signalcollect.examples.PageRankEdge 
+import com.signalcollect.fraudppuchino.repeatedanalysis.RepeatedAnalysisVertex
 
 object VisualizationProto extends App {
 
@@ -19,11 +18,11 @@ object VisualizationProto extends App {
 
   val graph = GraphBuilder.withConsole(true, 8081, "html/detective.html").build
   
-  val pa1 = new PublicAddress(1)
-  val pa2 = new PublicAddress(2)
-  val pa3 = new PublicAddress(3)
+  val pa1 = new RepeatedAnalysisVertex(1)
+  val pa2 = new RepeatedAnalysisVertex(2)
+  val pa3 = new RepeatedAnalysisVertex(3)
 
-  val tr1 = new Transaction("1001")
+  val tr1 = new RepeatedAnalysisVertex(1001)
   
   graph.addVertex(pa1)
   graph.addVertex(pa2)

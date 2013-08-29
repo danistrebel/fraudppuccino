@@ -1,8 +1,8 @@
-package com.signalcollect.pd.algorithms
+package com.signalcollect.fraudppuchino.repeatedanalysis.algorithms
 
 import com.signalcollect._
-import com.signalcollect.pd.analysis.VertexAlgorithm
-import com.signalcollect.pd.analysis.RepeatedAnalysisVertex
+import com.signalcollect.fraudppuchino.repeatedanalysis.VertexAlgorithm
+import com.signalcollect.fraudppuchino.repeatedanalysis.RepeatedAnalysisVertex
 import scala.collection.JavaConversions.mapAsScalaMap
 
 class PageRankAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {

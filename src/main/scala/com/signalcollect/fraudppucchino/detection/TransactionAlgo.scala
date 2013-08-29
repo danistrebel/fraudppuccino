@@ -1,8 +1,8 @@
-package com.signalcollect.transactionsenders
+package com.signalcollect.fraudppucchino.detection
 
 import com.signalcollect._
-import com.signalcollect.pd.analysis.VertexAlgorithm
-import com.signalcollect.pd.analysis.RepeatedAnalysisVertex
+import com.signalcollect.fraudppuchino.repeatedanalysis.VertexAlgorithm
+import com.signalcollect.fraudppuchino.repeatedanalysis.RepeatedAnalysisVertex
 import scala.collection.mutable.LinkedList
 import scala.collection.mutable.ArrayBuffer
 

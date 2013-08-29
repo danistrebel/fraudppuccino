@@ -16,12 +16,12 @@
  *  limitations under the License.
  *
  */
-package com.signalcollect.pd.analysis
+package com.signalcollect.fraudppuchino.repeatedanalysis
 
 import com.signalcollect.Vertex
 import com.signalcollect.GraphEditor
 import com.signalcollect.Edge
-import scala.collection.JavaConversions.mapAsScalaMap
+import scala.collection.JavaConversions._ 
 
 /**
  * This Vertex aims to facilitate the repeated execution of possibly different computations on the

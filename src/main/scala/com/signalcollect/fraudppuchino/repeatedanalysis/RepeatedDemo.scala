@@ -1,8 +1,8 @@
-package com.signalcollect.pd.analysis
+package com.signalcollect.fraudppuchino.repeatedanalysis
 
 import com.signalcollect._
-import com.signalcollect.pd.algorithms.SSSPAlgorithm
-import com.signalcollect.pd.algorithms.PageRankAlgorithm
+import com.signalcollect.fraudppuchino.repeatedanalysis.algorithms._
+
 
 object RepeatedDemo extends App {
   var ssspAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new SSSPAlgorithm(vertex)
