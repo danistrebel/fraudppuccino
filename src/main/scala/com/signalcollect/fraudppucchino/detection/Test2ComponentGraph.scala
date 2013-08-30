@@ -1,6 +1,6 @@
 package com.signalcollect.fraudppucchino.detection
 
-import com.signalcollect.fraudppuchino.repeatedanalysis._
+import com.signalcollect.fraudppucchino.repeatedanalysis._
 import com.signalcollect.GraphBuilder
 import scala.io.Source
 import com.signalcollect.Vertex
@@ -11,9 +11,8 @@ import com.signalcollect.fraudppucchino.repeatedanalysis.RepeatedAnalysisVertex
 object Test2ComponentGraph extends App {
 
   //Vertex algorithms uses in the computation
-  var signalMultiplexig: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new SignalMultiplexer(vertex)
-  def transactionLinking: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionLinker(vertex)
-  def chainfinder: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new ChainFinder(vertex)
+  val signalMultiplexig: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new SignalMultiplexer(vertex)
+  val transactionLinking: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionLinker(vertex)
 
   // Step 0: Build the Graph
   val accounts = Map[Int, RepeatedAnalysisVertex[_]]()
@@ -41,8 +40,7 @@ object Test2ComponentGraph extends App {
 
   // Step 2: Find Interlinked Patterns 
   // Maybe one could use the idea of pattern matching here..
-  accounts.values.foreach(_.removeAlgorithmImplementation)
-  transactions.values.foreach(_.setAlgorithmImplementation(chainfinder))
+  
 
   graph.execute
 

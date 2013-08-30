@@ -11,7 +11,7 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   val candidateInputs = new ArrayBuffer[TransactionSignature]()
 
   val value = vertex.getResult("value").getOrElse(0).asInstanceOf[Int]
-  val time = vertex.getResult("value").getOrElse(0).asInstanceOf[Int]
+  val time = vertex.getResult("time").getOrElse(0).asInstanceOf[Int]
 
   def getState = None
 
@@ -74,7 +74,7 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
    * Combines one or more incoming transactions of a node if they could be the source of this transaction
    */
   def findAllMatchingInputs: Iterable[List[TransactionSignature]] = {
-    val allSuitableInputs = candidateInputs.filter(_.value < this.value)
+    val allSuitableInputs = candidateInputs.filter(_.value <= this.value)
     val subsets = allSuitableInputs.toSet.subsets
     subsets.toList.map(_.toList).filter(txCombo => areWithinTimeWindow(txCombo) && sumsUpToThisValue(txCombo))
   }
