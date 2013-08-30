@@ -71,7 +71,7 @@ object PatternIdentificationSpec extends SpecificationWithJUnit {
       tx0.outgoingEdges.map(_._2).size === 2
     }
 
-    " detect aggrefations of patterns" in {
+    " detect aggregations of patterns" in {
 
       // Graph:
       // -----------------------------------
