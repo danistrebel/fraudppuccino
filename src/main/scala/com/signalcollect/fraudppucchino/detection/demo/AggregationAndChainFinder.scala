@@ -56,7 +56,7 @@ object Test2ComponentGraph extends App {
       val targetAccountId = splitted(1).toInt
       val value = splitted(2).toInt
       val time = try {
-        splitted(3).toLong
+        splitted(3).toInt
       } catch {
         case e: Exception => 0
       }
