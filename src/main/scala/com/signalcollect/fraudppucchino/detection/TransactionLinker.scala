@@ -43,7 +43,7 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
 
   /**
    * Initially signal the transactions signature to its receiver
-   */ 
+   */
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]]) {
     for (edge <- outgoingEdges) {
       graphEditor.sendSignal(inputSignature, edge.targetId, Some(edge.id.sourceId))
@@ -52,37 +52,39 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   }
 
   /**
-   * Try to match the incoming signals and compute outputs and/or inputs of this transaction  
+   * Try to match the incoming signals and compute outputs and/or inputs of this transaction
    */
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
-    
+
     //split inputs in candidates for (chains/aggregations, splits)
     val inOutTuple = candidateInputs.partition(_.value <= this.value)
 
     //send split candidates for evaluation at the splitter
     for (splitCandidate <- inOutTuple._2) {
-    	graphEditor.sendSignal(outputSignature, splitCandidate.transactionID, Some(vertex.id))      
+      graphEditor.sendSignal(outputSignature, splitCandidate.transactionID, Some(vertex.id))
     }
     candidateInputs --= inOutTuple._2
-    
+
     //test for inputs that this transaction can be composed of and link them (this transaction acts as chain element or aggregator)
     val matchingInputs = findAllMatchingSignals(inOutTuple._1)
     if (!matchingInputs.isEmpty) {
       for (txSignature <- matchingInputs.head) {
-        graphEditor.addEdge(txSignature.transactionID, new TransactionPatternEdge(vertex.id.asInstanceOf[Int]))
+        graphEditor.addEdge(txSignature.transactionID, new DownstreamTransactionPatternEdge(vertex.id.asInstanceOf[Int]))
+        graphEditor.addEdge(vertex.id, new UpstreamTransactionPatternEdge(txSignature.transactionID))
         candidateInputs -= txSignature.asInstanceOf[TransactionInput]
       }
     }
-    
+
     //test for outputs that can be summed up to this transaction (transaction acts as a splitter)
     val matchingOutputs = findAllMatchingSignals(candidateOutputs)
     if (!matchingOutputs.isEmpty) {
       for (txSignature <- matchingOutputs.head) {
-        graphEditor.addEdge(vertex.id, new TransactionPatternEdge(txSignature.transactionID))
+        graphEditor.addEdge(vertex.id, new DownstreamTransactionPatternEdge(txSignature.transactionID))
+        graphEditor.addEdge(txSignature.transactionID, new UpstreamTransactionPatternEdge(vertex.id.asInstanceOf[Int]))
         candidateOutputs -= txSignature.asInstanceOf[TransactionOutput]
       }
     }
-    
+
     scoreCollect = 0.0
   }
 
@@ -111,7 +113,7 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   /**
    * Inputs have to happen before or immediately with this transaction.
    * Inputs are considered within the window size.
-   */ 
+   */
   def isIsPossibleInputByTime(inputCandidate: TransactionInput, windowSize: Int = 5): Boolean = {
     this.time - inputCandidate.time < windowSize && this.time - inputCandidate.time >= 0
   }
