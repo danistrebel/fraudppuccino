@@ -8,7 +8,8 @@ import scala.collection.mutable.ArrayBuffer
 
 class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
-  val candidateInputs = new ArrayBuffer[TransactionSignature]()
+  val candidateInputs = new ArrayBuffer[TransactionInput]()
+  val candidateOutputs = new ArrayBuffer[TransactionOutput]()
 
   val value = vertex.getResult("value").getOrElse(0).asInstanceOf[Int]
   val time = vertex.getResult("time").getOrElse(0).asInstanceOf[Int]
@@ -21,11 +22,18 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case txSignature: TransactionSignature => {
-        if (candidateInputs.size < 7) { //To make sure we don't explode
-          candidateInputs.append(txSignature)
+      case txInput: TransactionInput => {
+        if (isIsPossibleInputByTime(txInput) && candidateInputs.size < 7) { //To make sure we don't explode
+          candidateInputs.append(txInput)
+          scoreCollect = 1.0
         }
-        scoreCollect = 1.0
+        false
+      }
+      case txOutput: TransactionOutput => {
+        if (candidateOutputs.size < 7) { //To make sure we don't explode
+          candidateOutputs.append(txOutput)
+          scoreCollect = 1.0
+        }
         false
       }
       case _ => throw new Exception("Signal Type not compatible")
@@ -33,27 +41,48 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
 
   }
 
+  /**
+   * Initially signal the transactions signature to its receiver
+   */ 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]]) {
     for (edge <- outgoingEdges) {
-      graphEditor.sendSignal(signature, edge.targetId, Some(edge.id.sourceId))
+      graphEditor.sendSignal(inputSignature, edge.targetId, Some(edge.id.sourceId))
     }
     scoreSignal = 0.0
   }
 
   /**
-   *
+   * Try to match the incoming signals and compute outputs and/or inputs of this transaction  
    */
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
-    val matched = new ArrayBuffer[TransactionSignature]()
-    val matchingInputs = findAllMatchingInputs
+    
+    //split inputs in candidates for (chains/aggregations, splits)
+    val inOutTuple = candidateInputs.partition(_.value <= this.value)
+
+    //send split candidates for evaluation at the splitter
+    for (splitCandidate <- inOutTuple._2) {
+    	graphEditor.sendSignal(outputSignature, splitCandidate.transactionID, Some(vertex.id))      
+    }
+    candidateInputs --= inOutTuple._2
+    
+    //test for inputs that this transaction can be composed of and link them (this transaction acts as chain element or aggregator)
+    val matchingInputs = findAllMatchingSignals(inOutTuple._1)
     if (!matchingInputs.isEmpty) {
       for (txSignature <- matchingInputs.head) {
         graphEditor.addEdge(txSignature.transactionID, new TransactionPatternEdge(vertex.id.asInstanceOf[Int]))
-        matched += txSignature
+        candidateInputs -= txSignature.asInstanceOf[TransactionInput]
       }
     }
-    candidateInputs --= matched
-
+    
+    //test for outputs that can be summed up to this transaction (transaction acts as a splitter)
+    val matchingOutputs = findAllMatchingSignals(candidateOutputs)
+    if (!matchingOutputs.isEmpty) {
+      for (txSignature <- matchingOutputs.head) {
+        graphEditor.addEdge(vertex.id, new TransactionPatternEdge(txSignature.transactionID))
+        candidateOutputs -= txSignature.asInstanceOf[TransactionOutput]
+      }
+    }
+    
     scoreCollect = 0.0
   }
 
@@ -68,28 +97,29 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   /**
    * A compact representation of this Transaction.
    */
-  lazy val signature: TransactionSignature = TransactionSignature(vertex.id.asInstanceOf[Int], this.value, this.time)
+  lazy val inputSignature: TransactionInput = TransactionInput(vertex.id.asInstanceOf[Int], this.value, this.time)
+  lazy val outputSignature: TransactionOutput = TransactionOutput(vertex.id.asInstanceOf[Int], this.value, this.time)
 
   /**
    * Combines one or more incoming transactions of a node if they could be the source of this transaction
    */
-  def findAllMatchingInputs: Iterable[List[TransactionSignature]] = {
-    val allSuitableInputs = candidateInputs.filter(_.value <= this.value)
-    val subsets = allSuitableInputs.toSet.subsets
-    subsets.toList.map(_.toList).filter(txCombo => areWithinTimeWindow(txCombo) && sumsUpToThisValue(txCombo))
+  def findAllMatchingSignals(candidates: Iterable[TransactionSignal]): Iterable[List[TransactionSignal]] = {
+    val subsets = candidates.toSet.subsets
+    subsets.toList.map(_.toList).filter(txCombo => sumsUpToThisValue(txCombo))
   }
 
   /**
-   * Matching combinations of transactions that preceded this transaction by max #windowsize days.
+   * Inputs have to happen before or immediately with this transaction.
+   * Inputs are considered within the window size.
    */ 
-  def areWithinTimeWindow(combination: Iterable[TransactionSignature], windowSize: Int = 5): Boolean = {
-    combination.forall(otherTx => this.time - otherTx.time < windowSize && this.time - otherTx.time >= 0)
+  def isIsPossibleInputByTime(inputCandidate: TransactionInput, windowSize: Int = 5): Boolean = {
+    this.time - inputCandidate.time < windowSize && this.time - inputCandidate.time >= 0
   }
- 
+
   /**
    * Matching combinations have to sum up to the value of this transaction
    */
-  def sumsUpToThisValue(combination: List[TransactionSignature], tolerance: Float = 0.1f): Boolean = {
+  def sumsUpToThisValue(combination: List[TransactionSignal], tolerance: Float = 0.1f): Boolean = {
     matchesThisValue(combination.foldLeft(0.0)(_ + _.value), tolerance)
   }
 

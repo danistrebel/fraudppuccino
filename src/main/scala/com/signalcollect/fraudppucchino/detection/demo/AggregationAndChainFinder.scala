@@ -6,9 +6,7 @@ import scala.io.Source
 import scala.collection.mutable.Map
 import com.signalcollect.fraudppucchino.repeatedanalysis.VertexAlgorithm
 import com.signalcollect.fraudppucchino.repeatedanalysis.RepeatedAnalysisVertex
-import com.signalcollect.fraudppucchino.detection.SignalMultiplexer
-import com.signalcollect.fraudppucchino.detection.TransactionEdge
-import com.signalcollect.fraudppucchino.detection.TransactionLinker
+import com.signalcollect.fraudppucchino.detection._
 
 object Test2ComponentGraph extends App {
 
@@ -44,7 +42,7 @@ object Test2ComponentGraph extends App {
   // Maybe one could use the idea of pattern matching here..
   
 
-  graph.execute
+  println("PatternEdges " + transactions.values.count(_.outgoingEdges.filter(_._2.isInstanceOf[TransactionPatternEdge]).nonEmpty))
 
   // IO Utility function
   def loadTransactions(filename: String) {

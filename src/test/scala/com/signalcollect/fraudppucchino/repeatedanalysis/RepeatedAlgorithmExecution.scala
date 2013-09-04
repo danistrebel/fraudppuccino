@@ -2,7 +2,6 @@ package com.signalcollect.fraudppucchino.repeatedanalysis
 
 import org.specs2.mutable._
 import com.signalcollect.GraphBuilder
-import com.signalcollect.fraudppucchino.repeatedanalysis.RepeatedAnalysisVertex
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import com.signalcollect.fraudppucchino.repeatedanalysis.algorithms.SSSPAlgorithm
@@ -10,7 +9,7 @@ import com.signalcollect.StateForwarderEdge
 import com.signalcollect.fraudppucchino.repeatedanalysis.algorithms.PageRankAlgorithm
 
 @RunWith(classOf[JUnitRunner])
-object RepeatedAlgorithmExecution extends SpecificationWithJUnit {
+class RepeatedAlgorithmExecution extends SpecificationWithJUnit {
   "Repeated Analysis Algorithms" should {
 
     sequential
