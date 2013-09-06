@@ -1,3 +1,7 @@
+import AssemblyKeys._
+
+assemblySettings
+
 name := "signal-collect-detective"
 
 version := "0.0.1-SNAPSHOT"
@@ -13,3 +17,5 @@ libraryDependencies ++= Seq(
  "org.specs2" % "classycle" % "1.4.1" % "test",
  "org.mockito" % "mockito-all" % "1.9.0"  % "test"
 )
+
+jarName in assembly := "fraudppucchino.jar"
