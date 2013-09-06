@@ -1,4 +1,4 @@
-package com.signalcollection.fraudppucchino.evaluation.btc
+package com.signalcollect.fraudppucchino.evaluation.btc
 
 import org.specs2.mutable._
 import com.signalcollect.GraphBuilder

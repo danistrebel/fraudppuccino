@@ -1,4 +1,4 @@
-package com.signalcollection.fraudppucchino.evaluation.btc
+package com.signalcollect.fraudppucchino.evaluation.btc
 
 import com.signalcollect._
 import scala.io.Source
