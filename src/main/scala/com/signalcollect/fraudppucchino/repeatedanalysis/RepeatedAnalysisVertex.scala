@@ -100,9 +100,7 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
 
   def removeAllEdges(graphEditor: GraphEditor[Any, Any]): Int = {
     val edgesRemoved = outgoingEdges.size
-    for (outgoingEdge <- outgoingEdges.keys) {
-      removeEdge(outgoingEdge, graphEditor)
-    }
+    outgoingEdges.clear()
     edgesRemoved
   }
 

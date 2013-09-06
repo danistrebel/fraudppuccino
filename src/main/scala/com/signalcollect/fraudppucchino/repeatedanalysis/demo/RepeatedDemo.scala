@@ -1,7 +1,9 @@
-package com.signalcollect.fraudppucchino.repeatedanalysis
+package com.signalcollect.fraudppucchino.repeatedanalysis.demo
 
 import com.signalcollect._
 import com.signalcollect.fraudppucchino.repeatedanalysis.algorithms._
+import com.signalcollect.fraudppucchino.repeatedanalysis.RepeatedAnalysisVertex
+import com.signalcollect.fraudppucchino.repeatedanalysis.VertexAlgorithm
 
 
 object RepeatedDemo extends App {

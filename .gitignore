@@ -15,3 +15,5 @@ project/target/*
 
 target/*
 /bin
+log_messages.txt
+

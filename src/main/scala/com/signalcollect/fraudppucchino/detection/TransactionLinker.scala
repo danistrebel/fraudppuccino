@@ -11,8 +11,8 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   val candidateInputs = new ArrayBuffer[TransactionInput]()
   val candidateOutputs = new ArrayBuffer[TransactionOutput]()
 
-  val value = vertex.getResult("value").getOrElse(0).asInstanceOf[Int]
-  val time = vertex.getResult("time").getOrElse(0).asInstanceOf[Int]
+  val value = vertex.getResult("value").getOrElse(0.0).asInstanceOf[Double]
+  val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]
 
   def getState = None
 
