@@ -37,7 +37,7 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
     algorithm = algorithmFactory.apply(this)
   }
   
-  def removeAlgorithmImplementation = new DummyVertexAlgorithm
+  def removeAlgorithmImplementation = algorithm = new DummyVertexAlgorithm
 
   /**
    * Holds results from previous computations and makes them available
