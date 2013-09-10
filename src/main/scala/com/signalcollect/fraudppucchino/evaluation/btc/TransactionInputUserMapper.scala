@@ -31,7 +31,7 @@ object TransactionInputUserMapper extends App {
     val time = splitted(2).toLong
     try {
       val inputUserId = transactionToUserMapper.get(tx).get
-      userTransactions.write(tx)
+      userTransactions.writeInt(tx)
       userTransactions.writeInt(inputUserId)
       userTransactions.writeUTF(hashCode)
       userTransactions.writeLong(time)

@@ -34,8 +34,8 @@ object TransactionRecipientMapper extends App {
       val outAddress = splitted(1).toInt
       val userId = addressToUserMapper.get(outAddress).getOrElse(outAddress)
       val hashCode = splitted(2).toString().substring(1, splitted(2).length - 1)
-      userTransactions.write(tx)
-      userTransactions.write(userId)
+      userTransactions.writeInt(tx)
+      userTransactions.writeInt(userId)
       userTransactions.writeUTF(hashCode)
       userTransactions.writeLong(value)
       userTransactionsPlainText.write(tx + "," + userId + "," + hashCode + "," + value + "\n")
