@@ -34,9 +34,9 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
 
       val transactions = List(tx0, tx1, tx2)
 
-      val transactionInfos = List((tx0, 250.0, 0l, 0, 1l),
-        (tx1, 250.0, 1l, 1, 2l),
-        (tx2, 100.0, 1l, 1, 3))
+      val transactionInfos = List((tx0, 250l, 0l, 0, 1l),
+        (tx1, 250l, 1l, 1, 2l),
+        (tx2, 100l, 1l, 1, 3))
 
       for (account <- accounts) {
         account.setAlgorithmImplementation(vertex => new SignalMultiplexer(vertex))
@@ -97,10 +97,10 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
 
       val transactions = List(tx0, tx1, tx2, tx3)
 
-      val transactionInfos = List((tx0, 50.0, 0l, 0, 1),
-        (tx1, 250.0, 2l, 1, 2),
-        (tx2, 200.0, 1l, 3, 1),
-        (tx3, 100.0, 1l, 4, 1))
+      val transactionInfos = List((tx0, 50l, 0l, 0, 1),
+        (tx1, 250l, 2l, 1, 2),
+        (tx2, 200l, 1l, 3, 1),
+        (tx3, 100l, 1l, 4, 1))
 
       for (account <- accounts) {
         account.setAlgorithmImplementation(vertex => new SignalMultiplexer(vertex))
@@ -164,10 +164,10 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
 
       val transactions = List(tx0, tx1, tx2, tx3)
 
-      val transactionInfos = List((tx0, 200.0, 0l, 0, 1),
-        (tx1, 150.0, 2l, 1, 2),
-        (tx2, 50.0, 3l, 1, 3),
-        (tx3, 100.0, 1l, 4, 1))
+      val transactionInfos = List((tx0, 200l, 0l, 0, 1),
+        (tx1, 150l, 2l, 1, 2),
+        (tx2, 50l, 3l, 1, 3),
+        (tx3, 100l, 1l, 4, 1))
 
       for (account <- accounts) {
         account.setAlgorithmImplementation(vertex => new SignalMultiplexer(vertex))

@@ -11,7 +11,7 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   val candidateInputs = new ArrayBuffer[TransactionInput]()
   val candidateOutputs = new ArrayBuffer[TransactionOutput]()
 
-  val value = vertex.getResult("value").getOrElse(0.0).asInstanceOf[Double]
+  val value = vertex.getResult("value").getOrElse(0l).asInstanceOf[Long]
   val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]
 
   def getState = None
@@ -114,8 +114,8 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
    * Inputs have to happen before or immediately with this transaction.
    * Inputs are considered within the window size.
    */
-  def isIsPossibleInputByTime(inputCandidate: TransactionInput, windowSize: Int = 5): Boolean = {
-    this.time - inputCandidate.time < windowSize && this.time - inputCandidate.time >= 0
+  def isIsPossibleInputByTime(inputCandidate: TransactionInput, windowSize: Long = 432000l): Boolean = {
+     this.time - inputCandidate.time >= 0 && this.time - inputCandidate.time < windowSize
   }
 
   /**
