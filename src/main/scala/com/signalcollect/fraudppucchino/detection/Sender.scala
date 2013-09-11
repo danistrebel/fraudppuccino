@@ -5,7 +5,10 @@ import com.signalcollect.fraudppucchino.repeatedanalysis.VertexAlgorithm
 import com.signalcollect._
 import java.util.HashSet
 
-
+/**
+ * Simple VertexAlgorithm implementation that takes whatever signal
+ * it receives and multiplexes it along all its outgoing edges.
+ */ 
 class SignalMultiplexer(vertex : Vertex[_,_]) extends VertexAlgorithm {
   
   val signalsReceived = new HashSet[Any]

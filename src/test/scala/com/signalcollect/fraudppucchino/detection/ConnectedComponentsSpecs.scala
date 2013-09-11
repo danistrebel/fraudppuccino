@@ -64,7 +64,7 @@ class ConnectedComponentsSpecs extends SpecificationWithJUnit {
       graph.execute
       
       for(tx <- transactions) {
-        tx.setAlgorithmImplementation(vertex => new ConnectedComponentsFinder(vertex))
+        tx.setAlgorithmImplementation(vertex => new ConnectedComponentsIdentifier(vertex))
       }
       
       for(account <- accounts) {

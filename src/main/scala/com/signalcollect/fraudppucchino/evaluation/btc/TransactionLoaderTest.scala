@@ -5,6 +5,7 @@ import com.signalcollect.GraphBuilder
 import com.signalcollect.fraudppucchino.repeatedanalysis._
 import com.signalcollect.fraudppucchino.detection._
 import scala.util.control.Breaks._
+import scala.collection.mutable.HashMap
 
 object TransactionLoaderTest extends App {
 
@@ -18,7 +19,7 @@ object TransactionLoaderTest extends App {
     for (line <- Source.fromFile("/Volumes/Data/BTC_August2013/user-user-tx.csv").getLines) {
       val splitted = line.split(",")
 
-      if (splitted(0).toInt >= 350000) {
+      if (splitted(0).toInt >= 200000) {
         break
       }
 
@@ -54,9 +55,49 @@ object TransactionLoaderTest extends App {
     System.gc
   }
   println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / mb)
-
+  
+  graph.recalculateScores
   println(graph.execute)
   
+  graph.foreachVertex(v => {
+    if(v.id.asInstanceOf[Int]<0) {
+      v.asInstanceOf[RepeatedAnalysisVertex[Int]].setAlgorithmImplementation(v => new ConnectedComponentsIdentifier(v))
+    } else {
+      v.asInstanceOf[RepeatedAnalysisVertex[Int]].removeAlgorithmImplementation
+    }
+  })
+  
+  
+  graph.recalculateScores
+  graph.execute
+  
+  
+  val countsMap = HashMap[Int, Int]()
+  
+      println("building counts map")
+
+  
+  graph.foreachVertex(v => 
+    {
+      val id = v.id.asInstanceOf[Int]
+      
+      if(id<0) {
+        val state = v.state.asInstanceOf[Int]
+        if(countsMap.contains(id * -1)) {
+          countsMap+=((id * -1, countsMap(id * -1) + 1))
+        }
+        else {
+          countsMap+=((id * -1, 0))
+        }
+      }
+    })
+    
+    println("built subgraphs, count: " + countsMap.size)
+    
+    countsMap.filter(_._2 > 1).foreach(println(_))
+    
+    println("done")
+
   graph.shutdown
 
 }

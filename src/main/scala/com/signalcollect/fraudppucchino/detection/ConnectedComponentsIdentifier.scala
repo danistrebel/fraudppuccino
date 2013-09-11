@@ -3,7 +3,12 @@ package com.signalcollect.fraudppucchino.detection
 import com.signalcollect.fraudppucchino.repeatedanalysis._
 import com.signalcollect._
 
-class ConnectedComponentsFinder(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+/**
+ * Runs a specialized for of label propagation
+ * to label all connected sub-patterns with the
+ * smallest id of its members. 
+ */ 
+class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
   var componentId = vertex.id.asInstanceOf[Int]
 
