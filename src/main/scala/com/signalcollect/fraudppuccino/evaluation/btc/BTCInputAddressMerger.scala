@@ -63,7 +63,7 @@ object BTCInputAddressMerger extends App {
     txWriter.close
     addressWriter.close
   } catch {
-    case t => println("failed printing output")
+    case t : Throwable => println("failed printing output")
   }
 
   //  val tx2InputUser = graph.aggregate(new GetAllTransactions)

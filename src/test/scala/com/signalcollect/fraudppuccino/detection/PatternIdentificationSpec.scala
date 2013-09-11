@@ -53,13 +53,13 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       }
 
       //Linking the chain
-      graph.addEdge(a0.id, new TransactionEdge(tx0.id))
-      graph.addEdge(tx0.id, new TransactionEdge(a1.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx1.id))
-      graph.addEdge(tx1.id, new TransactionEdge(a2.id))
+      graph.addEdge(tx0.id, new TransactionEdge(a0.id))
+      graph.addEdge(a1.id, new TransactionEdge(tx0.id))
+      graph.addEdge(tx1.id, new TransactionEdge(a1.id))
+      graph.addEdge(a2.id, new TransactionEdge(tx1.id))
       //linking unrelated arm
-      graph.addEdge(a1.id, new TransactionEdge(tx2.id))
-      graph.addEdge(tx2.id, new TransactionEdge(a3.id))
+      graph.addEdge(tx2.id, new TransactionEdge(a1.id))
+      graph.addEdge(a3.id, new TransactionEdge(tx2.id))
 
       graph.recalculateScores
       graph.execute
@@ -117,15 +117,15 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       }
 
       //Linking the aggregator
-      graph.addEdge(a0.id, new TransactionEdge(tx0.id))
-      graph.addEdge(tx0.id, new TransactionEdge(a1.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx1.id))
-      graph.addEdge(tx1.id, new TransactionEdge(a2.id))
-      graph.addEdge(a3.id, new TransactionEdge(tx2.id))
-      graph.addEdge(tx2.id, new TransactionEdge(a1.id))
+      graph.addEdge(tx0.id, new TransactionEdge(a0.id))
+      graph.addEdge(a1.id, new TransactionEdge(tx0.id))
+      graph.addEdge(tx1.id, new TransactionEdge(a1.id))
+      graph.addEdge(a2.id, new TransactionEdge(tx1.id))
+      graph.addEdge(tx2.id, new TransactionEdge(a3.id))
+      graph.addEdge(a1.id, new TransactionEdge(tx2.id))
       //linking unrelated arm
-      graph.addEdge(a1.id, new TransactionEdge(tx3.id))
-      graph.addEdge(tx3.id, new TransactionEdge(a3.id))
+      graph.addEdge(tx3.id, new TransactionEdge(a1.id))
+      graph.addEdge(a3.id, new TransactionEdge(tx3.id))
 
       graph.recalculateScores
       graph.execute
@@ -184,15 +184,15 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       }
 
       //Linking the split
-      graph.addEdge(a0.id, new TransactionEdge(tx0.id))
-      graph.addEdge(tx0.id, new TransactionEdge(a1.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx1.id))
-      graph.addEdge(tx1.id, new TransactionEdge(a2.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx2.id))
-      graph.addEdge(tx2.id, new TransactionEdge(a3.id))
+      graph.addEdge(tx0.id, new TransactionEdge(a0.id))
+      graph.addEdge(a1.id, new TransactionEdge(tx0.id))
+      graph.addEdge(tx1.id, new TransactionEdge(a1.id))
+      graph.addEdge(a2.id, new TransactionEdge(tx1.id))
+      graph.addEdge(tx2.id, new TransactionEdge(a1.id))
+      graph.addEdge(a3.id, new TransactionEdge(tx2.id))
       //linking unrelated input
-      graph.addEdge(a4.id, new TransactionEdge(tx3.id))
-      graph.addEdge(tx3.id, new TransactionEdge(a1.id))
+      graph.addEdge(tx3.id, new TransactionEdge(a4.id))
+      graph.addEdge(a1.id, new TransactionEdge(tx3.id))
 
       graph.recalculateScores
       graph.execute

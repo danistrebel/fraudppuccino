@@ -21,31 +21,37 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
+      case txOutput: TransactionOutput => {
+        if (isIsPossibleOutputByTime(txOutput)) {
+          if (value < txOutput.value) {
+            graphEditor.sendSignal(inputSignature, txOutput.transactionID, Some(vertex.id))
+            true
+          } else if (candidateOutputs.size < 7) { //To make sure we don't explode
+            candidateOutputs.append(txOutput)
+            scoreCollect = 1.0
+          }
+        }
+        false
+
+      }
       case txInput: TransactionInput => {
-        if (isIsPossibleInputByTime(txInput) && candidateInputs.size < 7) { //To make sure we don't explode
+        if (candidateInputs.size < 7) { //To make sure we don't explode
           candidateInputs.append(txInput)
           scoreCollect = 1.0
         }
         false
       }
-      case txOutput: TransactionOutput => {
-        if (candidateOutputs.size < 7) { //To make sure we don't explode
-          candidateOutputs.append(txOutput)
-          scoreCollect = 1.0
-        }
-        false
-      }
-      case _ => throw new Exception("Signal Type not compatible")
+      case _ => throw new Exception("Signal type of signal: " + signal + " is not compatible")
     }
 
   }
 
   /**
-   * Initially signal the transactions signature to its receiver
+   * Initially signal the transactions signature to its sender
    */
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     for (edge <- outgoingEdges) {
-      graphEditor.sendSignal(inputSignature, edge._1, Some(vertex.id))
+      graphEditor.sendSignal(outputSignature, edge._1, Some(vertex.id))
     }
     scoreSignal = 0.0
   }
@@ -54,26 +60,6 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
    * Try to match the incoming signals and compute outputs and/or inputs of this transaction
    */
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
-
-    //split inputs in candidates for (chains/aggregations, splits)
-    val inOutTuple = candidateInputs.partition(_.value <= this.value)
-
-    //send split candidates for evaluation at the splitter
-    for (splitCandidate <- inOutTuple._2) {
-      graphEditor.sendSignal(outputSignature, splitCandidate.transactionID, Some(vertex.id))
-    }
-    candidateInputs --= inOutTuple._2
-
-    //test for inputs that this transaction can be composed of and link them (this transaction acts as chain element or aggregator)
-    val matchingInputs = findAllMatchingSignals(inOutTuple._1)
-    if (!matchingInputs.isEmpty) {
-      for (txSignature <- matchingInputs.head) {
-        graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], DownstreamTransactionPatternEdge))
-        graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, UpstreamTransactionPatternEdge))
-        candidateInputs -= txSignature.asInstanceOf[TransactionInput]
-      }
-    }
-
     //test for outputs that can be summed up to this transaction (transaction acts as a splitter)
     val matchingOutputs = findAllMatchingSignals(candidateOutputs)
     if (!matchingOutputs.isEmpty) {
@@ -81,6 +67,16 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
         graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, DownstreamTransactionPatternEdge))
         graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], UpstreamTransactionPatternEdge))
         candidateOutputs -= txSignature.asInstanceOf[TransactionOutput]
+      }
+    }
+
+    //test for inputs that this transaction can be composed of and link them (this transaction acts as chain element or aggregator)
+    val matchingInputs = findAllMatchingSignals(candidateInputs)
+    if (!matchingInputs.isEmpty) {
+      for (txSignature <- matchingInputs.head) {
+        graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], DownstreamTransactionPatternEdge))
+        graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, UpstreamTransactionPatternEdge))
+        candidateInputs -= txSignature.asInstanceOf[TransactionInput]
       }
     }
 
@@ -110,11 +106,11 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   }
 
   /**
-   * Inputs have to happen before or immediately with this transaction.
-   * Inputs are considered within the window size.
+   * Output have to happen after or immediately with this transaction.
+   * Outputs are considered within the window size.
    */
-  def isIsPossibleInputByTime(inputCandidate: TransactionInput, windowSize: Long = 432000l): Boolean = {
-     this.time - inputCandidate.time >= 0 && this.time - inputCandidate.time < windowSize
+  def isIsPossibleOutputByTime(outputCandidate: TransactionOutput, windowSize: Long = 432000l): Boolean = {
+    outputCandidate.time - this.time >= 0 && outputCandidate.time - this.time < windowSize
   }
 
   /**

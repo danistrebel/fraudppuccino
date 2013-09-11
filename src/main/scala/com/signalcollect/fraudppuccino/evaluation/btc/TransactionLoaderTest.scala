@@ -20,7 +20,7 @@ object TransactionLoaderTest extends App {
     for (line <- Source.fromFile("/Volumes/Data/BTC_August2013/user-user-tx.csv").getLines) {
       val splitted = line.split(",")
 
-      if (splitted(0).toInt >= 1100000) {
+      if (splitted(0).toInt >= 1200000) {
         break
       }
 
@@ -42,8 +42,8 @@ object TransactionLoaderTest extends App {
         graph.addVertex(sender)
         graph.addVertex(receiver)
 
-        graph.addEdge(splitted(2).toInt, new TransactionEdge(splitted(0).toInt * -1))
-        graph.addEdge(splitted(0).toInt * -1, new TransactionEdge(splitted(3).toInt))
+        graph.addEdge(splitted(0).toInt * -1, new TransactionEdge(splitted(2).toInt))
+        graph.addEdge(splitted(3).toInt, new TransactionEdge(splitted(0).toInt * -1))
       }
 
     }
