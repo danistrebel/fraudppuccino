@@ -14,7 +14,7 @@ import com.signalcollect._
  */ 
 class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
-  var componentId = vertex.id.asInstanceOf[Int]
+  var componentId = Math.abs(vertex.id.asInstanceOf[Int])
 
   var scoreSignal = 1.0
   var scoreCollect = 0.0
@@ -30,15 +30,15 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends V
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean = {
     signal match {
-      case id: Int => {
-        if(id<componentId) {
-          componentId = id
+      case receivedComponentId: Int => {
+        if(receivedComponentId<componentId) {
+          componentId = receivedComponentId
           scoreSignal = 1.0
         }
         
       }
     }
-    false
+    true
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) = {
