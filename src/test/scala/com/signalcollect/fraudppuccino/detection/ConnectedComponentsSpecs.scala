@@ -38,7 +38,7 @@ class ConnectedComponentsSpecs extends SpecificationWithJUnit {
         (tx2, 100l, 1l, 1, 3))
 
       for (account <- accounts) {
-        account.setAlgorithmImplementation(vertex => new SignalMultiplexer(vertex))
+        account.setAlgorithmImplementation(vertex => new SignalBroadcaster(vertex))
         graph.addVertex(account)
       }
 

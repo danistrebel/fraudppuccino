@@ -10,7 +10,7 @@ import com.signalcollect.fraudppuccino.detection._
 object Test2ComponentGraph extends App {
 
   //Vertex algorithms uses in the computation
-  val signalMultiplexig: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new SignalMultiplexer(vertex)
+  val signalMultiplexig: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new SignalBroadcaster(vertex)
   val transactionLinking: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionLinker(vertex)
 
   // Step 0: Build the Graph

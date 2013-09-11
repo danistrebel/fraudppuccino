@@ -9,7 +9,7 @@ import com.signalcollect.fraudppuccino.detection.demo._
 
 object WindowedStructureDetection extends App {
 
-  val signalMultiplexig: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new SignalMultiplexer(vertex)
+  val signalMultiplexig: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new SignalBroadcaster(vertex)
 
   // Step 0: Build the Graph
   val accounts = Map[Int, RepeatedAnalysisVertex[_]]()

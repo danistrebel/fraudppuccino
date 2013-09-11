@@ -2,6 +2,9 @@ package com.signalcollect.fraudppuccino.repeatedanalysis
 
 import com.signalcollect._
 
+/**
+ * Defines the structure of an interchangeable algorithm implementation
+ */ 
 abstract class VertexAlgorithm {
   
   def getState: Any
