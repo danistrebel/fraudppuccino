@@ -10,7 +10,7 @@ abstract class VertexAlgorithm {
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean
   
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]])
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)])
 
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any])
 

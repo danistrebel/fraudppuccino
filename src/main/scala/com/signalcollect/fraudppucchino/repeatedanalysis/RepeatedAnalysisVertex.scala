@@ -21,7 +21,9 @@ package com.signalcollect.fraudppucchino.repeatedanalysis
 import com.signalcollect.Vertex
 import com.signalcollect.GraphEditor
 import com.signalcollect.Edge
-import scala.collection.JavaConversions._ 
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.AbstractBuffer
 
 /**
  * This Vertex aims to facilitate the repeated execution of possibly different computations on the
@@ -33,10 +35,11 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
    * Pluggable Algorithm definition
    */
   var algorithm: VertexAlgorithm = new DummyVertexAlgorithm
+
   def setAlgorithmImplementation(algorithmFactory: (RepeatedAnalysisVertex[Id]) => VertexAlgorithm) {
     algorithm = algorithmFactory.apply(this)
   }
-  
+
   def removeAlgorithmImplementation = algorithm = new DummyVertexAlgorithm
 
   /**
@@ -46,56 +49,51 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
 
   /**
    * Store the current computational state to make it available to subsequent computations
-   * 
+   *
    * @param key unique key to store states on this vertex
    */
   def retainState(key: String) { results.put(key, algorithm.getState) }
 
   /**
    * Store some computational state to make it available to subsequent computations
-   * 
+   *
    * @param key unique key to store states on this vertex
    */
-  def storeAttribute(key: String, value: Any) {results.put(key, value)}
-  
+  def storeAttribute(key: String, value: Any) { results.put(key, value) }
+
   /**
    * Returns the results from previous computations
-   * 
+   *
    * @param key Identifier of the state that should be retrieved
-   */ 
+   */
   def getResult(key: String): Option[Any] = { results.get(key) }
 
   /**
    * Deletes the stored state with the specified key
-   * 
+   *
    * @param key The key to be deleted
-   */ 
+   */
   def dropState(key: String) { results.remove(key) }
 
-  var outgoingEdges: collection.mutable.Map[Any, Edge[_]] = new java.util.HashMap[Any, Edge[_]](0)
+  var outgoingEdges = ArrayBuffer[(Any, EdgeMarker)]()
 
+  /**
+   * Adds edges without checking for duplicates
+   * The edge object is trashed in order to save memory 
+   */ 
   def addEdge(edge: Edge[_], graphEditor: GraphEditor[Any, Any]): Boolean = {
-    outgoingEdges.get(edge.targetId) match {
-      case None =>
-        algorithm.noitfyTopologyChange
-        outgoingEdges.put(edge.targetId, edge)
-        edge.onAttach(this, graphEditor)
-        true
-      case Some(edge) =>
-        false
+
+    edge match {
+      case markerEdge: EdgeMarkerWrapper => outgoingEdges += ((markerEdge.edgeTarget, markerEdge.marker))
+      case otherEdge: Edge[_] => outgoingEdges += ((edge.targetId, UnknownEdge))
     }
+    true
   }
 
   def removeEdge(targetId: Any, graphEditor: GraphEditor[Any, Any]): Boolean = {
-    val outgoingEdge = outgoingEdges.get(targetId)
-    outgoingEdge match {
-      case None =>
-        false
-      case Some(edge) =>
-        algorithm.noitfyTopologyChange
-        outgoingEdges.remove(targetId)
-        true
-    }
+    val sizeBefore = outgoingEdges.size
+    outgoingEdges = outgoingEdges.filter(_._1 != targetId)
+    outgoingEdges.size != sizeBefore
   }
 
   def removeAllEdges(graphEditor: GraphEditor[Any, Any]): Int = {
@@ -110,7 +108,7 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
   def state(): Any = algorithm.getState
   def setState(state: Any): Unit = algorithm.setState(state)
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean = algorithm.deliverSignal(signal, sourceId, graphEditor)
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any]): Unit = algorithm.executeSignalOperation(graphEditor, outgoingEdges.values)
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any]): Unit = algorithm.executeSignalOperation(graphEditor, outgoingEdges)
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]): Unit = algorithm.executeCollectOperation(graphEditor)
   def scoreSignal(): Double = algorithm.scoreSignal
   def scoreCollect(): Double = algorithm.scoreCollect

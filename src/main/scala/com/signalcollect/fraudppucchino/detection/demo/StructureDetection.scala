@@ -1,12 +1,12 @@
-package com.signalcollect.fraudppucchino.repeatedanalysis
+package com.signalcollect.fraudppucchino.detection.demo
 
 import com.signalcollect.Graph
-import com.signalcollect.Vertex
 import scala.collection.mutable.Map
 import com.signalcollect.fraudppucchino.detection.TransactionLinker
 import com.signalcollect.fraudppucchino.detection.TransactionEdge
 import com.signalcollect.fraudppucchino.detection.TransactionPatternEdge
-import akka.dispatch.Foreach
+import com.signalcollect.fraudppucchino.repeatedanalysis.RepeatedAnalysisVertex
+import com.signalcollect.fraudppucchino.repeatedanalysis.VertexAlgorithm
 
 class StructureDetection(baseGraph: Graph[Any, Any]) {
 

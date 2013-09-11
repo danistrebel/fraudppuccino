@@ -5,6 +5,11 @@ import com.signalcollect.fraudppucchino.repeatedanalysis.VertexAlgorithm
 import com.signalcollect.fraudppucchino.repeatedanalysis.RepeatedAnalysisVertex
 import scala.collection.mutable.LinkedList
 import scala.collection.mutable.ArrayBuffer
+import com.signalcollect.fraudppucchino.repeatedanalysis.EdgeMarker
+import com.signalcollect.fraudppucchino.repeatedanalysis.EdgeMarkerWrapper
+import com.signalcollect.fraudppucchino.repeatedanalysis.EdgeMarkerWrapper
+import com.signalcollect.fraudppucchino.repeatedanalysis.EdgeMarkerWrapper
+import com.signalcollect.fraudppucchino.repeatedanalysis.EdgeMarkerWrapper
 
 class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
@@ -44,9 +49,9 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   /**
    * Initially signal the transactions signature to its receiver
    */
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]]) {
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     for (edge <- outgoingEdges) {
-      graphEditor.sendSignal(inputSignature, edge.targetId, Some(edge.id.sourceId))
+      graphEditor.sendSignal(inputSignature, edge._1, Some(vertex.id))
     }
     scoreSignal = 0.0
   }
@@ -69,8 +74,8 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
     val matchingInputs = findAllMatchingSignals(inOutTuple._1)
     if (!matchingInputs.isEmpty) {
       for (txSignature <- matchingInputs.head) {
-        graphEditor.addEdge(txSignature.transactionID, new DownstreamTransactionPatternEdge(vertex.id.asInstanceOf[Int]))
-        graphEditor.addEdge(vertex.id, new UpstreamTransactionPatternEdge(txSignature.transactionID))
+        graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], DownstreamTransactionPatternEdge))
+        graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, UpstreamTransactionPatternEdge))
         candidateInputs -= txSignature.asInstanceOf[TransactionInput]
       }
     }
@@ -79,8 +84,8 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
     val matchingOutputs = findAllMatchingSignals(candidateOutputs)
     if (!matchingOutputs.isEmpty) {
       for (txSignature <- matchingOutputs.head) {
-        graphEditor.addEdge(vertex.id, new DownstreamTransactionPatternEdge(txSignature.transactionID))
-        graphEditor.addEdge(txSignature.transactionID, new UpstreamTransactionPatternEdge(vertex.id.asInstanceOf[Int]))
+        graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, DownstreamTransactionPatternEdge))
+        graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], UpstreamTransactionPatternEdge))
         candidateOutputs -= txSignature.asInstanceOf[TransactionOutput]
       }
     }
@@ -136,6 +141,6 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   def logFor(id: Int, msg: String) = if (vertex.id == id) println(msg)
 
   override def toString: String = {
-    "links to " + vertex.outgoingEdges.values.filter(_.isInstanceOf[TransactionPatternEdge])
+    "links to " + vertex.outgoingEdges
   }
 }

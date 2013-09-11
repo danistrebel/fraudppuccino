@@ -4,6 +4,7 @@ import com.signalcollect.DataGraphVertex
 import com.signalcollect.fraudppucchino.repeatedanalysis.VertexAlgorithm
 import com.signalcollect._
 import java.util.HashSet
+import com.signalcollect.fraudppucchino.repeatedanalysis.EdgeMarker
 
 /**
  * Simple VertexAlgorithm implementation that takes whatever signal
@@ -23,10 +24,10 @@ class SignalMultiplexer(vertex : Vertex[_,_]) extends VertexAlgorithm {
     true
   }
 
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]]) {
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     for(edge <- outgoingEdges) {
       for(signal <- signalsReceived.toArray) {
-        graphEditor.sendSignal(signal, edge.targetId, Some(edge.id.sourceId))
+        graphEditor.sendSignal(signal, edge._1, Some(vertex.id))
       }
     }
     signalsReceived.clear

@@ -29,10 +29,10 @@ class PageRankAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
     }
   }
 
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]]) {
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     val signal = state / outgoingEdges.size
     outgoingEdges.foreach(edge => {
-      graphEditor.sendSignal(signal, edge.id.targetId, Some(edge.sourceId))
+      graphEditor.sendSignal(signal, edge._1, Some(vertex.id))
     })
     lastSignalState = signal
   }

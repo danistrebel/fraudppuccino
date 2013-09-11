@@ -26,9 +26,9 @@ class SSSPAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
     }
   }
 
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]]) {
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     outgoingEdges.foreach(edge => {
-     graphEditor.sendSignal(minDistance+1, edge.id.targetId, Some(edge.sourceId))
+     graphEditor.sendSignal(minDistance+1, edge._1, Some(vertex.id))
     })
     scoreSignal = 0.0
   }

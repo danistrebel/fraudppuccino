@@ -12,7 +12,7 @@ class DummyVertexAlgorithm extends VertexAlgorithm {
    false
   }
 
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]]) {
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
   }
 
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {  

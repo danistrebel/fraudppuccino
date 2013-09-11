@@ -64,9 +64,9 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       graph.recalculateScores
       graph.execute
 
-      assert(tx0.outgoingEdges.exists(_._2.isInstanceOf[DownstreamTransactionPatternEdge]))
-      assert(!tx1.outgoingEdges.exists(_._2.isInstanceOf[DownstreamTransactionPatternEdge]))
-      assert(!tx2.outgoingEdges.exists(_._2.isInstanceOf[DownstreamTransactionPatternEdge]))
+      assert(tx0.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
+      assert(!tx1.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
+      assert(!tx2.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
 
       tx0.outgoingEdges.map(_._2).size === 2
     }
@@ -130,9 +130,9 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       graph.recalculateScores
       graph.execute
 
-      assert(tx0.outgoingEdges.exists(_._2.isInstanceOf[DownstreamTransactionPatternEdge]))
-      assert(!tx1.outgoingEdges.exists(_._2.isInstanceOf[DownstreamTransactionPatternEdge]))
-      assert(tx2.outgoingEdges.exists(_._2.isInstanceOf[DownstreamTransactionPatternEdge]))
+      assert(tx0.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
+      assert(!tx1.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
+      assert(tx2.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
 
       tx0.outgoingEdges.map(_._2).size === 2
       tx2.outgoingEdges.map(_._2).size === 2
@@ -197,10 +197,10 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       graph.recalculateScores
       graph.execute
 
-      tx0.outgoingEdges.filter(_._2.isInstanceOf[DownstreamTransactionPatternEdge]).size === 2
-      tx1.outgoingEdges.filter(_._2.isInstanceOf[DownstreamTransactionPatternEdge]).size === 0
-      tx2.outgoingEdges.filter(_._2.isInstanceOf[DownstreamTransactionPatternEdge]).size === 0
-      tx3.outgoingEdges.filter(_._2.isInstanceOf[DownstreamTransactionPatternEdge]).size === 0
+      tx0.outgoingEdges.filter(_._2==DownstreamTransactionPatternEdge).size === 2
+      tx1.outgoingEdges.filter(_._2==DownstreamTransactionPatternEdge).size === 0
+      tx2.outgoingEdges.filter(_._2==DownstreamTransactionPatternEdge).size === 0
+      tx3.outgoingEdges.filter(_._2==DownstreamTransactionPatternEdge).size === 0
 
     }
   }

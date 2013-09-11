@@ -25,10 +25,10 @@ class PathMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
     }
   }
 
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[Edge[_]]) {
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     for (edge <- outgoingEdges) {
       for (m <- matches) {
-        graphEditor.sendSignal(m, edge.targetId, Some(edge.id.sourceId))
+        graphEditor.sendSignal(m, edge._1, Some(vertex.id))
       }
     }
     matches = List()
