@@ -54,6 +54,7 @@ object TransactionLoaderTest extends App {
 
   for (i <- 0 until 10) {
     System.gc
+    Thread.sleep(500);
   }
   println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / mb)
 
