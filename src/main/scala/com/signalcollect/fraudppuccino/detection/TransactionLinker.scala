@@ -5,10 +5,13 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import scala.collection.mutable.LinkedList
 import scala.collection.mutable.ArrayBuffer
 
+/**
+ * Algorithm on transaction vertices that connects neighboring related transactions
+ */ 
 class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
-  val candidateInputs = new ArrayBuffer[TransactionInput]()
-  val candidateOutputs = new ArrayBuffer[TransactionOutput]()
+  val candidateInputs = new ArrayBuffer[TransactionInput]() // Transactions that could serve as inputs for this transaction
+  val candidateOutputs = new ArrayBuffer[TransactionOutput]() // Transactions that could serve as outputs for this transactions
 
   val value = vertex.getResult("value").getOrElse(0l).asInstanceOf[Long]
   val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]
@@ -19,6 +22,9 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
     scoreSignal = 1.0
   }
 
+  /**
+   * Append the incoming signals to the respective collection
+   */ 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case txOutput: TransactionOutput => {
@@ -115,6 +121,7 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
 
   /**
    * Matching combinations have to sum up to the value of this transaction
+   * This is a form of the subset problem (http://en.wikipedia.org/wiki/Subset_sum_problem) which is NP-complete.
    */
   def sumsUpToThisValue(combination: List[TransactionSignal], tolerance: Float = 0.1f): Boolean = {
     matchesThisValue(combination.foldLeft(0.0)(_ + _.value), tolerance)
