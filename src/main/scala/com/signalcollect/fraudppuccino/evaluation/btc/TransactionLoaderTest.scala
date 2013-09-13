@@ -58,6 +58,9 @@ object TransactionLoaderTest extends App {
   }
   println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / mb)
 
+  println("start profiler and hit ENTER")
+  readLine
+
   graph.recalculateScores
   println(graph.execute)
 
@@ -83,7 +86,7 @@ object TransactionLoaderTest extends App {
       }
     }
   })
-  
+
   println("Components " + components.toString)
   println("Component count " + components.size)
   println("Members " + count)

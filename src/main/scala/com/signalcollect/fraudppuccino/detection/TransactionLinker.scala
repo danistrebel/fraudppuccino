@@ -7,7 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 
 /**
  * Algorithm on transaction vertices that connects neighboring related transactions
- */ 
+ */
 class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
   val candidateInputs = new ArrayBuffer[TransactionInput]() // Transactions that could serve as inputs for this transaction
@@ -24,7 +24,7 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
 
   /**
    * Append the incoming signals to the respective collection
-   */ 
+   */
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case txOutput: TransactionOutput => {
@@ -67,23 +67,19 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
    */
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
     //test for outputs that can be summed up to this transaction (transaction acts as a splitter)
-    val matchingOutputs = findAllMatchingSignals(candidateOutputs)
-    if (!matchingOutputs.isEmpty) {
-      for (txSignature <- matchingOutputs.head) {
-        graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, DownstreamTransactionPatternEdge))
-        graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], UpstreamTransactionPatternEdge))
-        candidateOutputs -= txSignature.asInstanceOf[TransactionOutput]
-      }
+    val matchingOutputs = findMatchingsubsetSums(candidateOutputs)
+    for (txSignature <- matchingOutputs) {
+      graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, DownstreamTransactionPatternEdge))
+      graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], UpstreamTransactionPatternEdge))
+      candidateOutputs -= txSignature.asInstanceOf[TransactionOutput]
     }
 
     //test for inputs that this transaction can be composed of and link them (this transaction acts as chain element or aggregator)
-    val matchingInputs = findAllMatchingSignals(candidateInputs)
-    if (!matchingInputs.isEmpty) {
-      for (txSignature <- matchingInputs.head) {
-        graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], DownstreamTransactionPatternEdge))
-        graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, UpstreamTransactionPatternEdge))
-        candidateInputs -= txSignature.asInstanceOf[TransactionInput]
-      }
+    val matchingInputs = findMatchingsubsetSums(candidateInputs)
+    for (txSignature <- matchingInputs) {
+      graphEditor.addEdge(txSignature.transactionID, EdgeMarkerWrapper(vertex.id.asInstanceOf[Int], DownstreamTransactionPatternEdge))
+      graphEditor.addEdge(vertex.id, EdgeMarkerWrapper(txSignature.transactionID, UpstreamTransactionPatternEdge))
+      candidateInputs -= txSignature.asInstanceOf[TransactionInput]
     }
 
     scoreCollect = 0.0
@@ -104,11 +100,36 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   lazy val outputSignature: TransactionOutput = TransactionOutput(vertex.id.asInstanceOf[Int], this.value, this.time)
 
   /**
+   * Uses dynamic programming to find signals that sum up to the value of this transaction
+   */
+  def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], tolerance: Double = 0.1f) = {
+    var subsets = candidates.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
+    while (!(subsets.exists(subset => Math.abs(subset._2 - this.value) < tolerance) || subsets.isEmpty)) { //expanding is stopped if the sum is reached or all possible combinations are expanded
+      subsets = subsets.filter(partialResult => !partialResult._3.isEmpty && partialResult._2 < this.value) //drop all with no more remaining options
+      subsets = subsets.flatMap(partialResult => {
+        partialResult._3.map(elementToAdd => {
+          (elementToAdd :: partialResult._1, partialResult._2 + elementToAdd.value, partialResult._3.dropWhile(_ != elementToAdd).drop(1))
+        })
+      })
+    }
+    if (subsets.isEmpty) {
+      List()
+    } else {
+      subsets.head._1
+    }
+  }
+
+  /**
    * Combines one or more incoming transactions of a node if they could be the source of this transaction
    */
-  def findAllMatchingSignals(candidates: Iterable[TransactionSignal]): Iterable[List[TransactionSignal]] = {
+  def findAllMatchingSignals(candidates: Iterable[TransactionSignal], tolerance: Double = 0.1): List[TransactionSignal] = {
     val subsets = candidates.toSet.subsets
-    subsets.toList.map(_.toList).filter(txCombo => sumsUpToThisValue(txCombo))
+    val matchingSubsets = subsets.toList.map(_.toList).filter(txCombo => sumsUpToThisValue(txCombo, tolerance))
+    if (matchingSubsets.isEmpty) {
+      List()
+    } else {
+      matchingSubsets.head
+    }
   }
 
   /**
@@ -123,14 +144,14 @@ class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
    * Matching combinations have to sum up to the value of this transaction
    * This is a form of the subset problem (http://en.wikipedia.org/wiki/Subset_sum_problem) which is NP-complete.
    */
-  def sumsUpToThisValue(combination: List[TransactionSignal], tolerance: Float = 0.1f): Boolean = {
+  def sumsUpToThisValue(combination: List[TransactionSignal], tolerance: Double = 0.1): Boolean = {
     matchesThisValue(combination.foldLeft(0.0)(_ + _.value), tolerance)
   }
 
   /**
    * Is considered a match if differs at max 10% from another incoming transaction
    */
-  def matchesThisValue(otherValue: Double, tolerance: Float): Boolean = (Math.abs(otherValue - this.value) / this.value) < tolerance
+  def matchesThisValue(otherValue: Double, tolerance: Double): Boolean = (Math.abs(otherValue - this.value) / this.value) < tolerance
 
   /**
    * Logs debug for tx with id
