@@ -1,13 +1,18 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.evaluation.btc
 
 import org.junit.runner.RunWith
-import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.runner.JUnitRunner
 import com.signalcollect._
+import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.detection._
 
 @RunWith(classOf[JUnitRunner])
-class ConnectedComponentsSpecs extends SpecificationWithJUnit {
+class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
+
+  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new BTCTransactionMatcher(vertex)
+  val transactionAnnouncing: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionAnnouncer(vertex)
 
   "Connected Components" should {
 
@@ -33,12 +38,12 @@ class ConnectedComponentsSpecs extends SpecificationWithJUnit {
 
       val transactions = List(tx0, tx1, tx2)
 
-      val transactionInfos = List((tx0, 250l, 0l, 0, 1l),
-        (tx1, 250l, 1l, 1, 2l),
+      val transactionInfos = List((tx0, 250l, 0l, 0, 1),
+        (tx1, 250l, 1l, 1, 2),
         (tx2, 100l, 1l, 1, 3))
 
       for (account <- accounts) {
-        account.setAlgorithmImplementation(vertex => new SignalBroadcaster(vertex))
+        account.setAlgorithmImplementation(transactionMatching)
         graph.addVertex(account)
       }
 
@@ -47,33 +52,24 @@ class ConnectedComponentsSpecs extends SpecificationWithJUnit {
         transaction._1.storeAttribute("time", transaction._3)
         transaction._1.storeAttribute("src", transaction._4)
         transaction._1.storeAttribute("target", transaction._5)
-        transaction._1.setAlgorithmImplementation(vertex => new TransactionLinker(vertex))
+        transaction._1.setAlgorithmImplementation(transactionAnnouncing)
         graph.addVertex(transaction._1)
       }
 
-      //Linking the chain
-      graph.addEdge(a0.id, new TransactionEdge(tx0.id))
-      graph.addEdge(tx0.id, new TransactionEdge(a1.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx1.id))
-      graph.addEdge(tx1.id, new TransactionEdge(a2.id))
-      //linking unrelated arm
-      graph.addEdge(a1.id, new TransactionEdge(tx2.id))
-      graph.addEdge(tx2.id, new TransactionEdge(a3.id))
+      graph.recalculateScores
+      graph.execute
+
+      for (tx <- transactions) {
+        tx.setAlgorithmImplementation(vertex => new ConnectedComponentsIdentifier(vertex))
+      }
+
+      for (account <- accounts) {
+        account.removeAlgorithmImplementation
+      }
 
       graph.recalculateScores
       graph.execute
-      
-      for(tx <- transactions) {
-        tx.setAlgorithmImplementation(vertex => new ConnectedComponentsIdentifier(vertex))
-      }
-      
-      for(account <- accounts) {
-        account.removeAlgorithmImplementation
-      }
-      
-      graph.recalculateScores
-      graph.execute
-            
+
       tx0.state.asInstanceOf[Int] == 100
       tx1.state.asInstanceOf[Int] == 100
       tx2.state.asInstanceOf[Int] == 102

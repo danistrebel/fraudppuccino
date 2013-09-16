@@ -29,7 +29,7 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
     //Finds splits
     for (input <- inputs.filter(_.value>newOutPut.value)) {
       findMatchingsubsetSums(List(newOutPut) ++ outputs, input) match {
-        case Nil =>
+        case Nil => 
         case matches: List[TransactionOutput] => return (List(input), matches)
       }
     }

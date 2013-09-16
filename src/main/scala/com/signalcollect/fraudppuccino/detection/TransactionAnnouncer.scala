@@ -21,8 +21,8 @@ class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgo
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    graphEditor.sendSignal(TransactionInput(id, value, time), source, Some(id))
-    graphEditor.sendSignal(TransactionOutput(id, value, time), target, Some(id))
+    graphEditor.sendSignal(TransactionOutput(id, value, time), source, Some(id))
+    graphEditor.sendSignal(TransactionInput(id, value, time), target, Some(id))
     scoreSignal = 0.0
   }
 

@@ -34,30 +34,36 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
 
   def noitfyTopologyChange {
   }
-  
-  def processInputTransaction(input: TransactionInput,  graphEditor: GraphEditor[Any, Any]) {
-    if(unmatchedInputs.size<=15) {
-    	unmatchedInputs+=input      
-      
+
+  def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {
+    if (unmatchedInputs.size <= 15) {
+      unmatchedInputs += input
+
     }
   }
-  
+
   /**
    * Tries to find matching input and output transactions and then bi-connects them using pattern edges
-   */ 
-  def processOutputTransaction(output: TransactionOutput,  graphEditor: GraphEditor[Any, Any]) {
-    val (ins,outs) = findMatchingTransactions(output, unmatchedOutputs, unmatchedInputs) //Depends on the use case
-    for(in <- ins) {
-      for (out <- outs) {
-        graphEditor.addEdge(in.transactionID, new UpstreamTransactionEdge(out.transactionID))
-        graphEditor.addEdge(out.transactionID, new DownstreamTransactionEdge(out.transactionID))
+   */
+  def processOutputTransaction(output: TransactionOutput, graphEditor: GraphEditor[Any, Any]) {
+    val matchedCombination = findMatchingTransactions(output, unmatchedOutputs, unmatchedInputs) //Depends on the use case
+    matchedCombination match {
+      case (Nil, Nil) => unmatchedOutputs += output //If no match -> ad it to the unmatched outputs
+      case (ins, outs) => {
+        for (in <- ins) {
+          for (out <- outs) {
+            graphEditor.addEdge(in.transactionID, new DownstreamTransactionEdge(out.transactionID))
+            graphEditor.addEdge(out.transactionID, new UpstreamTransactionEdge(in.transactionID))
+          }
+        }
+        unmatchedInputs --= ins
+        unmatchedOutputs --= outs
       }
     }
-    unmatchedInputs--=ins
-    unmatchedOutputs--=outs
+
   }
-  
+
   //To be defined depending on the actual use case
-  def findMatchingTransactions(newOutPut: TransactionOutput, outputs: Iterable[TransactionOutput], inputs: Iterable[TransactionInput]) : (Iterable[TransactionInput], Iterable[TransactionOutput])
-  
+  def findMatchingTransactions(newOutPut: TransactionOutput, outputs: Iterable[TransactionOutput], inputs: Iterable[TransactionInput]): (Iterable[TransactionInput], Iterable[TransactionOutput])
+
 }
