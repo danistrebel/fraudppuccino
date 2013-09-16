@@ -41,7 +41,7 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
    * Uses dynamic programming to find signals that sum up to the value of this transaction
    */
   def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], target: TransactionSignal, tolerance: Double = 0.1f): Iterable[TransactionSignal] = {
-    var subsets = candidates.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
+    var subsets = candidates.par.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
     while (!subsets.isEmpty) { //expanding is stopped if the sum is reached or all possible combinations are expanded
       val result = subsets.find(subset => Math.abs(subset._2 - target.value) < tolerance)
       if (result.isDefined) {

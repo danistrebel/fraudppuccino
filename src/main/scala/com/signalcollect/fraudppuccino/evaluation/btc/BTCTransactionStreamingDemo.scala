@@ -8,7 +8,7 @@ import scala.util.control.Breaks._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
 
-object BTCTransactionMatcherDemo extends App {
+object BTCTransactionStreamingDemo extends App {
 
   val graph = GraphBuilder.build
 
@@ -20,7 +20,7 @@ object BTCTransactionMatcherDemo extends App {
     for (line <- Source.fromFile("/Volumes/Data/BTC_August2013/user-user-tx.csv").getLines) {
       val splitted = line.split(",")
 
-      if (splitted(0).toInt >= 1200000) {
+      if (splitted(0).toInt >= 1100000) {
         break
       }
 
@@ -41,6 +41,13 @@ object BTCTransactionMatcherDemo extends App {
         graph.addVertex(transaction)
         graph.addVertex(sender)
         graph.addVertex(receiver)
+
+        if (splitted(0).toInt % 100 == 0) {
+          graph.recalculateScores
+          graph.execute
+          println(splitted(0).toInt)
+
+        }
       }
 
     }
@@ -60,7 +67,6 @@ object BTCTransactionMatcherDemo extends App {
 
   graph.recalculateScores
   println(graph.execute)
-  readLine
 
   graph.foreachVertex(v => {
     if (v.id.asInstanceOf[Int] < 0) {
