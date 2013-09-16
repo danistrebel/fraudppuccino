@@ -1,9 +1,5 @@
-package com.signalcollect.fraudppuccino.evaluation.btc
+package com.signalcollect.fraudppuccino.evaluation.btc.datasetpreparation
 
-import scala.io.Source
-import java.io.ObjectInputStream
-import java.util.zip.GZIPInputStream
-import java.io.FileInputStream
 import com.signalcollect.GraphBuilder
 import java.io.BufferedReader
 import java.io.FileReader

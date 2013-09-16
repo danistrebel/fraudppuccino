@@ -5,6 +5,8 @@ import com.signalcollect.GraphBuilder
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import com.signalcollect.StateForwarderEdge
+import com.signalcollect.fraudppuccino.evaluation.btc.datasetpreparation.BTCTransaction
+import com.signalcollect.fraudppuccino.evaluation.btc.datasetpreparation.BTCInputAddress
 
 @RunWith(classOf[JUnitRunner])
 class InputAddressMergerSpec extends SpecificationWithJUnit {
