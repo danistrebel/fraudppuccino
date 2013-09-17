@@ -1,9 +1,7 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.structuredetection
 
-import com.signalcollect.DataGraphVertex
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
-import java.util.HashSet
 
 /**
  * Simple VertexAlgorithm implementation that takes whatever signal

@@ -7,6 +7,9 @@ import org.junit.runner.RunWith
 import com.signalcollect.fraudppuccino.detection._
 import org.specs2.runner.JUnitRunner
 import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 
 @RunWith(classOf[JUnitRunner])
 class BTCPatternIdentificationSpec extends SpecificationWithJUnit {

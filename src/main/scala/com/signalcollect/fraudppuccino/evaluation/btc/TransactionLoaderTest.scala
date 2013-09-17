@@ -7,6 +7,11 @@ import com.signalcollect.fraudppuccino.detection._
 import scala.util.control.Breaks._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
+import com.signalcollect.fraudppuccino.patternanalysis.ConnectedComponentsIdentifier
+import com.signalcollect.fraudppuccino.structuredetection.TransactionEdge
+import com.signalcollect.fraudppuccino.structuredetection.TransactionLinker
+import com.signalcollect.fraudppuccino.structuredetection.SignalBroadcaster
+import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
 
 object TransactionLoaderTest extends App {
 

@@ -1,7 +1,9 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.structuredetection
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
+import com.signalcollect.fraudppuccino.structuredetection.TransactionOutput
+import com.signalcollect.fraudppuccino.structuredetection.TransactionInput
 
 class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 

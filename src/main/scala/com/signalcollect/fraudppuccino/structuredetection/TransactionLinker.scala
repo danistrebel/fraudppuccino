@@ -1,9 +1,9 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.structuredetection
 
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
-import scala.collection.mutable.LinkedList
 import scala.collection.mutable.ArrayBuffer
+
 
 /**
  * Algorithm on transaction vertices that connects neighboring related transactions

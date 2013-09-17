@@ -4,6 +4,9 @@ import com.signalcollect.Graph
 import scala.collection.mutable.Map
 import com.signalcollect.fraudppuccino.detection._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.structuredetection.TransactionEdge
+import com.signalcollect.fraudppuccino.structuredetection.TransactionLinker
+import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
 
 class StructureDetection(baseGraph: Graph[Any, Any]) {
 

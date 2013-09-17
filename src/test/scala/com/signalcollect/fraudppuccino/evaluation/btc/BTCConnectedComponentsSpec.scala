@@ -7,6 +7,8 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.detection._
+import com.signalcollect.fraudppuccino.patternanalysis.ConnectedComponentsIdentifier
+import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 
 @RunWith(classOf[JUnitRunner])
 class BTCConnectedComponentsSpec extends SpecificationWithJUnit {

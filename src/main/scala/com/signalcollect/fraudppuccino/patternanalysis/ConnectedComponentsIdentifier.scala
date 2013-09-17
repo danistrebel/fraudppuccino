@@ -1,7 +1,8 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.patternanalysis
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
+import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
 
 /**
  * Runs a specialized for of label propagation

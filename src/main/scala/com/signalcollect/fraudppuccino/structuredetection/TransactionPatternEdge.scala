@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.structuredetection
 
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._

@@ -2,6 +2,10 @@ package com.signalcollect.fraudppuccino.evaluation.btc
 
 import com.signalcollect.fraudppuccino.detection._
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
+import com.signalcollect.fraudppuccino.structuredetection.AbstractTransactionMatcher
+import com.signalcollect.fraudppuccino.structuredetection.TransactionSignal
+import com.signalcollect.fraudppuccino.structuredetection.TransactionOutput
+import com.signalcollect.fraudppuccino.structuredetection.TransactionInput
 
 class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractTransactionMatcher(vertex) {
 
@@ -41,14 +45,14 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
    * Uses dynamic programming to find signals that sum up to the value of this transaction
    */
   def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], target: TransactionSignal, tolerance: Double = 0.1f): Iterable[TransactionSignal] = {
-    var subsets = candidates.par.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
-    while (!subsets.isEmpty) { //expanding is stopped if the sum is reached or all possible combinations are expanded
-      val result = subsets.find(subset => Math.abs(subset._2 - target.value) < tolerance)
+    var expandedCandidates = candidates.par.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
+    while (!expandedCandidates.isEmpty) { //expanding is stopped if the sum is reached or all possible combinations are expanded
+      val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value) < tolerance)
       if (result.isDefined) {
         return result.get._1
       }
-      subsets = subsets.filter(partialResult => !partialResult._3.isEmpty && partialResult._2 < target.value) //drop all with no more remaining options
-      subsets = subsets.flatMap(partialResult => {
+      expandedCandidates = expandedCandidates.filter(partialResult => !partialResult._3.isEmpty && partialResult._2 < target.value) //drop all with no more remaining options
+      expandedCandidates = expandedCandidates.flatMap(partialResult => {
         partialResult._3.map(elementToAdd => {
           (elementToAdd :: partialResult._1, partialResult._2 + elementToAdd.value, partialResult._3.dropWhile(_ != elementToAdd).drop(1))
         })
