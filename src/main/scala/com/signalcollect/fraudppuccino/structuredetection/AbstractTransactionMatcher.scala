@@ -38,7 +38,6 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
   def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {
     if (unmatchedInputs.size <= 7) {
       unmatchedInputs += input
-
     }
   }
 
@@ -48,7 +47,7 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
   def processOutputTransaction(output: TransactionOutput, graphEditor: GraphEditor[Any, Any]) {
     val matchedCombination = findMatchingTransactions(output, unmatchedOutputs, unmatchedInputs) //Depends on the use case
     matchedCombination match {
-      case (Nil, Nil) => if(unmatchedOutputs.size<=7) unmatchedOutputs += output //If no match -> ad it to the unmatched outputs
+      case (Nil, Nil) => if(unmatchedOutputs.size<=7) unmatchedOutputs += output //If no match -> add it to the unmatched outputs
       case (ins, outs) => {
         for (in <- ins) {
           for (out <- outs) {
