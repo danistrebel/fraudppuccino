@@ -13,7 +13,7 @@ import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
  * determine if two components are linked to each
  * other or not.
  */ 
-class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   var componentId = Math.abs(vertex.id.asInstanceOf[Int])
 

@@ -8,7 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Algorithm on transaction vertices that connects neighboring related transactions
  */
-class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+class TransactionLinker(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   val candidateInputs = new ArrayBuffer[TransactionInput]() // Transactions that could serve as inputs for this transaction
   val candidateOutputs = new ArrayBuffer[TransactionOutput]() // Transactions that could serve as outputs for this transactions

@@ -7,7 +7,7 @@ import com.signalcollect._
  * Simple VertexAlgorithm implementation that takes whatever signal
  * it receives and broadcasts it along all its outgoing edges.
  */
-class SignalBroadcaster(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+class SignalBroadcaster(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   def getState = None
 

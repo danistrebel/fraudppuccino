@@ -5,7 +5,7 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection.TransactionOutput
 import com.signalcollect.fraudppuccino.structuredetection.TransactionInput
 
-class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   val value = vertex.getResult("value").getOrElse(0l).asInstanceOf[Long]
   val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]

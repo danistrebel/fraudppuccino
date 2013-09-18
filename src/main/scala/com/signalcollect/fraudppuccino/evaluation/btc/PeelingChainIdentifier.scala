@@ -7,8 +7,7 @@ import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.structuredetection.TransactionOutput
 import com.signalcollect.fraudppuccino.structuredetection.TransactionInput
 
-class PeelingChainIdentifier(vertex: RepeatedAnalysisVertex[_]) extends TransactionRelationshipExplorer(vertex) {
-
+class PeelingChainIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
   val value = vertex.getResult("value").getOrElse(0l).asInstanceOf[Long]
   val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]
 

@@ -6,6 +6,7 @@ import com.signalcollect.fraudppuccino.structuredetection.AbstractTransactionMat
 import com.signalcollect.fraudppuccino.structuredetection.TransactionSignal
 import com.signalcollect.fraudppuccino.structuredetection.TransactionOutput
 import com.signalcollect.fraudppuccino.structuredetection.TransactionInput
+import scala.collection.GenIterable
 
 class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractTransactionMatcher(vertex) {
 
@@ -23,17 +24,17 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
   def findMatchingTransactions(newOutPut: TransactionOutput,
     outputs: Iterable[TransactionOutput],
     inputs: Iterable[TransactionInput]): (Iterable[TransactionInput], Iterable[TransactionOutput]) = {
-    
+
     //Finds chains and aggregations
     findMatchingsubsetSums(inputs, newOutPut) match {
       case Nil =>
       case matches: List[TransactionInput] => return (matches, List(newOutPut))
     }
-    
+
     //Finds splits
-    for (input <- inputs.filter(_.value>newOutPut.value)) {
+    for (input <- inputs.filter(_.value > newOutPut.value)) {
       findMatchingsubsetSums(List(newOutPut) ++ outputs, input) match {
-        case Nil => 
+        case Nil =>
         case matches: List[TransactionOutput] => return (List(input), matches)
       }
     }
@@ -45,8 +46,9 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
    * Uses dynamic programming to find signals that sum up to the value of this transaction
    */
   def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], target: TransactionSignal, tolerance: Double = 0.1f): Iterable[TransactionSignal] = {
-    var expandedCandidates = candidates.par.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
-    while (!expandedCandidates.isEmpty) { //expanding is stopped if the sum is reached or all possible combinations are expanded
+    var expandedCandidates = candidates.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
+
+    while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 6) { //expanding is stopped if the sum is reached or all possible combinations are expanded
       val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value) < tolerance)
       if (result.isDefined) {
         return result.get._1
@@ -59,7 +61,5 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
       })
     }
     List()
-
   }
-
 }

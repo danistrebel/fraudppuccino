@@ -5,8 +5,9 @@ import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionEdge
+import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
 
-abstract class TransactionRelationshipExplorer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+trait TransactionRelationshipExplorer extends VertexAlgorithm {
 
   /**
    * Returns true if this vertex is a source of a transaction sub-pattern.
@@ -18,16 +19,18 @@ abstract class TransactionRelationshipExplorer(vertex: RepeatedAnalysisVertex[_]
    */ 
   def isPatternSink: Boolean = hasPredecessors && !hasSuccessors
   
-  def isSplitter = vertex.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) > 1
+  def isIsolated : Boolean = !getHostVertex.outgoingEdges.exists(_._2.isInstanceOf[TransactionPatternEdge])
   
-  def isAggregator = vertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) > 1
+  def isSplitter = getHostVertex.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) > 1
+  
+  def isAggregator = getHostVertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) > 1
 
-  def hasPredecessors: Boolean = vertex.outgoingEdges.exists(_._2 == UpstreamTransactionPatternEdge)
+  def hasPredecessors: Boolean = getHostVertex.outgoingEdges.exists(_._2 == UpstreamTransactionPatternEdge)
   
-  def hasSuccessors: Boolean = vertex.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge)
+  def hasSuccessors: Boolean = getHostVertex.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge)
   
-  def countPredecessors: Int = vertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge)
+  def countPredecessors: Int = getHostVertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge)
   
-  def countSuccessors: Int = vertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge)
+  def countSuccessors: Int = getHostVertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge)
   
 }

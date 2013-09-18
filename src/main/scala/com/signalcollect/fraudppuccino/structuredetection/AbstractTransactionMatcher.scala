@@ -4,7 +4,7 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import scala.collection.mutable.ArrayBuffer
 
-abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   val unmatchedInputs = new ArrayBuffer[TransactionInput]() // Transactions that could serve as inputs for this transaction
   val unmatchedOutputs = new ArrayBuffer[TransactionOutput]() // Transactions that could serve as outputs for this transactions
