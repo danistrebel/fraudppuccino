@@ -6,6 +6,7 @@ import scala.collection.mutable._
 import scala.io.Source
 import com.signalcollect.fraudppuccino.detection._
 import com.signalcollect.fraudppuccino.detection.demo._
+import com.signalcollect.fraudppuccino.structuredetection.SignalBroadcaster
 
 object WindowedStructureDetection extends App {
 

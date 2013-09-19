@@ -4,7 +4,7 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import scala.collection.JavaConversions.mapAsScalaMap
 
-class PageRankAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+class PageRankAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   val dampingFactor = 0.85f
   var state = 1 - dampingFactor

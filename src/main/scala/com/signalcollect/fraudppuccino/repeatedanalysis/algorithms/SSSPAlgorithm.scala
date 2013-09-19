@@ -3,7 +3,7 @@ package com.signalcollect.fraudppuccino.repeatedanalysis.algorithms
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 
-class SSSPAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+class SSSPAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   var minDistance = Int.MaxValue
   var minSignal = Int.MaxValue

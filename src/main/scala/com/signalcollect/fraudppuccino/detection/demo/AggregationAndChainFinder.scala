@@ -6,6 +6,10 @@ import scala.io.Source
 import scala.collection.mutable.Map
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.detection._
+import com.signalcollect.fraudppuccino.structuredetection.TransactionEdge
+import com.signalcollect.fraudppuccino.structuredetection.TransactionLinker
+import com.signalcollect.fraudppuccino.structuredetection.SignalBroadcaster
+import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
 
 object Test2ComponentGraph extends App {
 

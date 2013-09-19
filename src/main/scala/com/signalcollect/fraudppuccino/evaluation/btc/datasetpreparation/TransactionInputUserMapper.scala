@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.evaluation.btc
+package com.signalcollect.fraudppuccino.evaluation.btc.datasetpreparation
 
 import scala.collection.mutable.HashMap
 import scala.io.Source

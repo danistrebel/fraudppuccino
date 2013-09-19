@@ -1,15 +1,25 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.evaluation.btc
 
 import org.specs2.mutable._
 import com.signalcollect.GraphBuilder
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import org.junit.runner.RunWith
+import com.signalcollect.fraudppuccino.detection._
 import org.specs2.runner.JUnitRunner
+import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 
 @RunWith(classOf[JUnitRunner])
-class PatternIdentificationSpec extends SpecificationWithJUnit {
+class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
+
+  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new BTCTransactionMatcher(vertex)
+  val transactionAnnouncing: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionAnnouncer(vertex)
 
   "The pattern identifier" should {
+
+    sequential
 
     " detect simple transaction chains" in {
 
@@ -34,12 +44,12 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
 
       val transactions = List(tx0, tx1, tx2)
 
-      val transactionInfos = List((tx0, 250l, 0l, 0, 1l),
-        (tx1, 250l, 1l, 1, 2l),
+      val transactionInfos = List((tx0, 250l, 0l, 0, 1),
+        (tx1, 250l, 1l, 1, 2),
         (tx2, 100l, 1l, 1, 3))
 
       for (account <- accounts) {
-        account.setAlgorithmImplementation(vertex => new SignalBroadcaster(vertex))
+        account.setAlgorithmImplementation(transactionMatching)
         graph.addVertex(account)
       }
 
@@ -48,27 +58,21 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
         transaction._1.storeAttribute("time", transaction._3)
         transaction._1.storeAttribute("src", transaction._4)
         transaction._1.storeAttribute("target", transaction._5)
-        transaction._1.setAlgorithmImplementation(vertex => new TransactionLinker(vertex))
+        transaction._1.setAlgorithmImplementation(transactionAnnouncing)
         graph.addVertex(transaction._1)
+        graph.recalculateScores
+        graph.execute
+
       }
 
-      //Linking the chain
-      graph.addEdge(tx0.id, new TransactionEdge(a0.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx0.id))
-      graph.addEdge(tx1.id, new TransactionEdge(a1.id))
-      graph.addEdge(a2.id, new TransactionEdge(tx1.id))
-      //linking unrelated arm
-      graph.addEdge(tx2.id, new TransactionEdge(a1.id))
-      graph.addEdge(a3.id, new TransactionEdge(tx2.id))
-
       graph.recalculateScores
-      graph.execute
+      println(graph.execute)
 
-      assert(tx0.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
-      assert(!tx1.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
-      assert(!tx2.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
+      assert(tx0.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
+      assert(tx1.outgoingEdges.exists(_._2 == UpstreamTransactionPatternEdge))
+      assert(!tx2.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
 
-      tx0.outgoingEdges.map(_._2).size === 2
+      tx0.outgoingEdges.size === 1
     }
 
     " detect aggregations of patterns" in {
@@ -87,8 +91,9 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       val a1 = new RepeatedAnalysisVertex(1)
       val a2 = new RepeatedAnalysisVertex(2)
       val a3 = new RepeatedAnalysisVertex(3)
+      val a4 = new RepeatedAnalysisVertex(4)
 
-      val accounts = List(a0, a1, a2, a3)
+      val accounts = List(a0, a1, a2, a3, a4)
 
       val tx0 = new RepeatedAnalysisVertex(100)
       val tx1 = new RepeatedAnalysisVertex(101)
@@ -98,12 +103,12 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       val transactions = List(tx0, tx1, tx2, tx3)
 
       val transactionInfos = List((tx0, 50l, 0l, 0, 1),
-        (tx1, 250l, 2l, 1, 2),
         (tx2, 200l, 1l, 3, 1),
-        (tx3, 100l, 1l, 4, 1))
+        (tx3, 100l, 1l, 4, 1),
+        (tx1, 250l, 2l, 1, 2))
 
       for (account <- accounts) {
-        account.setAlgorithmImplementation(vertex => new SignalBroadcaster(vertex))
+        account.setAlgorithmImplementation(transactionMatching)
         graph.addVertex(account)
       }
 
@@ -112,30 +117,22 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
         transaction._1.storeAttribute("time", transaction._3)
         transaction._1.storeAttribute("src", transaction._4)
         transaction._1.storeAttribute("target", transaction._5)
-        transaction._1.setAlgorithmImplementation(vertex => new TransactionLinker(vertex))
+        transaction._1.setAlgorithmImplementation(transactionAnnouncing)
         graph.addVertex(transaction._1)
+        graph.recalculateScores
+        graph.execute
       }
-
-      //Linking the aggregator
-      graph.addEdge(tx0.id, new TransactionEdge(a0.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx0.id))
-      graph.addEdge(tx1.id, new TransactionEdge(a1.id))
-      graph.addEdge(a2.id, new TransactionEdge(tx1.id))
-      graph.addEdge(tx2.id, new TransactionEdge(a3.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx2.id))
-      //linking unrelated arm
-      graph.addEdge(tx3.id, new TransactionEdge(a1.id))
-      graph.addEdge(a3.id, new TransactionEdge(tx3.id))
-
       graph.recalculateScores
       graph.execute
 
-      assert(tx0.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
-      assert(!tx1.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
-      assert(tx2.outgoingEdges.exists(_._2==DownstreamTransactionPatternEdge))
+      assert(tx0.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
+      assert(tx1.outgoingEdges.exists(_._2 == UpstreamTransactionPatternEdge))
+      assert(!tx1.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
+      assert(tx2.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
 
-      tx0.outgoingEdges.map(_._2).size === 2
-      tx2.outgoingEdges.map(_._2).size === 2
+      tx0.outgoingEdges.size === 1
+      tx1.outgoingEdges.size === 2
+      tx2.outgoingEdges.size === 1
 
     }
 
@@ -165,12 +162,12 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
       val transactions = List(tx0, tx1, tx2, tx3)
 
       val transactionInfos = List((tx0, 200l, 0l, 0, 1),
+        (tx3, 100l, 1l, 4, 1),
         (tx1, 150l, 2l, 1, 2),
-        (tx2, 50l, 3l, 1, 3),
-        (tx3, 100l, 1l, 4, 1))
+        (tx2, 50l, 3l, 1, 3))
 
       for (account <- accounts) {
-        account.setAlgorithmImplementation(vertex => new SignalBroadcaster(vertex))
+        account.setAlgorithmImplementation(transactionMatching)
         graph.addVertex(account)
       }
 
@@ -179,28 +176,19 @@ class PatternIdentificationSpec extends SpecificationWithJUnit {
         transaction._1.storeAttribute("time", transaction._3)
         transaction._1.storeAttribute("src", transaction._4)
         transaction._1.storeAttribute("target", transaction._5)
-        transaction._1.setAlgorithmImplementation(vertex => new TransactionLinker(vertex))
+        transaction._1.setAlgorithmImplementation(transactionAnnouncing)
         graph.addVertex(transaction._1)
+        graph.recalculateScores
+        graph.execute
       }
-
-      //Linking the split
-      graph.addEdge(tx0.id, new TransactionEdge(a0.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx0.id))
-      graph.addEdge(tx1.id, new TransactionEdge(a1.id))
-      graph.addEdge(a2.id, new TransactionEdge(tx1.id))
-      graph.addEdge(tx2.id, new TransactionEdge(a1.id))
-      graph.addEdge(a3.id, new TransactionEdge(tx2.id))
-      //linking unrelated input
-      graph.addEdge(tx3.id, new TransactionEdge(a4.id))
-      graph.addEdge(a1.id, new TransactionEdge(tx3.id))
 
       graph.recalculateScores
       graph.execute
 
-      tx0.outgoingEdges.filter(_._2==DownstreamTransactionPatternEdge).size === 2
-      tx1.outgoingEdges.filter(_._2==DownstreamTransactionPatternEdge).size === 0
-      tx2.outgoingEdges.filter(_._2==DownstreamTransactionPatternEdge).size === 0
-      tx3.outgoingEdges.filter(_._2==DownstreamTransactionPatternEdge).size === 0
+      tx0.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).size === 2
+      tx1.outgoingEdges.filter(_._2 == UpstreamTransactionPatternEdge).size === 1
+      tx2.outgoingEdges.filter(_._2 == UpstreamTransactionPatternEdge).size === 1
+      tx3.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).size === 0
 
     }
   }

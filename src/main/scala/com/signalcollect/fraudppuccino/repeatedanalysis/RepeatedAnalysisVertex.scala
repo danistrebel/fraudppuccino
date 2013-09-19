@@ -79,8 +79,8 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
 
   /**
    * Adds edges without checking for duplicates
-   * The edge object is trashed in order to save memory 
-   */ 
+   * The edge object is trashed in order to save memory
+   */
   def addEdge(edge: Edge[_], graphEditor: GraphEditor[Any, Any]): Boolean = {
 
     edge match {
@@ -100,6 +100,10 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
     val edgesRemoved = outgoingEdges.size
     outgoingEdges.clear()
     edgesRemoved
+  }
+
+  def removeEdgesOfType(edgeType: EdgeMarker) {
+    outgoingEdges = outgoingEdges.filter(_._2 != edgeType)
   }
 
   def edgeCount(): Int = outgoingEdges.size

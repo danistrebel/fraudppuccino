@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.structuredetection
 
 trait TransactionSignal{
   val transactionID: Int

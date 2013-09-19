@@ -1,6 +1,5 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.structuredetection
 
-import com.signalcollect.DefaultEdge
 import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarker
 import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkerWrapper
 

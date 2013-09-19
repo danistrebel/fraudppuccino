@@ -4,15 +4,15 @@ import com.signalcollect._
 
 /**
  * Defines the structure of an interchangeable algorithm implementation
- */ 
-abstract class VertexAlgorithm {
-  
+ */
+abstract class VertexAlgorithm(vertex: RepeatedAnalysisVertex[_]) {
+
   def getState: Any
-  
+
   def setState(state: Any)
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean
-  
+
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)])
 
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any])
@@ -20,6 +20,8 @@ abstract class VertexAlgorithm {
   def scoreSignal: Double
 
   def scoreCollect: Double
+
+  def noitfyTopologyChange
   
-  def noitfyTopologyChange  
+  def getHostVertex = vertex
 }

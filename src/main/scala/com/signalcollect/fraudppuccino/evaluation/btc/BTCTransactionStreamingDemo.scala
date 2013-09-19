@@ -8,24 +8,22 @@ import scala.util.control.Breaks._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
 import com.signalcollect.fraudppuccino.patternanalysis.ConnectedComponentsIdentifier
-import com.signalcollect.fraudppuccino.structuredetection.TransactionEdge
-import com.signalcollect.fraudppuccino.structuredetection.TransactionLinker
-import com.signalcollect.fraudppuccino.structuredetection.SignalBroadcaster
 import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 
-object TransactionLoaderTest extends App {
+object BTCTransactionStreamingDemo extends App {
 
   val graph = GraphBuilder.build
 
-  val signalMultiplexig: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new SignalBroadcaster(vertex)
-  val transactionLinking: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionLinker(vertex)
+  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new BTCTransactionMatcher(vertex)
+  val transactionAnnouncing: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionAnnouncer(vertex)
 
   breakable {
 
     for (line <- Source.fromFile("/Volumes/Data/BTC_August2013/user-user-tx.csv").getLines) {
       val splitted = line.split(",")
 
-      if (splitted(0).toInt >= 1200000) {
+      if (splitted(0).toInt >= 1100000) {
         break
       }
 
@@ -39,16 +37,20 @@ object TransactionLoaderTest extends App {
         transaction.storeAttribute("src", splitted(2).toInt)
         transaction.storeAttribute("target", splitted(3).toInt)
 
-        transaction.setAlgorithmImplementation(transactionLinking)
-        sender.setAlgorithmImplementation(signalMultiplexig)
-        receiver.setAlgorithmImplementation(signalMultiplexig)
+        transaction.setAlgorithmImplementation(transactionAnnouncing)
+        sender.setAlgorithmImplementation(transactionMatching)
+        receiver.setAlgorithmImplementation(transactionMatching)
 
         graph.addVertex(transaction)
         graph.addVertex(sender)
         graph.addVertex(receiver)
 
-        graph.addEdge(splitted(0).toInt * -1, new TransactionEdge(splitted(2).toInt))
-        graph.addEdge(splitted(3).toInt, new TransactionEdge(splitted(0).toInt * -1))
+        if (splitted(0).toInt % 1000 == 0) {
+          graph.recalculateScores
+          graph.execute
+          println(splitted(0).toInt)
+
+        }
       }
 
     }
@@ -95,6 +97,7 @@ object TransactionLoaderTest extends App {
   println("Components " + components.toString)
   println("Component count " + components.size)
   println("Members " + count)
+  readLine
 
   graph.shutdown
 

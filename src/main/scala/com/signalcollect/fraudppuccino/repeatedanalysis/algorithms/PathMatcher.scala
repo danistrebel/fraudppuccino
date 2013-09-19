@@ -3,7 +3,7 @@ package com.signalcollect.fraudppuccino.repeatedanalysis.algorithms
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 
-class PathMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+class PathMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   var unmatchedPatterns: List[RegexPattern] = List()
   var matches: List[RegexPattern] = List()

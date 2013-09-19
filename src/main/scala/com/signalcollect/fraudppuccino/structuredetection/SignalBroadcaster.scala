@@ -1,15 +1,13 @@
-package com.signalcollect.fraudppuccino.detection
+package com.signalcollect.fraudppuccino.structuredetection
 
-import com.signalcollect.DataGraphVertex
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
-import java.util.HashSet
 
 /**
  * Simple VertexAlgorithm implementation that takes whatever signal
  * it receives and broadcasts it along all its outgoing edges.
  */
-class SignalBroadcaster(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
+class SignalBroadcaster(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   def getState = None
 

@@ -2,7 +2,7 @@ package com.signalcollect.fraudppuccino.repeatedanalysis
 
 import com.signalcollect._
 
-class DummyVertexAlgorithm extends VertexAlgorithm {
+class DummyVertexAlgorithm() extends VertexAlgorithm(null) {
  def getState = None
 
   def setState(state: Any) = {
