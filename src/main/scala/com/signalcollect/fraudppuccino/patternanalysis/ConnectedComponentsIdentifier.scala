@@ -15,7 +15,7 @@ import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
  */
 class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends AbstractLabelMerger[Int](vertex) {
 
-  def initialLabel: Int = vertex.id.asInstanceOf[Int]
+  def initialLabel: Int = Math.abs(vertex.id.asInstanceOf[Int])
 
   def shouldSwitchToLabel(newLabel: Int): Boolean = this.label>newLabel
 

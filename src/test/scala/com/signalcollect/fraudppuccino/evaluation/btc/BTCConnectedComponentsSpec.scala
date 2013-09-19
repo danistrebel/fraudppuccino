@@ -72,9 +72,9 @@ class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
       graph.recalculateScores
       graph.execute
 
-      tx0.state.asInstanceOf[Int] == 100
-      tx1.state.asInstanceOf[Int] == 100
-      tx2.state.asInstanceOf[Int] == 102
+      tx0.state.asInstanceOf[Int] === 100
+      tx1.state.asInstanceOf[Int] === 100
+      tx2.state.asInstanceOf[Int] === 102
 
     }
   }

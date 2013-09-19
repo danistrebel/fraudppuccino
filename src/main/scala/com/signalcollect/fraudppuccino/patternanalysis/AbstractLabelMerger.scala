@@ -14,9 +14,9 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case newLabel: LabelType => {
-        if(shouldSwitchToLabel(newLabel)) {
+        if (shouldSwitchToLabel(newLabel)) {
           label = newLabel
-          vertex.outgoingEdges.forall(edge => shouldSignalForEdgeType(edge._2))
+          scoreSignal = 1.0
         }
       }
     }
@@ -24,12 +24,14 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
+    vertex.outgoingEdges.filter(edge => shouldSignalForEdgeType(edge._2)).foreach(edge => graphEditor.sendSignal(label, edge._1, Some(vertex.id)))
+    scoreSignal = 0.0
   }
 
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
   }
 
-  var scoreSignal = 0.0
+  var scoreSignal = 1.0
 
   var scoreCollect = 0.0
 
@@ -39,6 +41,6 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
   def initialLabel: LabelType
 
   def shouldSwitchToLabel(newLabel: LabelType): Boolean
-  
-  def shouldSignalForEdgeType(edgeType: EdgeMarker) : Boolean
+
+  def shouldSignalForEdgeType(edgeType: EdgeMarker): Boolean
 }

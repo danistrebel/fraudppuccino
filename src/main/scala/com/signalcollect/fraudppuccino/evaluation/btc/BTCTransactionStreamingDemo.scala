@@ -45,7 +45,7 @@ object BTCTransactionStreamingDemo extends App {
         graph.addVertex(sender)
         graph.addVertex(receiver)
 
-        if (splitted(0).toInt % 100 == 0) {
+        if (splitted(0).toInt % 1000 == 0) {
           graph.recalculateScores
           graph.execute
           println(splitted(0).toInt)
