@@ -18,6 +18,7 @@ class QueryExecution {
 
   def load(filePath: String, start: Int, end: Int) {
     for (line <- Source.fromFile(filePath).getLines) {
+      
       val splitted = line.split(",")
 
       if (splitted(0).toInt >= end) {
