@@ -11,8 +11,8 @@ import language.dynamics
 
 class QueryExecution {
 
-  val transactions = ArrayBuffer[RepeatedAnalysisVertex[_]]()
-  val senders = ArrayBuffer[RepeatedAnalysisVertex[_]]()
+  var transactions = ArrayBuffer[RepeatedAnalysisVertex[_]]()
+  var senders = ArrayBuffer[RepeatedAnalysisVertex[_]]()
 
   val graph = GraphBuilder.build
 
