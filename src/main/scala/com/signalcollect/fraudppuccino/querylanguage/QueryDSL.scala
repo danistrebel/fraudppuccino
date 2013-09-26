@@ -19,35 +19,39 @@ object FRAUDPPUCCINO {
   }
 
   object RUN {
-    def apply(plan: ExecutionPlan) = plan.execute
+    def apply(plan: ExecutionPlan) = execution.execute(plan.transactionsAlgorithm, plan.sendersAlgorithm)
   }
 
   object LABEL {
+    def TRANSACTIONS(label: String) = LabelParser(Some(label), None)
+    def SENDERS(label: String) =  LabelParser(None, Some(label))
+  }
 
+  case class LabelParser(transactionLabel: Option[String] = None, senderLabel: Option[String] = None) {
+    def TRANSACTIONS(label: String) = LabelParser(Some(label), senderLabel)
+    def SENDERS(label: String) =  LabelParser(transactionLabel, Some(label))
+    def WITH(plan: ExecutionPlan) = execution.label(transactionLabel, senderLabel, plan.transactionsAlgorithm, plan.sendersAlgorithm)
   }
 
   abstract class ExecutionPlan {
-    def execute
+    def transactionsAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new DummyVertexAlgorithm()
+    def sendersAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new DummyVertexAlgorithm()
   }
 
   object CONNECTOR extends ExecutionPlan {
-
-    val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new BTCTransactionMatcher(vertex)
-    val transactionAnnouncing: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionAnnouncer(vertex)
-
-    def execute = {
-      execution.execute(transactionAnnouncing, transactionMatching)
-    }
+    override def sendersAlgorithm = vertex => new BTCTransactionMatcher(vertex)
+    override def transactionsAlgorithm = vertex => new TransactionAnnouncer(vertex)
+  }
+  
+  object SUBGRAPH_IDENTIFICATION extends ExecutionPlan {
+    override def transactionsAlgorithm = vertex => new ConnectedComponentsIdentifier(vertex)
+  }
+  
+  object DEPTH_EXPLORATION extends ExecutionPlan {
+    override def transactionsAlgorithm = vertex => new PatternDepthAnalyzer(vertex)
   }
 
-  object REST { //degug only
-
-    val dummyAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new DummyVertexAlgorithm()
-    val subgraphIdentification: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new ConnectedComponentsIdentifier(vertex)
-    val depthExplorer: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new PatternDepthAnalyzer(vertex)
-
-    execution.label(Some("component"), None, subgraphIdentification, dummyAlgorithm)
-    execution.label(Some("depth"), None, depthExplorer, dummyAlgorithm)
+  object REST { //debug only
     val transactionsByComponentId = execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
 
     val connectedComponents = transactionsByComponentId.filter(_._2.size > 1)
