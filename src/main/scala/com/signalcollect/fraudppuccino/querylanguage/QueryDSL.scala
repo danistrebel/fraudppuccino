@@ -6,13 +6,14 @@ import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.patternanalysis._
 
 import language.dynamics
-object FRAUDPPUCCINO  extends App {
+object FRAUDPPUCCINO extends App {
 
-  val execution = new QueryExecution
+  lazy val execution: QueryExecution = new QueryExecution
   var components: Map[Any, Iterable[RepeatedAnalysisVertex[_]]] = null
 
   object LOAD {
     def SOURCE(path: String) = RangeParser(path)
+    def COMPONENTS(comps: Map[Any, Iterable[RepeatedAnalysisVertex[_]]]) = components = comps
   }
 
   object CONNECT {
@@ -32,42 +33,65 @@ object FRAUDPPUCCINO  extends App {
     def TRANSACTIONS(label: String) = LabelParser(Some(label), None)
     def SENDERS(label: String) = LabelParser(None, Some(label))
   }
-  val WHERE = (s: String) => FilterParser(s)
 
   object FILTER {
-    //def TRANSACTIONS(o: Any): String => FilterParser = (s: String) => FilterParser(s) 
-    def TRANSACTIONS(s: String) = new Object {
-      //def WHERE(s: String) = {}      
+    def TRANSACTIONS(label: String) = FilterParser(label)
+    def COMPONENTS(operation: String): ComponentFilter = {
+      operation match {
+        case "size" => ComponentSizeFilter
+        case label: String => ComponentLabelFilter(label)
+      }
     }
   }
 
-//  case class ParseHelper extends Dynamic {
-//    def selectDynamic(name: String) = ParseHelper
-//    def applyDynamic(name: String, args: Any*) = ParseHelper
-//    def apply(as: Any*) = ParseHelper
-//  }
-
-  case class Parser(l: List[Any]) extends Dynamic  {
-    def applyDynamic(name: String)(args: Any*) = { Parser(args(0)::name::l)}
-    
+  abstract class ComponentFilter {
+    def EQUALS(referenceSize: Int)
+    def LESSTHAN(referenceSize: Int)
+    def GREATERTHAN(referenceSize: Int)
+    def MAX(a: Any): ComponentFilter
+    def MIN(a: Any): ComponentFilter
   }
-  val entry = Parser(Nil)
 
+  object ComponentSizeFilter extends ComponentFilter {
+    def EQUALS(referenceSize: Int) = {
+      components = components.filter(_._2.size == referenceSize)
+    }
+    def LESSTHAN(referenceSize: Int) = {
+      components = components.filter(_._2.size < referenceSize)
+    }
+    def GREATERTHAN(referenceSize: Int) = {
+      components = components.filter(_._2.size > referenceSize)
+    }
+    def MAX(a: Any): ComponentFilter = { null }
+    def MIN(a: Any): ComponentFilter = { null }
+  }
 
-  //val a = 1
-  val b = 2
-  //val c = 3
-  val d = 4
-  //val e = 5
-  val f = 6
-  //val g = 7
-  val h = 8
+  lazy val SIZE = "size"
+
+  case class ComponentLabelFilter(label: String, extractionFunction: Iterable[RepeatedAnalysisVertex[_]] => Int = members => 0) extends ComponentFilter {
+
+    def MAX(a: Any) = {
+      val extraction: Iterable[RepeatedAnalysisVertex[_]] => Int = members => members.map(_.getResult(label).get.asInstanceOf[Int]).max
+      ComponentLabelFilter(label, extraction)
+    }
+
+    def MIN(a: Any) = {
+      val extraction: Iterable[RepeatedAnalysisVertex[_]] => Int = members => members.map(_.getResult(label).get.asInstanceOf[Int]).min
+      ComponentLabelFilter(label, extraction)
+    }
+
+    def EQUALS(referenceSize: Int) = {
+      components = components.filter(c => extractionFunction(c._2) == referenceSize)
+    }
+    def LESSTHAN(referenceSize: Int) = {
+      components = components.filter(c => extractionFunction(c._2) < referenceSize)
+    }
+    def GREATERTHAN(referenceSize: Int) = {
+      components = components.filter(c => extractionFunction(c._2) > referenceSize)
+    }
+  }
   
-  val r = entry / b > 1 bello 
-  f gooooooooal
-  h;
-  
-  println(r.l.reverse)
+  lazy val VALUE = ""
 
   case class FilterParser(val label: String) {
     def EQUALS(referenceValue: Any) = {
@@ -99,7 +123,11 @@ object FRAUDPPUCCINO  extends App {
     }
 
   }
-
+  
+  object SHUTDOWN {
+    execution.shutdown
+  }
+  
   def COMPONENTS = components
   def TRANSACTIONS = execution.transactions
   def SENDERS = execution.transactions

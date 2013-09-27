@@ -3,6 +3,7 @@ package com.signalcollect.fraudppuccino.patternanalysis
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 
 class PatternDepthAnalyzer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
@@ -29,7 +30,10 @@ class PatternDepthAnalyzer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgo
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(depth+1, edge._1, Some(vertex.id)))
+    outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(depth+1, edge._1, Some(vertex.id)))
+    outgoingEdges.filter(edge => edge._2 == UpstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(depth-1, edge._1, Some(vertex.id)))
+
+    scoreSignal = 0
   }
 
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {

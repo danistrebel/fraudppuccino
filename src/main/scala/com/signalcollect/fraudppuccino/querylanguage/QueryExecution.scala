@@ -66,6 +66,8 @@ class QueryExecution {
       senders.foreach(_.retainState(label))
     }
   }
+  
+  def shutdown = graph.shutdown
 
 }
 
