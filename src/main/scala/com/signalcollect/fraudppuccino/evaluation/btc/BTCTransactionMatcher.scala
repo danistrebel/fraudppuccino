@@ -26,14 +26,14 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
     inputs: Iterable[TransactionInput]): (Iterable[TransactionInput], Iterable[TransactionOutput]) = {
 
     //Finds chains and aggregations
-    findMatchingsubsetSums(inputs, newOutPut) match {
+    findMatchingsubsetSums(inputs.filter(_.time<newOutPut.time), newOutPut) match {
       case Nil =>
       case matches: List[TransactionInput] => return (matches, List(newOutPut))
     }
 
     //Finds splits
-    for (input <- inputs.filter(_.value > newOutPut.value)) {
-      findMatchingsubsetSums(List(newOutPut) ++ outputs, input) match {
+    for (input <- inputs.filter(input => input.time < newOutPut.time && input.value > newOutPut.value)) {
+      findMatchingsubsetSums(List(newOutPut) ++ outputs.filter(_.time > input.time), input) match {
         case Nil =>
         case matches: List[TransactionOutput] => return (List(input), matches)
       }
@@ -48,7 +48,7 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
   def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], target: TransactionSignal, tolerance: Double = 0.1f): Iterable[TransactionSignal] = {
     var expandedCandidates = candidates.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
 
-    while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 6) { //expanding is stopped if the sum is reached or all possible combinations are expanded
+    while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 8) { //expanding is stopped if the sum is reached or all possible combinations are expanded
       val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value) < tolerance)
       if (result.isDefined) {
         return result.get._1

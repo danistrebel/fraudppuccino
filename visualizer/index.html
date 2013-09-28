@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Fraudppucchino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/app.css">
+  </head>
+  
+  <body>
+	  <nav class="navbar navbar-default" role="navigation">
+	          <div class="navbar-header">
+	            <a class="navbar-brand" href="#">fraudppuchino</a>
+	          </div>
+	  </nav>
+	  
+	  <div class="container">
+		  <div class="row">
+		    <div class="col-md-9">
+			    <div id="visualizer"></div>
+			</div>
+		    <div class="col-md-3">
+				<div class="panel panel-default">
+				  <!-- Default panel contents -->
+				<div class="panel-heading">Reports</div>
+				<div class="list-group">
+				  <a href="#" class="list-group-item active">April 11th - April 13th<br/>14 Transacitions<br/>$23,484.33</a>
+				  <a href="#" class="list-group-item">May 7th - May 10th<br/>11 Transacitions<br/>$455,894.13</a>
+				  <a href="#" class="list-group-item">May 13th - May 18th<br/>23 Transacitions<br/>$5,345.95</a>
+				  <a href="#" class="list-group-item">July 2nd - July 10th<br/>15 Transacitions<br/>$703,323.48</a>
+				</div>
+			  </div>
+		    </div>
+		</div>
+		<divclass="row">
+		<div class="col-md-12">
+		<div id="tabs">
+			<ul class="nav nav-tabs nav-justified">
+				<li id="queryNavTab" class="navTab active"><a href="#tabs-1">Query</a></li>
+				<li id="inspectorNavTab" class="navTab"><a href="#tabs-2">Inspector</a></li>
+			</ul>
+			<div id="tabsWrapper">
+			<div id="tabs-1">
+				<textarea id="query" rows="15" placeholder="Start here.."></textarea>
+<a class="btn btn-primary" href="#">Run</a>			
+			</div>
+			<div id="tabs-2">
+				<h3>Transaction Details</h2>
+			</div>
+		</div>	
+		</div>
+		</div>
+		</div> <!-- row -->
+      </div> <!-- container -->
+  </body>
+
+  <!-- jQuery -->
+  <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+  <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+  <!-- Bootstrap -->
+  <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>  
+  <!-- D3 Drawing -->
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/fraudppucchino.js"></script>
+</html>
