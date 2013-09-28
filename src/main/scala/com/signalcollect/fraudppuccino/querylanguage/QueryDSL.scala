@@ -5,15 +5,26 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.patternanalysis._
 
+import scala.collection.mutable.HashMap
+
 import language.dynamics
+
 object FRAUDPPUCCINO extends App {
 
   lazy val execution: QueryExecution = new QueryExecution
-  var components: Map[Any, Iterable[RepeatedAnalysisVertex[_]]] = null
+  var components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = null
+  
+  lazy val snapshots  = HashMap[String, Map[Int, Iterable[RepeatedAnalysisVertex[_]]]]()
 
   object LOAD {
     def SOURCE(path: String) = RangeParser(path)
-    def COMPONENTS(comps: Map[Any, Iterable[RepeatedAnalysisVertex[_]]]) = components = comps
+    def COMPONENTS(name: String) = components = snapshots(name)
+  }
+  
+  object STORE {
+    def COMPONENTS(name: String) = if(components != null) {
+      snapshots+= ((name, components))
+    }
   }
 
   object CONNECT {
@@ -182,18 +193,5 @@ object FRAUDPPUCCINO extends App {
     override def transactionsAlgorithm = vertex => new PatternDepthAnalyzer(vertex)
   }
 
-  object REST { //debug only
-    //    val transactionsByComponentId = execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
-    //
-    //    val connectedComponents = transactionsByComponentId.filter(_._2.size > 1)
-    //    println("Transactions: " + execution.transactions.size)
-    //    println("Components: " + connectedComponents.size)
-    //    println("their depths: " + connectedComponents.map(_._2.map(_.getResult("depth").get.asInstanceOf[Int]).max))
-    //    println("depth larger than 10: " + connectedComponents.map(_._2.map(_.getResult("depth").get.asInstanceOf[Int]).max).filter(_ > 10).size)
-    //
-    //    println("Larger than 10: " + connectedComponents.filter(_._2.size > 10).size)
-    //    println("sizes: " + connectedComponents.filter(_._2.size > 10).map(_._2.size))
-    //
-    //    println("Unconnected Transactions: " + transactionsByComponentId.filter(_._2.size == 1).size)
-  }
+  
 }

@@ -13,13 +13,14 @@ object QueryDSLDemo extends App {
 
   println("Transactions" + TRANSACTIONS.size)
   println("Components" + COMPONENTS.size)
-  val a = COMPONENTS
+  STORE COMPONENTS "a"
   FILTER COMPONENTS SIZE GREATERTHAN 1
+  
   println("bigger than 1:" + COMPONENTS.size)
-
-  LOAD COMPONENTS a
+  
+  LOAD COMPONENTS "a"
   FILTER COMPONENTS "depth" MAX VALUE GREATERTHAN 5
-  println("deeper than 5:" + COMPONENTS.size)
+  println("deeper than 5:" + COMPONENTS)
   
   SHUTDOWN
 }
