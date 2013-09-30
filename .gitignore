@@ -19,3 +19,7 @@ log_messages.txt
 
 
 src/main/scala/com/signalcollect/fraudppuccino/evaluation/btc/BTCTransactionMatcherDemo.scala
+
+*.class
+
+*.cache

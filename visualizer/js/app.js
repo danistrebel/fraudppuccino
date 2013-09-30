@@ -13,30 +13,12 @@ var svg = d3.select("div#visualizer").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-var reports = {
-	"components":[
-	{
-		"start":1380470421000,
-		"flow":300,
-		"depth":3,
-		"members":[{"id":1,"value":300.00,"time":1328530643,"successor":[1]},
-		{"id":2,"value":300.00,"time":1328530643,"successor":[2,3]},
-		{"id":3,"value":100.00,"time":1328530643,"successor":[]},
-		{"id":4,"value":100.00,"time":1328530643,"successor":[]}]	
-	},
-	{
-		"start":1380230421000,
-		"flow":8000,
-		"depth":4,
-		"members":[{"id":1,"value":8000.00,"time":1328530643,"successor":[1]},
-		{"id":2,"value":8000.00,"time":1328530643,"successor":[2]},
-		{"id":3,"value":8000.00,"time":1328530643,"successor":[3]},
-		{"id":4,"value":8000.00,"time":1328530643,"successor":[4]},	
-		{"id":5,"value":8000.00,"time":1328530643,"successor":[]}]	
-		
-	}
-	]
-}
+var reports = []
+
+d3.json("http://localhost:8888/components.json", function(error, json) {
+	reports = json.components; 
+	updateReports();
+});
 
 	
 var graph = {

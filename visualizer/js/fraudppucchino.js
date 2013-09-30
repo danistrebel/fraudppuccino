@@ -1,6 +1,5 @@
 $(function() {
     $( "#tabs" ).tabs();
-	updateReports();
 });
 
 $('.navTab a').click(function (e) {
@@ -9,7 +8,8 @@ $('.navTab a').click(function (e) {
 })
 
 function updateReports() {
-	reports.components.forEach(function(report, index) {
+	$("div #reportsList").empty();
+	reports.forEach(function(report, index) {
 		var date = new Date(report.start);
 		var reportListEntry = '<a href="#" data-component-id="'+index+'" class="list-group-item">' + date.toLocaleDateString() +'<br/>' + report.members.length +' Transactions<br/>$'+report.flow+'</a>';
 		$("div #reportsList").append(reportListEntry);
@@ -27,7 +27,7 @@ function loadComponentMembers(id) {
 	graph.nodes =[];
 	graph.links = [];
 	
-	reports.components[id].members.forEach(function(transaction, index){
+	reports[id].members.forEach(function(transaction, index){
 		var tx = {"name": transaction.id, "group":1 };
 		transaction.successor.forEach(function(linkTarget){
 			var link = {"source":index,"target":linkTarget,"value":1};
@@ -37,7 +37,29 @@ function loadComponentMembers(id) {
 	});
 	
     updateVisualization();
-	
-	
 }
+
+/**
+* Websocket Communication
+*/
+var wsUri = "ws://localhost:8888/websocket/"; 
+var websocket = new WebSocket(wsUri);
+
+	 
+ websocket.onmessage = function(msg) {
+	 console.log(msg);
+	 if(msg.data=="updateReports") { 
+		reports=[]
+		graph.nodes =[];
+		graph.links = [];
+		$('div #patternVisualizer').empty();
+		d3.json("http://localhost:8888/components.json", function(error, json) {
+			reports = json.components; 
+			updateReports();
+		});
+	 }
+ }
+
+
+
 

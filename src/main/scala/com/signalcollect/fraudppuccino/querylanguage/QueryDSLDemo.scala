@@ -13,6 +13,7 @@ object QueryDSLDemo extends App {
 
   println("Transactions" + TRANSACTIONS.size)
   println("Components" + COMPONENTS.size)
+  
   STORE COMPONENTS "a"
   FILTER COMPONENTS SIZE GREATERTHAN 1
   
