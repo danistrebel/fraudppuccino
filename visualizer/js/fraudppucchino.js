@@ -28,7 +28,7 @@ function loadComponentMembers(id) {
 	graph.nodes =[];
 	graph.links = [];
 	
-	reports.components[id].forEach(function(transaction, index){
+	reports.components[id].members.forEach(function(transaction, index){
 		var tx = {"name": transaction.id, "group":1 };
 		transaction.successor.forEach(function(linkTarget){
 			var link = {"source":index,"target":linkTarget,"value":1};
@@ -37,11 +37,8 @@ function loadComponentMembers(id) {
 		graph.nodes.push(tx);
 	});
 	
-	//set graph
-    force
-        .nodes(n)
-        .links(links)
-        .start();
+    updateVisualization();
+	
 	
 }
 

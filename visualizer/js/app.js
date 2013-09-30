@@ -4,11 +4,12 @@ var width = 960,
 var color = d3.scale.category20();
 
 var force = d3.layout.force()
-    .charge(-120)
-    .linkDistance(30)
+    .charge(-5000)
+    .linkDistance(15)
     .size([width, height]);
 
 var svg = d3.select("div#visualizer").append("svg")
+	.attr("id", "patternVisualizer")
     .attr("width", width)
     .attr("height", height);
 
@@ -42,13 +43,16 @@ var graph = {
   "nodes":[],
   "links":[]
 }
+
+function updateVisualization() {
    
-
-
+	$('div #patternVisualizer').empty();
+  
   force
       .nodes(graph.nodes)
       .links(graph.links)
       .start();
+  
 
   var link = svg.selectAll(".link")
       .data(graph.links)
@@ -76,3 +80,5 @@ var graph = {
     node.attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
   });
+  
+}
