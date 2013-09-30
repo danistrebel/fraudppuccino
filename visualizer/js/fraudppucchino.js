@@ -23,7 +23,6 @@ $(document).on('click','.list-group-item',function(){
 });
 
 function loadComponentMembers(id) {
-	console.log(reports.components[id]);
 	
 	graph.nodes =[];
 	graph.links = [];

@@ -5,6 +5,7 @@
 
 .link {
   stroke: #999;
+  stroke-width: 3px;
   stroke-opacity: .6;
 }
 
@@ -22,4 +23,8 @@ textarea#query {
 	background-color: rgba(233,233,233,0.6);
 	padding:20px;
 	height:450px;
+}
+
+marker#transaction {
+  fill: #555;
 }
