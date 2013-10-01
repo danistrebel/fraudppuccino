@@ -6,4 +6,7 @@ object FraudppucchinoBuild extends Build {
 
    val scFraudppucchino = Project(id = "signal-collect-fraudppucchino",
                          base = file(".")) dependsOn(scCore)
+                         
+  lazy val root = Project("root", file(".")) dependsOn(socko)
+  lazy val soundPlayerProject = RootProject(uri("git://github.com/alvinj/SoundFilePlayer.git"))
 }

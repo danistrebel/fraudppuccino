@@ -4,12 +4,13 @@ import com.signalcollect.fraudppuccino.evaluation.btc._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.patternanalysis._
-
 import scala.collection.mutable.HashMap
-
 import language.dynamics
+import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
 
-object FRAUDPPUCCINO extends App {
+object FRAUDPPUCCINO {
+  
+  lazy val visualizationServer = FraudppuchinoServer()
 
   lazy val execution: QueryExecution = new QueryExecution
   var components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = null
@@ -143,6 +144,8 @@ object FRAUDPPUCCINO extends App {
   def TRANSACTIONS = execution.transactions
   def SENDERS = execution.transactions
 
+  def SHOW = visualizationServer.updateResults(components)
+
   /**
    * PARSING UTILITIES
    */
@@ -192,6 +195,7 @@ object FRAUDPPUCCINO extends App {
   object DEPTH_EXPLORATION extends ExecutionPlan {
     override def transactionsAlgorithm = vertex => new PatternDepthAnalyzer(vertex)
   }
+  
 
   
 }

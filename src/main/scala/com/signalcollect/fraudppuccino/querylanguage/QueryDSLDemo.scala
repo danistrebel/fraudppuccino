@@ -3,8 +3,9 @@ package com.signalcollect.fraudppuccino.querylanguage
 import FRAUDPPUCCINO._
 
 object QueryDSLDemo extends App {
+  SHOW
   
-  LOAD SOURCE "/Volumes/Data/BTC_August2013/user-user-tx.csv" FROM 1000000 TO 1100000
+  LOAD SOURCE "/Volumes/Data/BTC_August2013/user-user-tx.csv" FROM 1000000 TO 1050000
 
   FILTER TRANSACTIONS "value" GREATERTHAN 10000000l
   
@@ -20,8 +21,8 @@ object QueryDSLDemo extends App {
   println("bigger than 1:" + COMPONENTS.size)
   
   LOAD COMPONENTS "a"
-  FILTER COMPONENTS "depth" MAX VALUE GREATERTHAN 5
-  println("deeper than 5:" + COMPONENTS)
+  FILTER COMPONENTS "depth" MAX VALUE GREATERTHAN 3
+  println("deeper than 3:" + COMPONENTS)
   
-  SHUTDOWN
+  SHOW
 }

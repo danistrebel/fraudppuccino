@@ -10,13 +10,19 @@ $('.navTab a').click(function(e) {
 function updateReports() {
 	$("div #reportsList").empty();
 	reports.forEach(function(report, index) {
-		var date = new Date(report.start);
-		var reportListEntry = '<a href="#" data-component-id="' + index
-				+ '" class="list-group-item">' + date.toLocaleDateString()
-				+ '<br/>' + report.members.length + ' Transactions<br/>$'
-				+ report.flow + '</a>';
-		$("div #reportsList").append(reportListEntry);
+		appendReport(report);
 	});
+}
+
+function appendReport(report) {
+	var index = reports.length;
+	reports.push(report);
+	var date = new Date(report.start);
+	var reportListEntry = '<a href="#" data-component-id="' + index
+			+ '" class="list-group-item">' + date.toLocaleDateString()
+			+ '<br/>' + report.members.length + ' Transactions<br/>$'
+			+ report.flow + '</a>';
+	$("div #reportsList").append(reportListEntry);
 }
 
 $(document).on('click', '.list-group-item', function() {
@@ -57,11 +63,10 @@ var websocket = new WebSocket(wsUri);
 
 websocket.onmessage = function(msg) {
 	console.log(msg);
-	reports = []
 	graph.nodes = [];
 	graph.links = [];
 	$('div #patternVisualizer').empty();
-	reports = JSON.parse(msg.data).components;
+	report = JSON.parse(msg.data);
 	console.log(reports);
-	updateReports();
+	appendReport(report);
 }

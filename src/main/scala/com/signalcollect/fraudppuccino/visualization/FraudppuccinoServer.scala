@@ -14,13 +14,13 @@ import java.io.File
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 
-object FraudppuchinoServer extends App {
+case class FraudppuchinoServer {
 
   /**
    * Static file handling
    */
 
-  val actorConfig = """
+  val visualizationActorConfig = """
       my-pinned-dispatcher {
         type=PinnedDispatcher
         executor=thread-pool-executor
@@ -47,7 +47,7 @@ object FraudppuchinoServer extends App {
       new StaticContentHandlerConfig(system.settings.config, "my-static-content-handler")
   }
 
-  val actorSystem = ActorSystem("FileUploadExampleActorSystem", ConfigFactory.parseString(actorConfig))
+  val actorSystem = ActorSystem("VisualizationActorSystem", ConfigFactory.parseString(visualizationActorConfig))
 
   val handlerConfig = MyStaticHandlerConfig(actorSystem)
 
@@ -79,47 +79,40 @@ object FraudppuchinoServer extends App {
   })
 
   val webServer = new WebServer(WebServerConfig(), routes, actorSystem)
-  webServer.start()
 
   Runtime.getRuntime.addShutdownHook(new Thread {
     override def run { webServer.stop() }
   })
+  
+  def updateResults(components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]]) {
+    if(components != null) {
+      for((componentId, members) <- components) {
+        val component = "{"+ 
+        "\"start\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).min + "000," + 
+        "\"flow\":" + members.map(_.getResult("value").get.asInstanceOf[Long]).max + "," + 
+        "\"members\":[" + serializeMembers(members) + 
+        "]}"
+        
+        sendResult(component)
+      }
+    }
+  }
+  
+  def  serializeMembers(members: Iterable[RepeatedAnalysisVertex[_]]) = {
+    members.map(member => {
+      "{\"id\":"+ member.id +",\"value\":" + member.getResult("value").get.asInstanceOf[Long]+",\"time\":"+member.getResult("time").get.asInstanceOf[Long]+",\"successor\":[]}"
+    }).toList.mkString(",")
+  }
+  
+  
 
   
-  def sendResults(jsonData: String) {
+  def sendResult(jsonData: String) {
     webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
   }
-  
-  for(i <- 0 to 10) {
-    readLine
-    var value = """{
-"components":[
-{
-	"start":1380470421000,
-	"flow":300,
-	"depth":3,
-	"members":[{"id":1,"value":300.00,"time":1328530643,"successor":[1]},
-	{"id":2,"value":300.00,"time":1328530643,"successor":[2,3]},
-	{"id":3,"value":100.00,"time":1328530643,"successor":[]},
-	{"id":4,"value":100.00,"time":1328530643,"successor":[]}]	
-},
-{
-	"start":1380230421000,
-	"flow":8000"""+i+""",
-	"depth":5,
-	"members":[{"id":1,"value":8000.00,"time":1328530643,"successor":[1]},
-	{"id":2,"value":8000.00,"time":1328530643,"successor":[2]},
-	{"id":3,"value":8000.00,"time":1328530643,"successor":[3]},
-	{"id":4,"value":8000.00,"time":1328530643,"successor":[4]},	
-	{"id":5,"value":8000.00,"time":1328530643,"successor":[]}]	
-	
-}
-]
-}""".replaceAll("\n", "").replaceAll("\r", "")
-	sendResults(value)
-	println("sent")
-  }
 
+  
+  webServer.start()
   System.out.println("Open your browser and navigate to http://localhost:8888")
 
 }
