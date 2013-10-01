@@ -1,7 +1,6 @@
 package com.signalcollect.fraudppuccino.visualization
 
 import org.mashupbots.socko.routes._
-
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.webserver._
 import akka.actor.ActorSystem
@@ -13,6 +12,7 @@ import akka.routing.FromConfig
 import java.io.File
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
+import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 
 case class FraudppuchinoServer {
 
@@ -100,7 +100,8 @@ case class FraudppuchinoServer {
   
   def  serializeMembers(members: Iterable[RepeatedAnalysisVertex[_]]) = {
     members.map(member => {
-      "{\"id\":"+ member.id +",\"value\":" + member.getResult("value").get.asInstanceOf[Long]+",\"time\":"+member.getResult("time").get.asInstanceOf[Long]+",\"successor\":[]}"
+      "{\"id\":"+ member.id +",\"value\":" + member.getResult("value").get.asInstanceOf[Long]+",\"time\":"+
+      member.getResult("time").get.asInstanceOf[Long]+",\"successor\":["+ member.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1).mkString(",") +"]}"
     }).toList.mkString(",")
   }
   

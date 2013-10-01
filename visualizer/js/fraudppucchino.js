@@ -23,6 +23,7 @@ function appendReport(report) {
 			+ '<br/>' + report.members.length + ' Transactions<br/>$'
 			+ report.flow + '</a>';
 	$("div #reportsList").append(reportListEntry);
+	$("div #reportsHeader").text("Reports("+ reports.length +")");
 }
 
 $(document).on('click', '.list-group-item', function() {
@@ -35,21 +36,24 @@ function loadComponentMembers(id) {
 
 	graph.nodes = [];
 	graph.links = [];
+	
+	var transactionLookUp = {}; //Index on transactionId
 
 	reports[id].members.forEach(function(transaction, index) {
-		var tx = {
-			"name" : transaction.id,
-			"group" : 1
-		};
+		var tx = {"name" : transaction.id, "group" : 1}
+		transactionLookUp[transaction.id] = tx
+		graph.nodes.push(tx)
+	});
+	
+	reports[id].members.forEach(function(transaction, index) {		
 		transaction.successor.forEach(function(linkTarget) {
 			var link = {
-				"source" : index,
-				"target" : linkTarget,
+				"source" : transactionLookUp[transaction.id],
+				"target" : transactionLookUp[linkTarget],
 				"value" : 1
 			};
 			graph.links.push(link);
 		});
-		graph.nodes.push(tx);
 	});
 
 	updateVisualization();
@@ -62,11 +66,9 @@ var wsUri = "ws://localhost:8888/websocket/";
 var websocket = new WebSocket(wsUri);
 
 websocket.onmessage = function(msg) {
-	console.log(msg);
 	graph.nodes = [];
 	graph.links = [];
 	$('div #patternVisualizer').empty();
 	report = JSON.parse(msg.data);
-	console.log(reports);
 	appendReport(report);
 }
