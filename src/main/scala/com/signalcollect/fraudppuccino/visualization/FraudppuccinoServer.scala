@@ -86,8 +86,38 @@ object FraudppuchinoServer extends App {
   })
 
   
-  def sendResults(components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]]) {
-    webSocketBroadcaster ! WebSocketBroadcastText("updateReports")
+  def sendResults(jsonData: String) {
+    webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
+  }
+  
+  for(i <- 0 to 10) {
+    readLine
+    var value = """{
+"components":[
+{
+	"start":1380470421000,
+	"flow":300,
+	"depth":3,
+	"members":[{"id":1,"value":300.00,"time":1328530643,"successor":[1]},
+	{"id":2,"value":300.00,"time":1328530643,"successor":[2,3]},
+	{"id":3,"value":100.00,"time":1328530643,"successor":[]},
+	{"id":4,"value":100.00,"time":1328530643,"successor":[]}]	
+},
+{
+	"start":1380230421000,
+	"flow":8000"""+i+""",
+	"depth":5,
+	"members":[{"id":1,"value":8000.00,"time":1328530643,"successor":[1]},
+	{"id":2,"value":8000.00,"time":1328530643,"successor":[2]},
+	{"id":3,"value":8000.00,"time":1328530643,"successor":[3]},
+	{"id":4,"value":8000.00,"time":1328530643,"successor":[4]},	
+	{"id":5,"value":8000.00,"time":1328530643,"successor":[]}]	
+	
+}
+]
+}""".replaceAll("\n", "").replaceAll("\r", "")
+	sendResults(value)
+	println("sent")
   }
 
   System.out.println("Open your browser and navigate to http://localhost:8888")

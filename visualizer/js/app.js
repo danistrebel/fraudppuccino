@@ -16,6 +16,7 @@ var svg = d3.select("div#visualizer").append("svg")
 var reports = []
 
 d3.json("http://localhost:8888/components.json", function(error, json) {
+	console.log(json);
 	reports = json.components; 
 	updateReports();
 });
