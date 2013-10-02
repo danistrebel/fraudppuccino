@@ -43,23 +43,24 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends AbstractT
   }
 
   /**
+   * 
    * Uses dynamic programming to find signals that sum up to the value of this transaction
    */
   def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], target: TransactionSignal, tolerance: Double = 0.1f): Iterable[TransactionSignal] = {
-    var expandedCandidates = candidates.map(elem => (List(elem), elem.value, candidates.dropWhile(_ != elem).drop(1)))
+    val indexedCandidates = candidates.toIndexedSeq
+    var expandedCandidates = indexedCandidates.map(elem => (List(elem), elem.value, indexedCandidates.indexOf(elem)+1))
 
     while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 8) { //expanding is stopped if the sum is reached or all possible combinations are expanded
-      val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value) < tolerance)
+      val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value) < tolerance) //checks if a match is already found
       if (result.isDefined) {
         return result.get._1
       }
-      expandedCandidates = expandedCandidates.filter(partialResult => !partialResult._3.isEmpty && partialResult._2 < target.value) //drop all with no more remaining options
+      expandedCandidates = expandedCandidates.filter(partialResult => partialResult._3<indexedCandidates.size && partialResult._2 < target.value) //drop all with no more remaining options
       expandedCandidates = expandedCandidates.flatMap(partialResult => {
-        partialResult._3.map(elementToAdd => {
-          (elementToAdd :: partialResult._1, partialResult._2 + elementToAdd.value, partialResult._3.dropWhile(_ != elementToAdd).drop(1))
-        })
+        (partialResult._3 until indexedCandidates.size).map(indexToAdd => (indexedCandidates(indexToAdd):: partialResult._1, partialResult._2 + indexedCandidates(indexToAdd).value, indexToAdd+1))
       })
     }
     List()
   }
+  
 }
