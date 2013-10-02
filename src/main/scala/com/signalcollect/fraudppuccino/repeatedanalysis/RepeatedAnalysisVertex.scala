@@ -45,7 +45,7 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
   /**
    * Holds results from previous computations and makes them available
    */
-  var results: collection.mutable.Map[String, Any] = new java.util.HashMap[String, Any](0)
+  val results: collection.mutable.Map[String, Any] = new java.util.HashMap[String, Any](0)
 
   /**
    * Store the current computational state to make it available to subsequent computations

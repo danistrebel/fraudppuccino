@@ -17,6 +17,7 @@ class QueryExecution {
   val graph = GraphBuilder.build
 
   def load(filePath: String, start: Int, end: Int) {
+    graph.reset
     for (line <- Source.fromFile(filePath).getLines) {
       
       val splitted = line.split(",")

@@ -1,6 +1,8 @@
 var width = 960, height = 500;
 
-var color = d3.scale.category20();
+var color = d3.scale.linear()
+.domain([0, 5, 10, 20])
+.range(["green","yellow", "orange", "red"]);
 
 var force = d3.layout.force().charge(-500).linkDistance(5).size(
 		[ width, height ]);
@@ -78,9 +80,9 @@ function appendReport(report) {
 	var reportListEntry = '<li data-component-id="'
 			+ index
 			+ '" class="list-group-item"><span class="glyphicon glyphicon-remove remove-report"></span>'
-			+ date.toLocaleDateString() + '<br/>BTC ' + report.flow / 100000000 
-			+ ', (' + report.members.length+ ') transactions<br/>'
-			+'<button type="button" class="btn btn-default btn-xs showAccountGraph">Account Graph</button><button type="button" class="btn btn-default btn-xs showTransactionGraph">Transaction Graph</button></li>';
+			+ date.toLocaleDateString() + '<br/>BTC ' + Math.round(report.flow / 100000000*10000)/10000 
+			+ ', ' + report.members.length+ ' transactions<br/>'
+			+'<button type="button" class="btn btn-default btn-xs showAccountGraph">Account Graph</button> <button type="button" class="btn btn-default btn-xs showTransactionGraph">Transaction Graph</button></li>';
 
 	$("div #reportsList").append(reportListEntry);
 	$("div #reportsHeader").text("Reports(" + reports.length + ")");
@@ -95,15 +97,18 @@ $(document).on('click', '.showAccountGraph', function() {
 });
 
 $(document).on('click', '.showTransactionGraph', function() {
-
 	var parent = $(this).parent();
 	parent.siblings().removeClass('active');
 	parent.addClass('active');
 	loadTransactionGraph(parent.attr("data-component-id"));
 });
 
-function loadTransactionGraph(id) {
+$(document).on('click', '.remove-report', function() {
+	$(this).parent().fadeOut(300, function(){ $(this).remove();});
+});
 
+function loadTransactionGraph(id) {
+		
 	graph.nodes = [];
 	graph.links = [];
 
@@ -112,7 +117,7 @@ function loadTransactionGraph(id) {
 	reports[id].members.forEach(function(transaction, index) {
 		var tx = {
 			"name" : transaction.id,
-			"group" : 1
+			"group" : transaction.depth
 		};
 		transactionLookUp[transaction.id] = tx;
 		graph.nodes.push(tx);
@@ -128,7 +133,6 @@ function loadTransactionGraph(id) {
 			graph.links.push(link);
 		});
 	});
-
 	updateVisualization();
 }
 
@@ -144,7 +148,7 @@ function loadAccountGraph(id) {
 		if(!accountsLookup[transaction.src]) {
 			var source = {
 					"name" : transaction.src,
-					"group" : 1
+					"group" : 2
 				};
 			accountsLookup[transaction.src] = source;
 			graph.nodes.push(source);
@@ -153,7 +157,7 @@ function loadAccountGraph(id) {
 		if(!accountsLookup[transaction.target]) {
 			var target = {
 					"name" : transaction.target,
-					"group" : 1
+					"group" : 2
 				};
 			accountsLookup[transaction.target] = target;
 			graph.nodes.push(target);
@@ -177,10 +181,6 @@ var wsUri = "ws://localhost:8888/websocket/";
 var websocket = new WebSocket(wsUri);
 
 websocket.onmessage = function(msg) {
-	console.log(msg)
-	graph.nodes = [];
-	graph.links = [];
-	$('div #patternVisualizer').empty();
 	report = JSON.parse(msg.data);
 	appendReport(report);
 }

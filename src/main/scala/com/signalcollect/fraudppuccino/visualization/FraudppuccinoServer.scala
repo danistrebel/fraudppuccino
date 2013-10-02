@@ -100,11 +100,8 @@ case class FraudppuchinoServer {
   
   def  serializeMembers(members: Iterable[RepeatedAnalysisVertex[_]]) = {
     members.map(member => {
-      "{\"id\":"+ member.id +
-      ",\"value\":" + member.getResult("value").get.asInstanceOf[Long]+
-      ",\"time\":"+ member.getResult("time").get.asInstanceOf[Long]+
-      ",\"src\":"+ member.getResult("src").get.asInstanceOf[Int]+
-      ",\"target\":"+ member.getResult("target").get.asInstanceOf[Int]+
+      "{\"id\":"+ member.id + "," +
+      member.results.map(result => "\""+result._1+"\":" + result._2.toString).mkString(",") +
       ",\"successor\":["+ member.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1).mkString(",") +"]}"
     }).toList.mkString(",")
   }
