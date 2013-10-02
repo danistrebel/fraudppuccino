@@ -26,5 +26,9 @@ textarea#query {
 }
 
 marker#transaction {
-  fill: #555;
+   fill: #555;
+}
+
+.remove-report {
+   float:right;
 }
