@@ -1,8 +1,7 @@
 var width = 960, height = 500;
 
-var color = d3.scale.linear()
-.domain([0, 5, 10, 20])
-.range(["green","yellow", "orange", "red"]);
+var color = d3.scale.linear().domain([ 0, 5, 10, 20 ]).range(
+		[ "green", "yellow", "orange", "red" ]);
 
 var force = d3.layout.force().charge(-500).linkDistance(5).size(
 		[ width, height ]);
@@ -44,12 +43,10 @@ function updateVisualization() {
 			.append("circle").attr("class", "node").attr("r", 5).style("fill",
 					function(d) {
 						return color(d.group);
-					}).call(force.drag);
-
-	node.append("title").text(function(d) {
-		return d.name;
-	});
-
+					}).call(force.drag).on("click", function(node) {
+				showDetailsForNode(node);
+			});
+	
 	force.on("tick", function() {
 		link.attr("d", function(d) {
 			var dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
@@ -66,6 +63,39 @@ function updateVisualization() {
 
 }
 
+function showDetailsForNode(node) {
+	console.log(node);
+
+	$('#inspectorNavTab :first-child').click(); // open the inspector tab
+
+	if (node.account) {
+		var details = '<h1>Account #' + node.name + '</h1>'
+				+ '<table class="table table-striped">'
+				+ '<tr><td># Transactions in</td><td>'
+				+ node.account["in-count"] + '</tr>'
+				+ '<tr><td># Transactions out</td><td>'
+				+ node.account["out-count"] + '</td></tr>'
+				+ '<tr><td>BTC Transactions in</td><td>' + node.account["in"]
+				/ 100000000 + ' BTC</td></tr>'
+				+ '<tr><td>BTC Transactions out</td><td>' + node.account["out"]
+				/ 100000000 + ' BTC</td></tr>' + '</table>'
+		$('#inspector-content').empty().append(details);
+	} else if (node.transaction) {
+		var transactionDate = new Date(node.transaction.time);
+		var details = '<h1>Transaction #' + Math.abs(node.name) + '</h1>'
+				+ '<table class="table table-striped">'
+				+ '<tr><td>BTC Transaction Value</td><td>'
+				+ node.transaction.value / 100000000 + ' BTC</td></tr>'
+				+ '<tr><td>Time</td><td>'
+				+ transactionDate.toLocaleDateString() + ' '
+				+ transactionDate.toLocaleTimeString() + '</td></tr>'
+				+ '<tr><td>Source</td><td>' + node.transaction.src
+				+ '</td></tr>' + '<tr><td>Target</td><td>'
+				+ node.transaction.target + '</td></tr>' + '</table>'
+		$('#inspector-content').empty().append(details);
+	}
+}
+
 function updateReports() {
 	$("div #reportsList").empty();
 	reports.forEach(function(report, index) {
@@ -76,20 +106,28 @@ function updateReports() {
 function appendReport(report) {
 	var index = reports.length;
 	reports.push(report);
-	var date = new Date(report.start);
+	var startDate = new Date(report.start);
+	var endDate = new Date(report.end);
 	var reportListEntry = '<li data-component-id="'
 			+ index
 			+ '" class="list-group-item"><span class="glyphicon glyphicon-remove remove-report"></span>'
-			+ date.toLocaleDateString() + '<br/>BTC ' + Math.round(report.flow / 100000000*10000)/10000 
-			+ ', ' + report.members.length+ ' transactions<br/>'
-			+'<button type="button" class="btn btn-default btn-xs showAccountGraph">Account Graph</button> <button type="button" class="btn btn-default btn-xs showTransactionGraph">Transaction Graph</button></li>';
+			+ startDate.toLocaleDateString()
+			+ '-'
+			+ endDate.toLocaleDateString()
+			+ '<br/>'
+			+ 'BTC '
+			+ Math.round(report.flow / 100000000 * 10000)
+			/ 10000
+			+ ', '
+			+ report.members.length
+			+ ' transactions<br/>'
+			+ '<button type="button" class="btn btn-default btn-xs showAccountGraph">Account Graph</button> <button type="button" class="btn btn-default btn-xs showTransactionGraph">Transaction Graph</button></li>';
 
 	$("div #reportsList").append(reportListEntry);
 	$("div #reportsHeader").text("Reports(" + reports.length + ")");
 }
 
 $(document).on('click', '.showAccountGraph', function() {
-	
 	var parent = $(this).parent();
 	parent.siblings().removeClass('active');
 	parent.addClass('active');
@@ -104,11 +142,13 @@ $(document).on('click', '.showTransactionGraph', function() {
 });
 
 $(document).on('click', '.remove-report', function() {
-	$(this).parent().fadeOut(300, function(){ $(this).remove();});
+	$(this).parent().fadeOut(300, function() {
+		$(this).remove();
+	});
 });
 
 function loadTransactionGraph(id) {
-		
+
 	graph.nodes = [];
 	graph.links = [];
 
@@ -117,7 +157,8 @@ function loadTransactionGraph(id) {
 	reports[id].members.forEach(function(transaction, index) {
 		var tx = {
 			"name" : transaction.id,
-			"group" : transaction.depth
+			"group" : transaction.depth,
+			"transaction" : transaction
 		};
 		transactionLookUp[transaction.id] = tx;
 		graph.nodes.push(tx);
@@ -143,34 +184,53 @@ function loadAccountGraph(id) {
 
 	var accountsLookup = {}; // Index on accountId
 
-	reports[id].members.forEach(function(transaction, index) {
-		
-		if(!accountsLookup[transaction.src]) {
-			var source = {
-					"name" : transaction.src,
-					"group" : 2
+	reports[id].members
+			.forEach(function(transaction, index) {
+
+				if (!accountsLookup[transaction.src]) {
+					var source = {
+						"name" : transaction.src,
+						"group" : 2,
+						"account" : {
+							"in" : 0,
+							"out" : 0,
+							"in-count" : 0,
+							"out-count" : 0
+						}
+					};
+					accountsLookup[transaction.src] = source;
+					graph.nodes.push(source);
+				}
+				accountsLookup[transaction.src].account["out"] = accountsLookup[transaction.src].account["out"]
+						+ transaction.value;
+				accountsLookup[transaction.src].account["out-count"]++;
+
+				if (!accountsLookup[transaction.target]) {
+					var target = {
+						"name" : transaction.target,
+						"group" : 2,
+						"account" : {
+							"in" : 0,
+							"out" : 0,
+							"in-count" : 0,
+							"out-count" : 0
+						}
+					};
+					accountsLookup[transaction.target] = target;
+					graph.nodes.push(target);
+				}
+				accountsLookup[transaction.target].account["in"] = accountsLookup[transaction.target].account["in"]
+						+ transaction.value;
+				accountsLookup[transaction.target].account["in-count"]++;
+
+				var link = {
+					"source" : accountsLookup[transaction.src],
+					"target" : accountsLookup[transaction.target],
+					"value" : 1
 				};
-			accountsLookup[transaction.src] = source;
-			graph.nodes.push(source);
-		} 
-		
-		if(!accountsLookup[transaction.target]) {
-			var target = {
-					"name" : transaction.target,
-					"group" : 2
-				};
-			accountsLookup[transaction.target] = target;
-			graph.nodes.push(target);
-		} 
-		
-		var link = {
-			"source" : accountsLookup[transaction.src],
-			"target" : accountsLookup[transaction.target],
-			"value" : 1
-		};
-		graph.links.push(link);
-	});
-	
+				graph.links.push(link);
+			});
+
 	updateVisualization();
 }
 

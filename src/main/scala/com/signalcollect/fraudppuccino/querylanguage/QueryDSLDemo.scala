@@ -3,9 +3,9 @@ package com.signalcollect.fraudppuccino.querylanguage
 import FRAUDPPUCCINO._
 
 object QueryDSLDemo extends App {
-  SHOW
-  for(i <- 1050000 to 1200000 by 50000) {
-	  LOAD SOURCE "/Volumes/Data/BTC_August2013/user-user-tx.csv" FROM 1000000 TO 1100000
+  SHOW //Just to start the web server
+  for(lower <- 1000000 to 1200000 by 100000) {
+	  LOAD SOURCE "/Volumes/Data/BTC_August2013/user-user-tx.csv" FROM lower TO lower+100000
 	  
 	  FILTER TRANSACTIONS "value" GREATERTHAN 10000000l
 	  
@@ -26,4 +26,5 @@ object QueryDSLDemo extends App {
 	  
 	  SHOW    
   } 
+  SHUTDOWN
 }

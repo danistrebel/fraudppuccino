@@ -3,6 +3,11 @@
   stroke-width: 1.5px;
 }
 
+.selected {
+  stroke: #FF6600;
+  stroke-width: 3px;
+}
+
 .link {
   stroke: #999;
   stroke-width: 3px;

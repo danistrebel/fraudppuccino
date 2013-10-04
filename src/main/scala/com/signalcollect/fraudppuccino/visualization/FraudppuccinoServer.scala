@@ -83,37 +83,32 @@ case class FraudppuchinoServer {
   Runtime.getRuntime.addShutdownHook(new Thread {
     override def run { webServer.stop() }
   })
-  
+
   def updateResults(components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]]) {
-    if(components != null) {
-      for((componentId, members) <- components) {
-        val component = "{"+ 
-        "\"start\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).min + "000," + 
-        "\"flow\":" + members.map(_.getResult("value").get.asInstanceOf[Long]).max + "," + 
-        "\"members\":[" + serializeMembers(members) + 
-        "]}"
-        
+    if (components != null) {
+      for ((componentId, members) <- components) {
+        val component = "{" +
+          "\"start\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).min + "000," +
+          "\"end\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).max + "000," +
+          "\"flow\":" + members.map(_.getResult("value").get.asInstanceOf[Long]).max + "," +
+          "\"members\":[" + serializeMembers(members) + "]}"
         sendResult(component)
       }
     }
   }
-  
-  def  serializeMembers(members: Iterable[RepeatedAnalysisVertex[_]]) = {
+
+  def serializeMembers(members: Iterable[RepeatedAnalysisVertex[_]]) = {
     members.map(member => {
-      "{\"id\":"+ member.id + "," +
-      member.results.map(result => "\""+result._1+"\":" + result._2.toString).mkString(",") +
-      ",\"successor\":["+ member.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1).mkString(",") +"]}"
+      "{\"id\":" + member.id + "," +
+        member.results.map(result => "\"" + result._1 + "\":" + result._2.toString).mkString(",") +
+        ",\"successor\":[" + member.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1).mkString(",") + "]}"
     }).toList.mkString(",")
   }
-  
-  
 
-  
   def sendResult(jsonData: String) {
     webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
   }
 
-  
   webServer.start()
   System.out.println("Open your browser and navigate to http://localhost:8888")
 
