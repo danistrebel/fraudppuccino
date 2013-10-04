@@ -18,6 +18,9 @@ class QueryExecution {
 
   def load(filePath: String, start: Int, end: Int) {
     graph.reset
+    transactions.clear
+    senders.clear
+    
     for (line <- Source.fromFile(filePath).getLines) {
       
       val splitted = line.split(",")

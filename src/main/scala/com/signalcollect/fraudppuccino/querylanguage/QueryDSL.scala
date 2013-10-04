@@ -9,31 +9,34 @@ import language.dynamics
 import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
 
 object FRAUDPPUCCINO {
-  
+
   lazy val visualizationServer = FraudppuchinoServer()
 
   lazy val execution: QueryExecution = new QueryExecution
   var components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = null
-  
-  lazy val snapshots  = HashMap[String, Map[Int, Iterable[RepeatedAnalysisVertex[_]]]]()
+
+  lazy val snapshots = HashMap[String, Map[Int, Iterable[RepeatedAnalysisVertex[_]]]]()
 
   object LOAD {
     def SOURCE(path: String) = RangeParser(path)
     def COMPONENTS(name: String) = components = snapshots(name)
   }
-  
+
   object STORE {
-    def COMPONENTS(name: String) = if(components != null) {
-      snapshots+= ((name, components))
+    def COMPONENTS(name: String) = if (components != null) {
+      snapshots += ((name, components))
     }
   }
 
   object CONNECT {
     def IF(condition: ConnectionCondition) = {
-      RUN(CONNECTOR) //config missing here i.e. chains / splits / aggregation
+      if (condition == CHAIN_CONNECTION) {
+        RUN(Connector(MATCH_CHAIN))
+      } else {
+        RUN(Connector(MATCH_ALL))
+      }
       LABEL TRANSACTIONS "component" WITH SUBGRAPH_IDENTIFICATION
       components = execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
-
     }
   }
 
@@ -102,7 +105,7 @@ object FRAUDPPUCCINO {
       components = components.filter(c => extractionFunction(c._2) > referenceSize)
     }
   }
-  
+
   lazy val VALUE = ""
 
   case class FilterParser(val label: String) {
@@ -135,11 +138,11 @@ object FRAUDPPUCCINO {
     }
 
   }
-  
+
   object SHUTDOWN {
     execution.shutdown
   }
-  
+
   def COMPONENTS = components
   def TRANSACTIONS = execution.transactions
   def SENDERS = execution.transactions
@@ -169,9 +172,8 @@ object FRAUDPPUCCINO {
 
   }
 
-  object ANY_CONNECTION extends ConnectionCondition {
-
-  }
+  object ANY_CONNECTION extends ConnectionCondition
+  object CHAIN_CONNECTION extends ConnectionCondition
 
   /**
    * EXECUTION PLANS
@@ -183,8 +185,8 @@ object FRAUDPPUCCINO {
     def sendersAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new DummyVertexAlgorithm()
   }
 
-  object CONNECTOR extends ExecutionPlan {
-    override def sendersAlgorithm = vertex => new BTCTransactionMatcher(vertex)
+  case class Connector(matchingMode: MatchingMode) extends ExecutionPlan {
+    override def sendersAlgorithm = vertex => new BTCTransactionMatcher(vertex, matchingMode)
     override def transactionsAlgorithm = vertex => new TransactionAnnouncer(vertex)
   }
 
@@ -195,7 +197,5 @@ object FRAUDPPUCCINO {
   object DEPTH_EXPLORATION extends ExecutionPlan {
     override def transactionsAlgorithm = vertex => new PatternDepthAnalyzer(vertex)
   }
-  
 
-  
 }

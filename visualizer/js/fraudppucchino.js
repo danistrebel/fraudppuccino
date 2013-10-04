@@ -81,7 +81,7 @@ function showDetailsForNode(node) {
 				/ 100000000 + ' BTC</td></tr>' + '</table>'
 		$('#inspector-content').empty().append(details);
 	} else if (node.transaction) {
-		var transactionDate = new Date(node.transaction.time);
+		var transactionDate = new Date(node.transaction.time * 1000);
 		var details = '<h1>Transaction #' + Math.abs(node.name) + '</h1>'
 				+ '<table class="table table-striped">'
 				+ '<tr><td>BTC Transaction Value</td><td>'
