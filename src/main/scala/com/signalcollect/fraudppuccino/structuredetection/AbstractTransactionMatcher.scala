@@ -51,8 +51,8 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
       case (ins, outs) => {
         for (in <- ins) {
           for (out <- outs) {
-            graphEditor.addEdge(in.transactionID, new DownstreamTransactionEdge(out.transactionID))
-            graphEditor.addEdge(out.transactionID, new UpstreamTransactionEdge(in.transactionID))
+            graphEditor.sendSignal((out.transactionID, DownstreamTransactionPatternEdge), in.transactionID, None)
+            graphEditor.sendSignal((in.transactionID, UpstreamTransactionPatternEdge), out.transactionID, None)
           }
         }
         unmatchedInputs --= ins

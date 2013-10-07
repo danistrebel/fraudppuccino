@@ -4,8 +4,6 @@ import scala.io.Source
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection.TransactionEdge
-import com.signalcollect.fraudppuccino.structuredetection.SignalBroadcaster
-import com.signalcollect.fraudppuccino.structuredetection.TransactionLinker
 import scala.collection.mutable.ArrayBuffer
 import language.dynamics
 

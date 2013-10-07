@@ -17,6 +17,10 @@ class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgo
   }
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
+    signal match {
+      case (linkTarget: Int, edgeType: EdgeMarker) => vertex.outgoingEdges+=((linkTarget, edgeType))
+      case _ => 
+    }
     false
   }
 
