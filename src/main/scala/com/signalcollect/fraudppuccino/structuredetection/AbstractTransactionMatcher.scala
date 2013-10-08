@@ -6,8 +6,10 @@ import scala.collection.mutable.ArrayBuffer
 
 abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
-  val unmatchedInputs = new ArrayBuffer[TransactionInput]() // Transactions that could serve as inputs for this transaction
-  val unmatchedOutputs = new ArrayBuffer[TransactionOutput]() // Transactions that could serve as outputs for this transactions
+  val unmatchedInputs = ArrayBuffer[TransactionInput]() // Transactions that could serve as inputs for this transaction
+  val unmatchedOutputs =  ArrayBuffer[TransactionOutput]() // Transactions that could serve as outputs for this transactions
+  val matchesFound = ArrayBuffer[(Iterable[TransactionInput], Iterable[TransactionOutput])]()
+  val uncollectedOutputs = ArrayBuffer[TransactionOutput]() 
 
   def getState
 
@@ -15,17 +17,34 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case input: TransactionInput => processInputTransaction(input, graphEditor)
-      case output: TransactionOutput => processOutputTransaction(output, graphEditor)
+      case input: TransactionInput => processInputTransaction(input, graphEditor); true
+      case output: TransactionOutput =>  {
+        uncollectedOutputs += output
+        scoreCollect = 1.0
+        false
+      }
       case _ => throw new Exception("Unknown signal received: " + signal)
     }
-    true
+    
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
+    for((ins, outs) <- matchesFound) {
+       for (in <- ins) {
+          for (out <- outs) {
+        	  graphEditor.sendSignal((out.transactionID, DownstreamTransactionPatternEdge), in.transactionID, None)
+        	  graphEditor.sendSignal((in.transactionID, UpstreamTransactionPatternEdge), out.transactionID, None)            
+          }
+        }
+    }
+    scoreSignal = 0.0
   }
 
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
+    for(output <- uncollectedOutputs) {
+    	processOutputTransaction(output, graphEditor);      
+    }
+    scoreCollect = 0.0
   }
 
   var scoreSignal = 0.0
@@ -49,17 +68,12 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
     matchedCombination match {
       case (Nil, Nil) => if(unmatchedOutputs.size<=10) unmatchedOutputs += output //If no match -> add it to the unmatched outputs
       case (ins, outs) => {
-        for (in <- ins) {
-          for (out <- outs) {
-            graphEditor.sendSignal((out.transactionID, DownstreamTransactionPatternEdge), in.transactionID, None)
-            graphEditor.sendSignal((in.transactionID, UpstreamTransactionPatternEdge), out.transactionID, None)
-          }
-        }
+        matchesFound+=((ins, outs))
         unmatchedInputs --= ins
         unmatchedOutputs --= outs
+        scoreSignal=1.0
       }
     }
-
   }
 
   //To be defined depending on the actual use case

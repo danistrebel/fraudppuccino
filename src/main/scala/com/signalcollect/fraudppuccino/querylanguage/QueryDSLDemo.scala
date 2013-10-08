@@ -6,7 +6,7 @@ object QueryDSLDemo extends App {
   SHOW //Just to start the web server
 
   val windowsize = 200000
-  for (lower <- 4800000 to 50000000 by windowsize) {
+  for (lower <- 0 to 50000000 by windowsize) {
 
 	val start = System.currentTimeMillis
     val loadingStart = System.currentTimeMillis

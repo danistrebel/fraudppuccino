@@ -2,9 +2,9 @@ package com.signalcollect.fraudppuccino.structuredetection
 
 trait TransactionSignal{
   val transactionID: Int
-  val value: Double
+  val value: Long
   val time : Long 
 }
 
-case class TransactionInput(transactionID: Int, value: Double, time : Long) extends TransactionSignal
-case class TransactionOutput(transactionID: Int, value: Double, time : Long) extends TransactionSignal
+case class TransactionInput(transactionID: Int, value: Long, time : Long) extends TransactionSignal
+case class TransactionOutput(transactionID: Int, value: Long, time : Long) extends TransactionSignal

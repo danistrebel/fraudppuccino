@@ -45,7 +45,7 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: Mat
     if (matchingMode == MATCH_SPLIT || matchingMode == MATCH_ALL) {
       //Finds splits
       for (input <- inputs.filter(input => input.time < newOutPut.time && input.value > newOutPut.value)) {
-        findMatchingsubsetSums(List(newOutPut) ++ outputs.filter(_.time > input.time), input) match {
+        findMatchingsubsetSums(List(newOutPut) ++ outputs.filter(_.time > input.time), input, firstCandidateIsMandatory = true) match {
           case Nil =>
           case matches: Iterable[TransactionOutput] => return (List(input), matches)
         }
@@ -59,9 +59,13 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: Mat
    *
    * Uses dynamic programming to find signals that sum up to the value of this transaction
    */
-  def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], target: TransactionSignal, tolerance: Double = 0.1f): Iterable[TransactionSignal] = {
+  def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], target: TransactionSignal, tolerance: Double = 0.1f, firstCandidateIsMandatory: Boolean = false): Iterable[TransactionSignal] = {
     val indexedCandidates = candidates.toIndexedSeq
-    var expandedCandidates = indexedCandidates.map(elem => (List(elem), elem.value, indexedCandidates.indexOf(elem) + 1))
+    var expandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)] = if (firstCandidateIsMandatory) {
+      Array((List(indexedCandidates(0)), indexedCandidates(0).value, 1))
+    } else {
+      indexedCandidates.map(elem => (List(elem), elem.value, indexedCandidates.indexOf(elem) + 1))
+    }
 
     while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 8) { //expanding is stopped if the sum is reached or all possible combinations are expanded
       val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value) < tolerance) //checks if a match is already found

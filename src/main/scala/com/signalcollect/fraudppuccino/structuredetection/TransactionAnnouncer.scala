@@ -21,7 +21,7 @@ class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgo
       case (linkTarget: Int, edgeType: EdgeMarker) => vertex.outgoingEdges+=((linkTarget, edgeType))
       case _ => 
     }
-    false
+    true
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
@@ -30,8 +30,7 @@ class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgo
     scoreSignal = 0.0
   }
 
-  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
-  }
+  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {}
 
   var scoreSignal = 1.0
 
