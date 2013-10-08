@@ -13,15 +13,21 @@ class QueryExecution {
   var senders = ArrayBuffer[RepeatedAnalysisVertex[_]]()
 
   val graph = GraphBuilder.build
+  var iter: Iterator[String] = null
+  
 
   def load(filePath: String, start: Int, end: Int) {
     graph.reset
     transactions.clear
     senders.clear
     
-    for (line <- Source.fromFile(filePath).getLines) {
+    if(iter == null) {
+    	iter = Source.fromFile(filePath).getLines      
+    }
+    
+    while(iter.hasNext) {
       
-      val splitted = line.split(",")
+      val splitted = iter.next.split(",")
 
       if (splitted(0).toInt >= end) {
         return
