@@ -7,6 +7,8 @@ import com.signalcollect.fraudppuccino.structuredetection.TransactionSignal
 import com.signalcollect.fraudppuccino.structuredetection.TransactionOutput
 import com.signalcollect.fraudppuccino.structuredetection.TransactionInput
 import scala.collection.GenIterable
+import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL) extends AbstractTransactionMatcher(vertex) {
 
@@ -55,6 +57,27 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: Mat
     (Nil, Nil)
   }
 
+  def expandCandidates(unexpandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)], indexedCandidates: IndexedSeq[TransactionSignal]): IndexedSeq[(List[TransactionSignal], Long, Int)] = {
+	
+    @tailrec
+    def expandNextCandidate(candidateIndex: Int, indexToAdd: Int, partialResult:ArrayBuffer[(List[TransactionSignal], Long, Int)] = ArrayBuffer()): IndexedSeq[(List[TransactionSignal], Long, Int)] =  {
+	  if(candidateIndex>=unexpandedCandidates.size) { // All candidates are expanded
+	    partialResult
+	  }
+	  else if (indexToAdd < 0) { // Start expansion of a new candidate
+	    expandNextCandidate(candidateIndex, unexpandedCandidates(candidateIndex)._3, partialResult)
+	  }
+	  else if(indexToAdd < indexedCandidates.size) { //Expand the current candidate
+	    val expandedCandidate = (indexedCandidates(indexToAdd)::unexpandedCandidates(candidateIndex)._1, unexpandedCandidates(candidateIndex)._2 + indexedCandidates(indexToAdd).value, indexToAdd + 1)
+	    expandNextCandidate(candidateIndex, indexToAdd+1, partialResult+=expandedCandidate)
+	  }
+	  else{
+	    expandNextCandidate(candidateIndex+1, -1, partialResult)
+	  }
+	}
+	expandNextCandidate(0, -1)
+  }
+
   /**
    *
    * Uses dynamic programming to find signals that sum up to the value of this transaction
@@ -73,13 +96,10 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: Mat
         return result.get._1
       }
       expandedCandidates = expandedCandidates.filter(partialResult => partialResult._3 < indexedCandidates.size && partialResult._2 < target.value) //drop all with no more remaining options
-      expandedCandidates = expandedCandidates.flatMap(partialResult => {
-        (partialResult._3 until indexedCandidates.size).map(indexToAdd => (indexedCandidates(indexToAdd) :: partialResult._1, partialResult._2 + indexedCandidates(indexToAdd).value, indexToAdd + 1))
-      })
+      expandedCandidates = expandCandidates(expandedCandidates, indexedCandidates)
     }
     List()
   }
-
 }
 
 abstract class MatchingMode
