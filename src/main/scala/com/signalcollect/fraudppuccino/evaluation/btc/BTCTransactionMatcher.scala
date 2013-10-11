@@ -58,36 +58,41 @@ class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: Mat
   }
 
   def expandCandidates(unexpandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)], indexedCandidates: IndexedSeq[TransactionSignal]): IndexedSeq[(List[TransactionSignal], Long, Int)] = {
-	
+
     @tailrec
-    def expandNextCandidate(candidateIndex: Int, indexToAdd: Int, partialResult:ArrayBuffer[(List[TransactionSignal], Long, Int)] = ArrayBuffer()): IndexedSeq[(List[TransactionSignal], Long, Int)] =  {
-	  if(candidateIndex>=unexpandedCandidates.size) { // All candidates are expanded
-	    partialResult
-	  }
-	  else if (indexToAdd < 0) { // Start expansion of a new candidate
-	    expandNextCandidate(candidateIndex, unexpandedCandidates(candidateIndex)._3, partialResult)
-	  }
-	  else if(indexToAdd < indexedCandidates.size) { //Expand the current candidate
-	    val expandedCandidate = (indexedCandidates(indexToAdd)::unexpandedCandidates(candidateIndex)._1, unexpandedCandidates(candidateIndex)._2 + indexedCandidates(indexToAdd).value, indexToAdd + 1)
-	    expandNextCandidate(candidateIndex, indexToAdd+1, partialResult+=expandedCandidate)
-	  }
-	  else{
-	    expandNextCandidate(candidateIndex+1, -1, partialResult)
-	  }
-	}
-	expandNextCandidate(0, -1)
+    def expandNextCandidate(candidateIndex: Int, indexToAdd: Int, partialResult: ArrayBuffer[(List[TransactionSignal], Long, Int)] = ArrayBuffer()): IndexedSeq[(List[TransactionSignal], Long, Int)] = {
+      if (candidateIndex >= unexpandedCandidates.size) { // All candidates are expanded
+        partialResult
+      } else if (indexToAdd < 0) { // Start expansion of a new candidate
+        expandNextCandidate(candidateIndex, unexpandedCandidates(candidateIndex)._3, partialResult)
+      } else if (indexToAdd < indexedCandidates.size) { //Expand the current candidate
+        val expandedCandidate = (indexedCandidates(indexToAdd) :: unexpandedCandidates(candidateIndex)._1, unexpandedCandidates(candidateIndex)._2 + indexedCandidates(indexToAdd).value, indexToAdd + 1)
+        expandNextCandidate(candidateIndex, indexToAdd + 1, partialResult += expandedCandidate)
+      } else {
+        expandNextCandidate(candidateIndex + 1, -1, partialResult)
+      }
+    }
+    expandNextCandidate(0, -1)
   }
 
   /**
    *
    * Uses dynamic programming to find signals that sum up to the value of this transaction
    */
-  def findMatchingsubsetSums(candidates: Iterable[TransactionSignal], target: TransactionSignal, tolerance: Double = 0.1f, firstCandidateIsMandatory: Boolean = false): Iterable[TransactionSignal] = {
+  def findMatchingsubsetSums(
+    candidates: Iterable[TransactionSignal],
+    target: TransactionSignal, 
+    tolerance: Double = 0.1f,
+    firstCandidateIsMandatory: Boolean = false): Iterable[TransactionSignal] = {
+    
     val indexedCandidates = candidates.toIndexedSeq
-    var expandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)] = if (firstCandidateIsMandatory) {
-      Array((List(indexedCandidates(0)), indexedCandidates(0).value, 1))
-    } else {
-      indexedCandidates.map(elem => (List(elem), elem.value, indexedCandidates.indexOf(elem) + 1))
+    
+    var expandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)] = {
+      if (firstCandidateIsMandatory) {
+        Array((List(indexedCandidates(0)), indexedCandidates(0).value, 1))
+      } else {
+        indexedCandidates.map(elem => (List(elem), elem.value, indexedCandidates.indexOf(elem) + 1))
+      }
     }
 
     while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 8) { //expanding is stopped if the sum is reached or all possible combinations are expanded

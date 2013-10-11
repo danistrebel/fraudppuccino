@@ -18,8 +18,12 @@ object FRAUDPPUCCINO {
   lazy val snapshots = HashMap[String, Map[Int, Iterable[RepeatedAnalysisVertex[_]]]]()
 
   object LOAD {
-    def SOURCE(path: String) = RangeParser(path)
+    def SOURCE(path: String) = RangeParser(path=path)
     def COMPONENTS(name: String) = components = snapshots(name)
+  }
+  
+  object STREAM {
+    def SOURCE(path: String) = RangeParser(stream = true, path=path)
   }
 
   object STORE {
@@ -158,9 +162,9 @@ object FRAUDPPUCCINO {
     def WITH(plan: ExecutionPlan) = execution.label(transactionLabel, senderLabel, plan.transactionsAlgorithm, plan.sendersAlgorithm)
   }
 
-  case class RangeParser(path: String = "", start: Int = 0, end: Int = 0) {
+  case class RangeParser(stream: Boolean = false, path: String = "", start: Int = 0, end: Int = 0) {
     def FROM(i: Int) = this.copy(start = i)
-    def TO(i: Int) = execution.load(path, start, i)
+    def TO(i: Int) = execution.load(path, start, i, stream)
   }
 
   /**

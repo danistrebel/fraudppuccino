@@ -16,10 +16,18 @@ class QueryExecution {
   var iter: Iterator[String] = null
   
 
-  def load(filePath: String, start: Int, end: Int) {
-    graph.reset
-    transactions.clear
-    senders.clear
+  def load(filePath: String, start: Int, end: Int, streamingMode: Boolean) {
+    
+    if(streamingMode) {
+      //remove all transactions that are not in the window anymore 
+      //and are not connected to a node that is still in the window.
+      //
+      //remove senders with empty matching lists.
+    } else {
+    	graph.reset
+    	transactions.clear
+    	senders.clear            
+    }
     
     if(iter == null) {
     	iter = Source.fromFile(filePath).getLines      

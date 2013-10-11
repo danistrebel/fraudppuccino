@@ -15,7 +15,7 @@ object QueryExecutionDemo extends App {
 
   val execution = new QueryExecution
 
-  execution.load("/Volumes/Data/BTC_August2013/user-user-tx.csv", 1000000, 1100000)
+  execution.load("/Volumes/Data/BTC_August2013/user-user-tx.csv", 1000000, 1100000, false)
   execution.execute(transactionAnnouncing, transactionMatching)
   execution.label(Some("component"), None, subgraphIdentification, dummyAlgorithm)
   execution.label(Some("depth"), None, depthExplorer, dummyAlgorithm)
