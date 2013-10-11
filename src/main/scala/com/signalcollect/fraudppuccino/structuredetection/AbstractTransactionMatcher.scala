@@ -37,6 +37,7 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
           }
         }
     }
+    matchesFound.clear
     scoreSignal = 0.0
   }
 

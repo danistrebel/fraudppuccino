@@ -6,14 +6,14 @@ object StreamingExecutionDemo extends App {
 
   SHOW //Just to start the web server
 
-  val windowsize = 20000
-  for (lower <- 10000000 to 50000000 by windowsize) {
+  val windowsize = 604800 //1 week
+  for (lower <- 1231000000 to 1376839940 by windowsize) {
 
 	val start = System.currentTimeMillis
     val loadingStart = System.currentTimeMillis
 
     //Loading the transactions
-    STREAM SOURCE args(0) FROM lower TO lower + windowsize
+    LOAD SOURCE args(0) FROM lower TO lower + windowsize
     val loadingTime = (System.currentTimeMillis - loadingStart)
 
     FILTER TRANSACTIONS "value" GREATERTHAN 10000000l
@@ -36,7 +36,7 @@ object StreamingExecutionDemo extends App {
     //	  
     //	  LOAD COMPONENTS "a"
 
-    FILTER COMPONENTS "depth" MAX VALUE GREATERTHAN 6
+    //FILTER COMPONENTS "depth" MAX VALUE GREATERTHAN 6
     print(lower + "," + (lower + windowsize))
     print("," + (System.currentTimeMillis() - start))
     print("," + loadingTime)

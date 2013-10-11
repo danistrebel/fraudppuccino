@@ -3,7 +3,7 @@ package com.signalcollect.fraudppuccino.structuredetection
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 
-class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
+case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
   val value = vertex.getResult("value").getOrElse(0l).asInstanceOf[Long]
   val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]

@@ -10,7 +10,7 @@ import scala.collection.GenIterable
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
-class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL) extends AbstractTransactionMatcher(vertex) {
+case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL) extends AbstractTransactionMatcher(vertex) {
 
   var balance: Long = 0l
 

@@ -14,6 +14,13 @@ import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 
+/**
+ * Visualization component to visually represent findings within the graph.
+ * 
+ * The Component is responsible for serving the client side libraries in a static file server
+ * and broadcast new reports to all interested clients through a websocket connection.
+ * 
+ */
 case class FraudppuchinoServer {
 
   /**

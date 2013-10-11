@@ -23,7 +23,7 @@ object FRAUDPPUCCINO {
   }
   
   object STREAM {
-    def SOURCE(path: String) = RangeParser(stream = true, path=path)
+    def SOURCE(path: String) = RangeParser(path)
   }
 
   object STORE {
@@ -162,9 +162,9 @@ object FRAUDPPUCCINO {
     def WITH(plan: ExecutionPlan) = execution.label(transactionLabel, senderLabel, plan.transactionsAlgorithm, plan.sendersAlgorithm)
   }
 
-  case class RangeParser(stream: Boolean = false, path: String = "", start: Int = 0, end: Int = 0) {
-    def FROM(i: Int) = this.copy(start = i)
-    def TO(i: Int) = execution.load(path, start, i, stream)
+  case class RangeParser(path: String = "", start: Long = 0l, end: Long = 0l) {
+    def FROM(i: Long) = this.copy(start = i)
+    def TO(i: Long) = execution.load(path, start, i)
   }
 
   /**
