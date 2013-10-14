@@ -13,7 +13,7 @@ object FRAUDPPUCCINO {
   lazy val visualizationServer = FraudppuchinoServer()
 
   lazy val execution: QueryExecution = new QueryExecution
-  var components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = null
+  var components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = Map[Int, Iterable[RepeatedAnalysisVertex[_]]]()
 
   lazy val snapshots = HashMap[String, Map[Int, Iterable[RepeatedAnalysisVertex[_]]]]()
 
@@ -39,13 +39,17 @@ object FRAUDPPUCCINO {
       } else {
         RUN(Connector(MATCH_ALL))
       }
-      LABEL TRANSACTIONS "component" WITH SUBGRAPH_IDENTIFICATION
-      components = execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
+      
     }
+  }
+  
+  def MKCOMPONENTS = {
+    LABEL TRANSACTIONS "component" WITH SUBGRAPH_IDENTIFICATION
+    components = execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
   }
 
   object RUN {
-    def apply(plan: ExecutionPlan) = execution.execute(plan.transactionsAlgorithm, plan.sendersAlgorithm)
+    def apply(plan: ExecutionPlan) = execution.execute(plan.transactionsAlgorithm)
   }
 
   object LABEL {
@@ -164,7 +168,11 @@ object FRAUDPPUCCINO {
 
   case class RangeParser(path: String = "", start: Long = 0l, end: Long = 0l) {
     def FROM(i: Long) = this.copy(start = i)
-    def TO(i: Long) = execution.load(path, start, i)
+    def TO(i: Long) =  this.copy(end = i)
+    def EXPIRING(i: Long) = {
+      execution.load(path, start, end, i)
+      execution.graph.execute
+    }
   }
 
   /**

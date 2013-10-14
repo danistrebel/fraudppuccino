@@ -26,7 +26,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   def findMatchingTransactions(newOutPut: TransactionOutput,
     outputs: Iterable[TransactionOutput],
     inputs: Iterable[TransactionInput]): (Iterable[TransactionInput], Iterable[TransactionOutput]) = {
-
+    
     val tolerance = 0.1f
 
     if (matchingMode == MATCH_CHAIN) {

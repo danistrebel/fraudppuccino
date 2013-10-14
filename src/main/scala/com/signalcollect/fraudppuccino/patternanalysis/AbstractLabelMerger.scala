@@ -13,6 +13,7 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
+      case timeout: Long => //ignore timeout
       case newLabel: LabelType => {
         if (shouldSwitchToLabel(newLabel)) {
           label = newLabel

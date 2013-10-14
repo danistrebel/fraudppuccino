@@ -6,46 +6,34 @@ object StreamingExecutionDemo extends App {
 
   SHOW //Just to start the web server
 
-  val windowsize = 604800 //1 week
-  for (lower <- 1231000000 to 1376839940 by windowsize) {
+  val windowsize = 86400 //1 day
+  val maxTimeBetweenConnectedTransactions = 604800 // 1 Week
 
-	val start = System.currentTimeMillis
+  val startUnixTime = 1231460000
+  val endUnixTime = 1269821600 //1376839940
+
+  for (lower <- startUnixTime to endUnixTime by windowsize) {
+
+    val start = System.currentTimeMillis
     val loadingStart = System.currentTimeMillis
 
-    //Loading the transactions
-    LOAD SOURCE args(0) FROM lower TO lower + windowsize
+    // Loading the transactions of the next window Step and remove all expired transactions
+    LOAD SOURCE args(0) FROM lower TO lower + windowsize EXPIRING (lower - maxTimeBetweenConnectedTransactions)
     val loadingTime = (System.currentTimeMillis - loadingStart)
 
-    FILTER TRANSACTIONS "value" GREATERTHAN 10000000l
+    MKCOMPONENTS
 
-    //Matching of connected transactions
-    val matchingStart = System.currentTimeMillis
-    CONNECT IF ANY_CONNECTION
-    val matchingTime = (System.currentTimeMillis - matchingStart)
-
-    //    println("INTERVAL " + lower + " - " + (lower + windowsize))
-    //    println("Transactions" + TRANSACTIONS.size)
-    //    println("Components" + COMPONENTS.size)
-
-    LABEL TRANSACTIONS "depth" WITH DEPTH_EXPLORATION
-
-    //	  STORE COMPONENTS "a"
-    //	  FILTER COMPONENTS SIZE GREATERTHAN 1
-    //	  
-    //	  println("bigger than 1:" + COMPONENTS.size)
-    //	  
-    //	  LOAD COMPONENTS "a"
-
-    //FILTER COMPONENTS "depth" MAX VALUE GREATERTHAN 6
     print(lower + "," + (lower + windowsize))
     print("," + (System.currentTimeMillis() - start))
     print("," + loadingTime)
-    print("," + matchingTime)
+    print("," + 0)
     print("," + TRANSACTIONS.size)
     println("," + COMPONENTS.size)
 
-    SHOW
   }
-      
-  SHUTDOWN
+  
+  LABEL TRANSACTIONS "depth" WITH DEPTH_EXPLORATION
+  FILTER COMPONENTS "depth" MAX VALUE GREATERTHAN 6
+
+  SHOW
 }

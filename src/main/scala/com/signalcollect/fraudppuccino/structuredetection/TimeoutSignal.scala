@@ -1,0 +1,3 @@
+package com.signalcollect.fraudppuccino.structuredetection
+
+object TransactionTimedOut

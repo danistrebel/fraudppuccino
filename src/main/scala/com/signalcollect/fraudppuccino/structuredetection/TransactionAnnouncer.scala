@@ -11,20 +11,29 @@ case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends Verte
   val target = vertex.getResult("target").getOrElse(0).asInstanceOf[Int]
   def id = vertex.id.asInstanceOf[Int]
 
-  def getState = None
+  var timedout = false
+
+  def getState = timedout
 
   def setState(state: Any) = {
   }
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case (linkTarget: Int, edgeType: EdgeMarker) => vertex.outgoingEdges+=((linkTarget, edgeType))
-      case _ => 
+      case (linkTarget: Int, edgeType: EdgeMarker) => vertex.outgoingEdges += ((linkTarget, edgeType))
+      case timeoutPill: Long => //Timeout pill represents the maximum age that a transaction is allowed to have in order to stay in the graph.
+        if (!timedout && time < timeoutPill) {
+          graphEditor.sendSignal(TransactionTimedOut, source, Some(id))
+          graphEditor.sendSignal(TransactionTimedOut, target, Some(id))
+          timedout = true
+        }
+      case _ =>
     }
     true
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
+
     graphEditor.sendSignal(TransactionOutput(id, value, time), source, Some(id))
     graphEditor.sendSignal(TransactionInput(id, value, time), target, Some(id))
     scoreSignal = 0.0
