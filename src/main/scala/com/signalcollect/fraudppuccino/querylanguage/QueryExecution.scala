@@ -61,7 +61,6 @@ class QueryExecution {
 
       if (splitted(5).toLong >= endTime) {
         graph.recalculateScores
-        println(splitted(0))
         return
       }
 

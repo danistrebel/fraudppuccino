@@ -3,7 +3,9 @@ var width = 960, height = 500;
 var color = d3.scale.linear().domain([ 0, 5, 10, 20 ]).range(
 		[ "green", "yellow", "orange", "red" ]);
 
-var force = d3.layout.force().charge(-500).linkDistance(5).size(
+var transactionValue = d3.scale.log().domain([1, 1000]).range([0, 20]);
+
+var force = d3.layout.force().charge(-500).linkDistance(50).size(
 		[ width, height ]);
 
 var svg = d3.select("svg#patternVisualizer");
@@ -40,7 +42,9 @@ function updateVisualization() {
 					"url(#transaction)")
 
 	var node = svg.append("svg:g").selectAll(".node").data(graph.nodes).enter()
-			.append("circle").attr("class", "node").attr("r", 5).style("fill",
+			.append("circle").attr("class", "node").attr("r", function(d) {
+				return Math.min(20, transactionValue(d.value));
+			}).style("fill",
 					function(d) {
 						return color(d.group);
 					}).call(force.drag).on("click", function(node) {
@@ -158,7 +162,8 @@ function loadTransactionGraph(id) {
 		var tx = {
 			"name" : transaction.id,
 			"group" : transaction.depth,
-			"transaction" : transaction
+			"transaction" : transaction,
+			"value" : 1 + (transaction.value / 100000000),
 		};
 		transactionLookUp[transaction.id] = tx;
 		graph.nodes.push(tx);
@@ -196,7 +201,8 @@ function loadAccountGraph(id) {
 							"out" : 0,
 							"in-count" : 0,
 							"out-count" : 0
-						}
+						},
+						"value" : 10
 					};
 					accountsLookup[transaction.src] = source;
 					graph.nodes.push(source);
@@ -214,7 +220,8 @@ function loadAccountGraph(id) {
 							"out" : 0,
 							"in-count" : 0,
 							"out-count" : 0
-						}
+						},
+						"value" : 10
 					};
 					accountsLookup[transaction.target] = target;
 					graph.nodes.push(target);
