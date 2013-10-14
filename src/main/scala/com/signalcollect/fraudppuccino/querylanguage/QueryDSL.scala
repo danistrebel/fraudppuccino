@@ -8,28 +8,17 @@ import scala.collection.mutable.HashMap
 import language.dynamics
 import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
 
+/**
+ * DSL to control a fraudppuccino analysis session
+ */ 
 object FRAUDPPUCCINO {
 
-  lazy val visualizationServer = FraudppuchinoServer()
-
   lazy val execution: QueryExecution = new QueryExecution
-  var components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = Map[Int, Iterable[RepeatedAnalysisVertex[_]]]()
 
   lazy val snapshots = HashMap[String, Map[Int, Iterable[RepeatedAnalysisVertex[_]]]]()
 
   object LOAD {
-    def SOURCE(path: String) = RangeParser(path=path)
-    def COMPONENTS(name: String) = components = snapshots(name)
-  }
-  
-  object STREAM {
-    def SOURCE(path: String) = RangeParser(path)
-  }
-
-  object STORE {
-    def COMPONENTS(name: String) = if (components != null) {
-      snapshots += ((name, components))
-    }
+    def SOURCE(path: String) = RangeParser(path = path)
   }
 
   object CONNECT {
@@ -39,22 +28,24 @@ object FRAUDPPUCCINO {
       } else {
         RUN(Connector(MATCH_ALL))
       }
-      
+
     }
   }
-  
+
   def MKCOMPONENTS = {
     LABEL TRANSACTIONS "component" WITH SUBGRAPH_IDENTIFICATION
-    components = execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
+    execution.components.clear
+    execution.components ++= execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
   }
+
+  def RETIRE(maxTime: Long) = execution.retire(maxTime)
 
   object RUN {
     def apply(plan: ExecutionPlan) = execution.execute(plan.transactionsAlgorithm)
   }
 
   object LABEL {
-    def TRANSACTIONS(label: String) = LabelParser(Some(label), None)
-    def SENDERS(label: String) = LabelParser(None, Some(label))
+    def TRANSACTIONS(label: String) = LabelParser(Some(label))
   }
 
   object FILTER {
@@ -68,22 +59,22 @@ object FRAUDPPUCCINO {
   }
 
   abstract class ComponentFilter {
-    def EQUALS(referenceSize: Int)
-    def LESSTHAN(referenceSize: Int)
-    def GREATERTHAN(referenceSize: Int)
+    def EQUALS(referenceSize: Int): Map[Int, Iterable[RepeatedAnalysisVertex[_]]]
+    def LESSTHAN(referenceSize: Int): Map[Int, Iterable[RepeatedAnalysisVertex[_]]]
+    def GREATERTHAN(referenceSize: Int): Map[Int, Iterable[RepeatedAnalysisVertex[_]]]
     def MAX(a: Any): ComponentFilter
     def MIN(a: Any): ComponentFilter
   }
 
   object ComponentSizeFilter extends ComponentFilter {
-    def EQUALS(referenceSize: Int) = {
-      components = components.filter(_._2.size == referenceSize)
+    def EQUALS(referenceSize: Int): Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = {
+      execution.components.filter(_._2.size == referenceSize).toMap
     }
-    def LESSTHAN(referenceSize: Int) = {
-      components = components.filter(_._2.size < referenceSize)
+    def LESSTHAN(referenceSize: Int): Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = {
+      execution.components.filter(_._2.size < referenceSize).toMap
     }
-    def GREATERTHAN(referenceSize: Int) = {
-      components = components.filter(_._2.size > referenceSize)
+    def GREATERTHAN(referenceSize: Int): Map[Int, Iterable[RepeatedAnalysisVertex[_]]] = {
+      execution.components.filter(_._2.size > referenceSize).toMap
     }
     def MAX(a: Any): ComponentFilter = { null }
     def MIN(a: Any): ComponentFilter = { null }
@@ -104,13 +95,13 @@ object FRAUDPPUCCINO {
     }
 
     def EQUALS(referenceSize: Int) = {
-      components = components.filter(c => extractionFunction(c._2) == referenceSize)
+      execution.components.filter(c => extractionFunction(c._2) == referenceSize).toMap
     }
     def LESSTHAN(referenceSize: Int) = {
-      components = components.filter(c => extractionFunction(c._2) < referenceSize)
+      execution.components.filter(c => extractionFunction(c._2) < referenceSize).toMap
     }
     def GREATERTHAN(referenceSize: Int) = {
-      components = components.filter(c => extractionFunction(c._2) > referenceSize)
+      execution.components.filter(c => extractionFunction(c._2) > referenceSize).toMap
     }
   }
 
@@ -118,31 +109,31 @@ object FRAUDPPUCCINO {
 
   case class FilterParser(val label: String) {
     def EQUALS(referenceValue: Any) = {
-      execution.transactions = execution.transactions.filter(tx => tx.getResult(label).get == referenceValue)
+      //      execution.transactions = execution.transactions.filter(tx => tx.getResult(label).get == referenceValue)
 
     }
     def LESSTHAN(referenceValue: Any) = {
-      execution.transactions = execution.transactions.filter(tx => {
-        val fieldValue = tx.getResult(label).get
-        fieldValue match {
-          case field: Int => field < referenceValue.asInstanceOf[Int]
-          case field: Long => field < referenceValue.asInstanceOf[Long]
-          case field: Float => field < referenceValue.asInstanceOf[Float]
-          case field: String => field < referenceValue.asInstanceOf[String]
-        }
-      })
+      //      execution.transactions = execution.transactions.filter(tx => {
+      //        val fieldValue = tx.getResult(label).get
+      //        fieldValue match {
+      //          case field: Int => field < referenceValue.asInstanceOf[Int]
+      //          case field: Long => field < referenceValue.asInstanceOf[Long]
+      //          case field: Float => field < referenceValue.asInstanceOf[Float]
+      //          case field: String => field < referenceValue.asInstanceOf[String]
+      //        }
+      //      })
     }
 
     def GREATERTHAN(referenceValue: Any) = {
-      execution.transactions = execution.transactions.filter(tx => {
-        val fieldValue = tx.getResult(label).get
-        fieldValue match {
-          case field: Int => field > referenceValue.asInstanceOf[Int]
-          case field: Long => field > referenceValue.asInstanceOf[Long]
-          case field: Float => field > referenceValue.asInstanceOf[Float]
-          case field: String => field > referenceValue.asInstanceOf[String]
-        }
-      })
+      //      execution.transactions = execution.transactions.filter(tx => {
+      //        val fieldValue = tx.getResult(label).get
+      //        fieldValue match {
+      //          case field: Int => field > referenceValue.asInstanceOf[Int]
+      //          case field: Long => field > referenceValue.asInstanceOf[Long]
+      //          case field: Float => field > referenceValue.asInstanceOf[Float]
+      //          case field: String => field > referenceValue.asInstanceOf[String]
+      //        }
+      //      })
     }
 
   }
@@ -151,26 +142,23 @@ object FRAUDPPUCCINO {
     execution.shutdown
   }
 
-  def COMPONENTS = components
+  def COMPONENTS = execution.components
   def TRANSACTIONS = execution.transactions
   def SENDERS = execution.transactions
-
-  def SHOW = visualizationServer.updateResults(components)
 
   /**
    * PARSING UTILITIES
    */
-  case class LabelParser(transactionLabel: Option[String] = None, senderLabel: Option[String] = None) {
-    def TRANSACTIONS(label: String) = LabelParser(Some(label), senderLabel)
-    def SENDERS(label: String) = LabelParser(transactionLabel, Some(label))
-    def WITH(plan: ExecutionPlan) = execution.label(transactionLabel, senderLabel, plan.transactionsAlgorithm, plan.sendersAlgorithm)
+  case class LabelParser(transactionLabel: Option[String] = None) {
+    def TRANSACTIONS(label: String) = LabelParser(Some(label))
+    def WITH(plan: ExecutionPlan) = execution.label(transactionLabel, plan.transactionsAlgorithm)
   }
 
   case class RangeParser(path: String = "", start: Long = 0l, end: Long = 0l) {
     def FROM(i: Long) = this.copy(start = i)
-    def TO(i: Long) =  this.copy(end = i)
-    def EXPIRING(i: Long) = {
-      execution.load(path, start, end, i)
+    def TO(i: Long) = {
+      execution.load(path, start, i)
+      execution.graph.recalculateScores
       execution.graph.execute
     }
   }

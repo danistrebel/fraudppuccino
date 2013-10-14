@@ -17,8 +17,8 @@ object QueryExecutionDemo extends App {
 
   execution.load("/Volumes/Data/BTC_August2013/user-user-tx.csv", 1000000, 1100000)
 
-  execution.label(Some("component"), None, subgraphIdentification, dummyAlgorithm)
-  execution.label(Some("depth"), None, depthExplorer, dummyAlgorithm)
+  execution.label(Some("component"), subgraphIdentification)
+  execution.label(Some("depth"), depthExplorer)
   val transactionsByComponentId = execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
 
   

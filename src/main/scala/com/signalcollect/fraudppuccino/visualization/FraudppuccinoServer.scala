@@ -16,10 +16,10 @@ import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionP
 
 /**
  * Visualization component to visually represent findings within the graph.
- * 
+ *
  * The Component is responsible for serving the client side libraries in a static file server
  * and broadcast new reports to all interested clients through a websocket connection.
- * 
+ *
  */
 case class FraudppuchinoServer {
 
@@ -93,15 +93,23 @@ case class FraudppuchinoServer {
 
   def updateResults(components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]]) {
     if (components != null) {
-      for ((componentId, members) <- components) {
-        val component = "{" +
-          "\"start\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).min + "000," +
-          "\"end\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).max + "000," +
-          "\"flow\":" + members.map(_.getResult("value").get.asInstanceOf[Long]).max + "," +
-          "\"members\":[" + serializeMembers(members) + "]}"
-        sendResult(component)
+      for (component <- components) {
+        updateResult(component)
       }
     }
+  }
+
+  def updateResult(c: (Int, Iterable[RepeatedAnalysisVertex[_]])) {
+    val componentId = c._1
+    val members = c._2
+    val component = "{" +
+      "\"id\" : " + componentId + "," +
+      "\"start\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).min + "000," +
+      "\"end\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).max + "000," +
+      "\"flow\":" + members.map(_.getResult("value").get.asInstanceOf[Long]).max + "," +
+      "\"members\":[" + serializeMembers(members) + "]}"
+    sendResult(component)
+
   }
 
   def serializeMembers(members: Iterable[RepeatedAnalysisVertex[_]]) = {

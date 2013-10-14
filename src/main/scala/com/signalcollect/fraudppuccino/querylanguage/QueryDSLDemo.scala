@@ -3,7 +3,6 @@ package com.signalcollect.fraudppuccino.querylanguage
 import FRAUDPPUCCINO._
 
 object QueryDSLDemo extends App {
-  SHOW //Just to start the web server
 
   val windowsize = 200000
   for (lower <- 0 to 50000000 by windowsize) {
@@ -43,7 +42,6 @@ object QueryDSLDemo extends App {
     print("," + TRANSACTIONS.size)
     println("," + COMPONENTS.size)
 
-    SHOW
   }
       
   SHUTDOWN

@@ -10,32 +10,57 @@ import com.signalcollect.fraudppuccino.evaluation.btc.BTCTransactionMatcher
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
+import scala.collection.mutable.HashMap
+import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
 
 class QueryExecution {
 
-  var transactions = ArrayBuffer[RepeatedAnalysisVertex[_]]()
-  var senders = ArrayBuffer[RepeatedAnalysisVertex[_]]()
+  val transactions = ArrayBuffer[RepeatedAnalysisVertex[_]]()
+  var components: HashMap[Int, Iterable[RepeatedAnalysisVertex[_]]] = HashMap[Int, Iterable[RepeatedAnalysisVertex[_]]]()
+  
 
   val graph = GraphBuilder.build
   var iter: Iterator[String] = null
 
+  val visualizationServer = FraudppuchinoServer()
+
   /**
-   * Removes all old transactions from the graph and loads a new window.
+   * Loads a new window of transactions.
    * Assumes that the transactions are ordered by time in the input file.
    *
    * @param filePath The file from where the transactions should be loaded
    * @param startTime The min time from where transactions should be loaded
    * @param endTime The max time up to where transactions should be loaded
-   * @param maxTime The max time stamp for unconnected transactions to survive
-   * @param matchingAlgorithmFactory Creates the appropriate matching Strategy for the specified usecase
+   *
    */
   def load(
     filePath: String,
     startTime: Long,
-    endTime: Long,
-    maxTime: Long = Long.MaxValue) {
+    endTime: Long) {
+    if (iter == null) {
+      iter = Source.fromFile(filePath).getLines
+    }
 
-    //Send the max age that vertices are allowed to have. 
+    while (iter.hasNext) {
+
+      val splitted = iter.next.split(",")
+
+      if (splitted(5).toLong >= endTime) {
+        return
+      }
+
+      if (splitted(5).toLong >= startTime && splitted(2).toInt != splitted(3).toInt) {
+        loadTransaction(splitted(0).toInt * -1, splitted(4).toLong, splitted(5).toLong, splitted(2).toInt, splitted(3).toInt)
+      }
+    }
+  }
+
+  /**
+   * Removes all transactions that have timedout.
+   *
+   * @param maxTime The max time stamp for unconnected transactions to survive
+   */
+  def retire(maxTime: Long) {
     sendPoisonPillToAllOlderThan(maxTime)
     graph.execute
 
@@ -51,24 +76,20 @@ class QueryExecution {
         }
       })
 
-    if (iter == null) {
-      iter = Source.fromFile(filePath).getLines
-    }
-
-    while (iter.hasNext) {
-
-      val splitted = iter.next.split(",")
-
-      if (splitted(5).toLong >= endTime) {
-        graph.recalculateScores
-        return
+    //remove components that are entirely out of the window (i.e. the newest member of the component has expired)
+    components.foreach(component => {
+      val members = component._2
+      val maxComponentTime = maxTime - 691200
+      if (members.map(_.getResult("time").get.asInstanceOf[Long]).max < maxComponentTime) {
+        if (members.size > 8) {
+          visualizationServer.updateResult(component)
+        }
+        members.foreach(vertex => {
+          transactions -= vertex
+          graph.removeVertex(vertex.id)
+        })
       }
-
-      if (splitted(5).toLong >= startTime && splitted(2).toInt != splitted(3).toInt) {
-        loadTransaction(splitted(0).toInt * -1, splitted(4).toLong, splitted(5).toLong, splitted(2).toInt, splitted(3).toInt)
-      }
-    }
-    graph.recalculateScores
+    })
   }
 
   def execute(transactionsAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm) {
@@ -77,15 +98,11 @@ class QueryExecution {
     graph.execute
   }
 
-  def label(transactionsLabel: Option[String] = None, sendersLabel: Option[String] = None, transactionsAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm, sendersAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm) {
+  def label(transactionsLabel: Option[String] = None, transactionsAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm) {
     execute(transactionsAlgorithm)
     if (transactionsLabel.isDefined) {
       val label = transactionsLabel.get
       transactions.foreach(_.retainState(label))
-    }
-    if (sendersLabel.isDefined) {
-      val label = sendersLabel.get
-      senders.foreach(_.retainState(label))
     }
   }
 
@@ -101,8 +118,7 @@ class QueryExecution {
     sender.setAlgorithmImplementation(v => BTCTransactionMatcher(v))
     val receiver = new RepeatedAnalysisVertex(targetId)
     receiver.setAlgorithmImplementation(v => BTCTransactionMatcher(v))
-    //senders += sender
-    //senders += receiver
+    
 
     graph.addVertex(transaction)
     graph.addVertex(sender)
