@@ -2,7 +2,7 @@ package com.signalcollect.fraudppuccino.structuredetection
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
-import com.signalcollect.fraudppuccino.patternanalysis.ConnectedComponentsIdentifier
+import com.signalcollect.fraudppuccino.componentdetection.ConnectedComponentsIdentifier
 
 case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 

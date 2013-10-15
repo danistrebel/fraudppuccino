@@ -3,10 +3,9 @@ package com.signalcollect.fraudppuccino.querylanguage
 import scala.io.Source
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
-import com.signalcollect.fraudppuccino.structuredetection.TransactionEdge
 import scala.collection.mutable.ArrayBuffer
 import language.dynamics
-import com.signalcollect.fraudppuccino.evaluation.btc.BTCTransactionMatcher
+import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge

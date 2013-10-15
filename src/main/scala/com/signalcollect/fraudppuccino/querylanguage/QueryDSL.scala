@@ -7,6 +7,10 @@ import com.signalcollect.fraudppuccino.patternanalysis._
 import scala.collection.mutable.HashMap
 import language.dynamics
 import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
+import com.signalcollect.fraudppuccino.structuredetection.MatchingMode
+import com.signalcollect.fraudppuccino.structuredetection.MATCH_CHAIN
+import com.signalcollect.fraudppuccino.structuredetection.MATCH_ALL
+import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
 
 /**
  * DSL to control a fraudppuccino analysis session

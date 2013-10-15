@@ -10,6 +10,7 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
+import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
 
 @RunWith(classOf[JUnitRunner])
 class BTCPatternIdentificationSpec extends SpecificationWithJUnit {

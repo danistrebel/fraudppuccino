@@ -5,6 +5,7 @@ import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.SpecificationWithJUnit
 import com.signalcollect.fraudppuccino.detection._
 import com.signalcollect.fraudppuccino.structuredetection._
+import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
 
 @RunWith(classOf[JUnitRunner])
 class BTCTransactionMatcherSpec extends SpecificationWithJUnit {
