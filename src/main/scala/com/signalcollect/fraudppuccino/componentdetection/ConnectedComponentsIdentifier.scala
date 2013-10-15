@@ -4,7 +4,6 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
 
-
 /**
  * Runs a specialized for of label propagation
  * to label all connected sub-patterns with the
@@ -16,15 +15,22 @@ import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
  */
 class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends AbstractLabelMerger[(Int, Long)](vertex) {
 
-  def initialLabel: (Int, Long) = (Math.abs(vertex.id.asInstanceOf[Int]), vertex.getResult("time").get.asInstanceOf[Long])
+  def initialLabel: (Int, Long) = (vertex.id.asInstanceOf[Int], vertex.getResult("time").get.asInstanceOf[Long])
 
-  def shouldSwitchToLabel(newLabel: (Int, Long)): Boolean = this.label._2<newLabel._2 //switch to the id of the newer time stamp
+  def shouldSwitchToLabel(newLabel: (Int, Long)): Boolean = this.label._2 < newLabel._2 //switch to the id of the newer time stamp
 
   def shouldSignalForEdgeType(edgeType: EdgeMarker): Boolean = edgeType.isInstanceOf[TransactionPatternEdge]
-  
-  def handleTimeout(timeout: Array[Long]) = if(timeout(1)>this.label._2) {
-    vertex.storeAttribute("component", label)
-    println("Found Component: " + label)
+
+  def handleTimeout(timeout: Array[Long]) = if (timeout(1) > this.label._2) {
+    vertex.storeAttribute("component", label._1)
+
+    //Test if this is the component head or a member
+    if (this.label._1 == vertex.id.asInstanceOf[Int]) {
+      vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMaster(v)
+    } else {
+      vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMember(v)
+    }
+
   }
 
 }

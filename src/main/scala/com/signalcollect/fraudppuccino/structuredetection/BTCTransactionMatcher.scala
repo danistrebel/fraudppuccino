@@ -1,6 +1,5 @@
 package com.signalcollect.fraudppuccino.structuredetection
 
-import com.signalcollect.fraudppuccino.detection._
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection.AbstractTransactionMatcher
 import com.signalcollect.fraudppuccino.structuredetection.TransactionSignal

@@ -117,8 +117,14 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
   //Stuff that is delegated to the actual algorithm implementation
   def state(): Any = algorithm.getState
   def setState(state: Any): Unit = algorithm.setState(state)
-  def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean = algorithm.deliverSignal(signal, sourceId, graphEditor)
+
+  def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean = {
+    val hasCollected = algorithm.deliverSignal(signal, sourceId, graphEditor)
+    loadNextAlgorithm
+    hasCollected
+  }
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any]): Unit = algorithm.executeSignalOperation(graphEditor, outgoingEdges)
+
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]): Unit = {
     algorithm.executeCollectOperation(graphEditor)
     loadNextAlgorithm
