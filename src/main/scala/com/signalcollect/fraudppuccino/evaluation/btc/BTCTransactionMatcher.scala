@@ -57,16 +57,24 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     (Nil, Nil)
   }
 
-  def expandCandidates(unexpandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)], indexedCandidates: IndexedSeq[TransactionSignal]): IndexedSeq[(List[TransactionSignal], Long, Int)] = {
-
+  /**
+   * Expand partially expandedCandidates with previously unexpandedCandidates
+   * 
+   * @param partiallyExpandedCandidates Intermediary results pf the form (List of members already expanded, sum of expanded members, index of next unexpanded candidate)
+   * @param allCandidates All candidates that are available for expansion
+   */ 
+  def expandCandidates(partiallyExpandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)], allCandidates: IndexedSeq[TransactionSignal]): IndexedSeq[(List[TransactionSignal], Long, Int)] = {
+	val unexpandedCandidatesCount = partiallyExpandedCandidates.size
+	val allCandidatesCount =  allCandidates.size
+	
     @tailrec
     def expandNextCandidate(candidateIndex: Int, indexToAdd: Int, partialResult: ArrayBuffer[(List[TransactionSignal], Long, Int)] = ArrayBuffer()): IndexedSeq[(List[TransactionSignal], Long, Int)] = {
-      if (candidateIndex >= unexpandedCandidates.size) { // All candidates are expanded
+      if (candidateIndex >= unexpandedCandidatesCount) { // All candidates are expanded
         partialResult
       } else if (indexToAdd < 0) { // Start expansion of a new candidate
-        expandNextCandidate(candidateIndex, unexpandedCandidates(candidateIndex)._3, partialResult)
-      } else if (indexToAdd < indexedCandidates.size) { //Expand the current candidate
-        val expandedCandidate = (indexedCandidates(indexToAdd) :: unexpandedCandidates(candidateIndex)._1, unexpandedCandidates(candidateIndex)._2 + indexedCandidates(indexToAdd).value, indexToAdd + 1)
+        expandNextCandidate(candidateIndex, partiallyExpandedCandidates(candidateIndex)._3, partialResult)
+      } else if (indexToAdd < allCandidatesCount) { //Expand the current candidate
+        val expandedCandidate = (allCandidates(indexToAdd) :: partiallyExpandedCandidates(candidateIndex)._1, partiallyExpandedCandidates(candidateIndex)._2 + allCandidates(indexToAdd).value, indexToAdd + 1)
         expandNextCandidate(candidateIndex, indexToAdd + 1, partialResult += expandedCandidate)
       } else {
         expandNextCandidate(candidateIndex + 1, -1, partialResult)

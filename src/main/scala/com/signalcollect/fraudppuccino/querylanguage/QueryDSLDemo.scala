@@ -5,7 +5,9 @@ import FRAUDPPUCCINO._
 object QueryDSLDemo extends App {
 
   val windowsize = 200000
-  for (lower <- 0 to 50000000 by windowsize) {
+  for (lower <- 1276839940 to 1376839940 by windowsize) {
+    
+    RETIRE(1476839940)
 
 	val start = System.currentTimeMillis
     val loadingStart = System.currentTimeMillis

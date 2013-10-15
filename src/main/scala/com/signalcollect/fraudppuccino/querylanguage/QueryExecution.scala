@@ -15,11 +15,10 @@ import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
 
 class QueryExecution {
 
-  val transactions = ArrayBuffer[RepeatedAnalysisVertex[_]]()
-  var components: HashMap[Int, Iterable[RepeatedAnalysisVertex[_]]] = HashMap[Int, Iterable[RepeatedAnalysisVertex[_]]]()
-  
+  val transactions = HashMap[Int, RepeatedAnalysisVertex[Int]]()
+  var components: HashMap[Int, Iterable[RepeatedAnalysisVertex[Int]]] = HashMap[Int, Iterable[RepeatedAnalysisVertex[Int]]]()
 
-  val graph = GraphBuilder.build
+  val graph = GraphBuilder.withStorageFactory(factory.storage.JavaMapStorage).build
   var iter: Iterator[String] = null
 
   val visualizationServer = FraudppuchinoServer()
@@ -46,6 +45,7 @@ class QueryExecution {
       val splitted = iter.next.split(",")
 
       if (splitted(5).toLong >= endTime) {
+        println(splitted(0))
         return
       }
 
@@ -67,10 +67,10 @@ class QueryExecution {
     //remove all unconnected transactions that have timed out
     graph.foreachVertex(v =>
       if (v.state == true) {
-        val vertex = v.asInstanceOf[RepeatedAnalysisVertex[_]]
+        val vertex = v.asInstanceOf[RepeatedAnalysisVertex[Int]]
         if (vertex.outgoingEdges.exists(edge => edge._2 == DownstreamTransactionPatternEdge || edge._2 == UpstreamTransactionPatternEdge)) {
           vertex.removeAlgorithmImplementation
-          transactions += vertex
+          transactions += ((vertex.id, vertex))
         } else {
           graph.removeVertex(vertex.id)
         }
@@ -79,13 +79,13 @@ class QueryExecution {
     //remove components that are entirely out of the window (i.e. the newest member of the component has expired)
     components.foreach(component => {
       val members = component._2
-      val maxComponentTime = maxTime - 691200
+      val maxComponentTime = maxTime - 1123200
       if (members.map(_.getResult("time").get.asInstanceOf[Long]).max < maxComponentTime) {
         if (members.size > 8) {
           visualizationServer.updateResult(component)
         }
         members.foreach(vertex => {
-          transactions -= vertex
+          transactions -= vertex.id
           graph.removeVertex(vertex.id)
         })
       }
@@ -93,7 +93,13 @@ class QueryExecution {
   }
 
   def execute(transactionsAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm) {
-    transactions.foreach(_.setAlgorithmImplementation(transactionsAlgorithm))
+    transactions.foreach(tx =>
+      if(tx._2==null) {
+        println(transactions)
+        println(tx)
+      } else {
+    	  tx._2.setAlgorithmImplementation(transactionsAlgorithm)
+      })
     graph.recalculateScores
     graph.execute
   }
@@ -102,7 +108,7 @@ class QueryExecution {
     execute(transactionsAlgorithm)
     if (transactionsLabel.isDefined) {
       val label = transactionsLabel.get
-      transactions.foreach(_.retainState(label))
+      transactions.foreach(tx => tx._2.retainState(label))
     }
   }
 
@@ -118,7 +124,6 @@ class QueryExecution {
     sender.setAlgorithmImplementation(v => BTCTransactionMatcher(v))
     val receiver = new RepeatedAnalysisVertex(targetId)
     receiver.setAlgorithmImplementation(v => BTCTransactionMatcher(v))
-    
 
     graph.addVertex(transaction)
     graph.addVertex(sender)
@@ -126,8 +131,11 @@ class QueryExecution {
   }
 
   def sendPoisonPillToAllOlderThan(maxTime: Long) {
-    //Send a time stamped poison pill to all vertices
-    graph.foreachVertexWithGraphEditor(graphEditor => vertex => vertex.deliverSignal(maxTime, None, graphEditor))
+    //Send a time stamped poison pill to all vertices    
+    graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+      if (vertex.state == false) {
+        vertex.deliverSignal(maxTime, None, graphEditor)
+      })
   }
 
   def shutdown = graph.shutdown

@@ -33,9 +33,9 @@ object FRAUDPPUCCINO {
   }
 
   def MKCOMPONENTS = {
-    LABEL TRANSACTIONS "component" WITH SUBGRAPH_IDENTIFICATION
+    execution.label(Some("component"), SUBGRAPH_IDENTIFICATION.transactionsAlgorithm)
     execution.components.clear
-    execution.components ++= execution.transactions.groupBy(_.getResult("component").get.asInstanceOf[Int])
+    execution.components ++= execution.transactions.map(_._2).groupBy(_.getResult("component").get.asInstanceOf[Int])
   }
 
   def RETIRE(maxTime: Long) = execution.retire(maxTime)
@@ -158,8 +158,6 @@ object FRAUDPPUCCINO {
     def FROM(i: Long) = this.copy(start = i)
     def TO(i: Long) = {
       execution.load(path, start, i)
-      execution.graph.recalculateScores
-      execution.graph.execute
     }
   }
 
