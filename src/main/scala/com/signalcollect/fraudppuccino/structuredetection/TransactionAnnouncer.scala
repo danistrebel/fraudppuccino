@@ -2,6 +2,7 @@ package com.signalcollect.fraudppuccino.structuredetection
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
+import com.signalcollect.fraudppuccino.patternanalysis.ConnectedComponentsIdentifier
 
 case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
@@ -21,11 +22,12 @@ case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends Verte
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case (linkTarget: Int, edgeType: EdgeMarker) => vertex.outgoingEdges += ((linkTarget, edgeType))
-      case timeoutPill: Long => //Timeout pill represents the maximum age that a transaction is allowed to have in order to stay in the graph.
-        if (!timedout && time < timeoutPill) {
-          graphEditor.sendSignal(TransactionTimedOut, source, Some(id))
-          graphEditor.sendSignal(TransactionTimedOut, target, Some(id))
+      case timeoutPill: Array[Long] => //Timeout pill represents the maximum age that a transaction is allowed to have in order to stay in the graph.
+        if (!timedout && (time < timeoutPill(0))) {
+        	graphEditor.sendSignal(TransactionTimedOut, source, Some(id))
+        	graphEditor.sendSignal(TransactionTimedOut, target, Some(id))
           timedout = true
+          scoreCollect = 1.0
         }
       case _ =>
     }
@@ -39,7 +41,15 @@ case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends Verte
     scoreSignal = 0.0
   }
 
-  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {}
+  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
+    //if it is connected it should switch to the component identification algorithm
+    if (vertex.outgoingEdges.exists(edge => edge._2 == DownstreamTransactionPatternEdge || edge._2 == UpstreamTransactionPatternEdge)) {
+      vertex.nextAlgorithm = ((v: RepeatedAnalysisVertex[_]) => new ConnectedComponentsIdentifier(v))
+    } else {
+      graphEditor.removeVertex(vertex.id)
+    }
+    scoreCollect = 0.0
+  }
 
   var scoreSignal = 1.0
 

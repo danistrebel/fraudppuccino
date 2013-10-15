@@ -32,7 +32,7 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
     }
     
     "add transaction to the chain if within the time window" in {
-      execution.sendPoisonPillToAllOlderThan(0l);
+      execution.sendPoisonPillToAllOlderThan(Array(0l, 0l));
       execution.loadTransaction(4, 300l, 5l, 102, 103)
       execution.graph.recalculateScores
       execution.graph.execute
@@ -41,7 +41,7 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
     }
     
     "NOT add transaction to the chain if they are outside of the time window" in {
-      execution.sendPoisonPillToAllOlderThan(1l);
+      execution.sendPoisonPillToAllOlderThan(Array(1l, 0l));
       execution.loadTransaction(5, 200l, 5l, 105, 106)
       execution.graph.recalculateScores
       execution.graph.execute

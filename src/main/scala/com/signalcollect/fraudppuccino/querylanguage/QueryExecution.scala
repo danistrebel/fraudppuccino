@@ -61,25 +61,13 @@ class QueryExecution {
    * @param maxTime The max time stamp for unconnected transactions to survive
    */
   def retire(maxTime: Long) {
-    sendPoisonPillToAllOlderThan(maxTime)
+	val maxComponentTime = maxTime - 1123200
+    sendPoisonPillToAllOlderThan(Array(maxTime, maxComponentTime))
     graph.execute
-
-    //remove all unconnected transactions that have timed out
-    graph.foreachVertex(v =>
-      if (v.state == true) {
-        val vertex = v.asInstanceOf[RepeatedAnalysisVertex[Int]]
-        if (vertex.outgoingEdges.exists(edge => edge._2 == DownstreamTransactionPatternEdge || edge._2 == UpstreamTransactionPatternEdge)) {
-          vertex.removeAlgorithmImplementation
-          transactions += ((vertex.id, vertex))
-        } else {
-          graph.removeVertex(vertex.id)
-        }
-      })
 
     //remove components that are entirely out of the window (i.e. the newest member of the component has expired)
     components.foreach(component => {
       val members = component._2
-      val maxComponentTime = maxTime - 1123200
       if (members.map(_.getResult("time").get.asInstanceOf[Long]).max < maxComponentTime) {
         if (members.size > 8) {
           visualizationServer.updateResult(component)
@@ -130,12 +118,10 @@ class QueryExecution {
     graph.addVertex(receiver)
   }
 
-  def sendPoisonPillToAllOlderThan(maxTime: Long) {
+  def sendPoisonPillToAllOlderThan(maxTime: Array[Long]) {
     //Send a time stamped poison pill to all vertices    
     graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
-      if (vertex.state == false) {
-        vertex.deliverSignal(maxTime, None, graphEditor)
-      })
+        vertex.deliverSignal(maxTime, None, graphEditor))
   }
 
   def shutdown = graph.shutdown

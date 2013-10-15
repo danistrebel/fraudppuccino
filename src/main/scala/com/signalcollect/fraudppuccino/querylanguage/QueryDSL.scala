@@ -33,7 +33,6 @@ object FRAUDPPUCCINO {
   }
 
   def MKCOMPONENTS = {
-    execution.label(Some("component"), SUBGRAPH_IDENTIFICATION.transactionsAlgorithm)
     execution.components.clear
     execution.components ++= execution.transactions.map(_._2).groupBy(_.getResult("component").get.asInstanceOf[Int])
   }
@@ -186,10 +185,6 @@ object FRAUDPPUCCINO {
   case class Connector(matchingMode: MatchingMode) extends ExecutionPlan {
     override def sendersAlgorithm = vertex => new BTCTransactionMatcher(vertex, matchingMode)
     override def transactionsAlgorithm = vertex => new TransactionAnnouncer(vertex)
-  }
-
-  object SUBGRAPH_IDENTIFICATION extends ExecutionPlan {
-    override def transactionsAlgorithm = vertex => new ConnectedComponentsIdentifier(vertex)
   }
 
   object DEPTH_EXPLORATION extends ExecutionPlan {
