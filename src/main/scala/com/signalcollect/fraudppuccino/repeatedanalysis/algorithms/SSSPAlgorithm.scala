@@ -48,7 +48,7 @@ class SSSPAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(v
     }
   }
 
-  def noitfyTopologyChange {
+  def notifyTopologyChange {
     //Not considered
   }
 

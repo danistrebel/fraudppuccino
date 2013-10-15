@@ -21,7 +21,7 @@ abstract class VertexAlgorithm(vertex: RepeatedAnalysisVertex[_]) {
 
   def scoreCollect: Double
 
-  def noitfyTopologyChange
+  def notifyTopologyChange
   
   def getHostVertex = vertex
 }

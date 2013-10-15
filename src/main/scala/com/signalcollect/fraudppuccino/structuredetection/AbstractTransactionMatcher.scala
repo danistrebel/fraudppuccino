@@ -60,7 +60,7 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
 
   var scoreCollect = 0.0
 
-  def noitfyTopologyChange {
+  def notifyTopologyChange {
   }
 
   def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {

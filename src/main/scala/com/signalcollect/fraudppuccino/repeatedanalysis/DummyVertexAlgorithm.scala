@@ -22,6 +22,6 @@ class DummyVertexAlgorithm() extends VertexAlgorithm(null) {
 
   var scoreCollect = 0.0
 
-  def noitfyTopologyChange {
+  def notifyTopologyChange {
   }
 }

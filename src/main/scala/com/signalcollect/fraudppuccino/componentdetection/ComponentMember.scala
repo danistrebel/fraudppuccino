@@ -3,37 +3,43 @@ package com.signalcollect.fraudppuccino.componentdetection
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 
+
+/**
+ * Member of a connected component.
+ * Serves as a wrapper for yet another VertexAlgorithm and reports it's results back to the master of the connected component.
+ */ 
 class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
   
-  var embeddedAlgorithm: VertexAlgorithm = new DummyVertexAlgorithm
+  //Underlying algorithm implementation
+  var embeddedAlgorithm: VertexAlgorithm = new ComponentMemberAnnoncer(vertex)
   
   def getState = None
 
   def setState(state: Any) = {
   }
 
+  /*
+   * Handles all component internal communication e.g. sent by the component master
+   * or delegates the signal to the current algorithm implementation
+   */ 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case ComponentMemberQuery(key) => graphEditor.sendSignal(ComponentMemberResponse(vertex.getResult(key)), sourceId.get, Some(vertex.id))
+      case ComponentMemberAlgorithm(algorithmFactory) => embeddedAlgorithm = algorithmFactory(vertex)
       case _ => embeddedAlgorithm.deliverSignal(signal, sourceId, graphEditor)
     }
     true
   }
 
-  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-  }
-
-  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
-  }
-
-  var scoreSignal = 0.0
-
-  var scoreCollect = 0.0
-
-  def noitfyTopologyChange {
-  }
+  //Delegate all algorithm specific methods to the wrapped algorithm
+  def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) = embeddedAlgorithm.executeSignalOperation(graphEditor, outgoingEdges)
+  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = embeddedAlgorithm.executeCollectOperation(graphEditor)
+  var scoreSignal = embeddedAlgorithm.scoreSignal
+  var scoreCollect = embeddedAlgorithm.scoreCollect
+  def notifyTopologyChange = embeddedAlgorithm.notifyTopologyChange
 }
 
 object ComponentMemberRegistration
 case class ComponentMemberQuery(key: String)
 case class ComponentMemberResponse(response: Option[Any])
+case class ComponentMemberAlgorithm(algorithmFactory: RepeatedAnalysisVertex[_] => VertexAlgorithm)

@@ -57,6 +57,6 @@ class PageRankAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
     }
   }
 
-  def noitfyTopologyChange {}
+  def notifyTopologyChange {}
 
 }

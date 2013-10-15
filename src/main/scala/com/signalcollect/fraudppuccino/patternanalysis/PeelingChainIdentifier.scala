@@ -43,7 +43,7 @@ class PeelingChainIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAl
 
   var scoreCollect = 0.0
 
-  def noitfyTopologyChange {
+  def notifyTopologyChange {
   }
 
 }

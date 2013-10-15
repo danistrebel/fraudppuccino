@@ -55,7 +55,7 @@ case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends Verte
 
   var scoreCollect = 0.0
 
-  def noitfyTopologyChange {
+  def notifyTopologyChange {
   }
 
 }
