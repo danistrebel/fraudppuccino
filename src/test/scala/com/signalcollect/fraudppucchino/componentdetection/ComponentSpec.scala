@@ -16,8 +16,11 @@ import akka.actor.Props
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
 import akka.actor.Actor
 
+/**
+ * 
+ */ 
 @RunWith(classOf[JUnitRunner])
-class MemberAnnoucementSpec extends SpecificationWithJUnit {
+class ComponentSpecs extends SpecificationWithJUnit {
 
   sequential
   val graph = GraphBuilder.build
@@ -26,7 +29,7 @@ class MemberAnnoucementSpec extends SpecificationWithJUnit {
     "register itself in the actor system " in {
       //Register a component handler
       val system = ActorSystemRegistry.retrieve("SignalCollect").get
-      val componentHandler = system.actorOf(Props(new ComponentHandler), "componentHandler")
+      val componentHandler = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
       system.actorFor("akka://SignalCollect/user/componentHandler") === componentHandler
     }
   }
@@ -54,11 +57,7 @@ class MemberAnnoucementSpec extends SpecificationWithJUnit {
       graph.recalculateScores
       graph.execute
 
-      graph.sendSignal(ComponentSizeQuery, 1, None)
-      graph.sendSignal(ComponentSizeQuery, 4, None)
-
       graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.getResult("componentSize") }) === Some(3)
-      graph.forVertexWithId(vertexId = 4, f = { v: RepeatedAnalysisVertex[_] => v.getResult("componentSize") }) === Some(1)
     }
   }
 }

@@ -23,7 +23,7 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
     if(handler == null) {
     	val system = ActorSystemRegistry.retrieve("SignalCollect").get
     	handler = system.actorFor("akka://SignalCollect/user/componentHandler")
-    	graphEditor.sendToActor(handler, "new component " + vertex.id)
+    	graphEditor.sendToActor(handler, ComponentAnnouncement(vertex.id))
     }
 	  
     
@@ -31,10 +31,14 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
       case ComponentMemberRegistration =>
         members += sourceId.get; true
       case ComponentSizeQuery => {
-        if(sourceId.isDefined) {
-        	graphEditor.sendSignal(members.size, sourceId.get, Some(vertex.id))          
-        }
+        graphEditor.sendToActor(handler, ComponentSizeReply(vertex.id, members.size))
         vertex.storeAttribute("componentSize", members.size)
+        true
+      }
+      case ComponentElimination => {
+        members.foreach(memberId => {
+          graphEditor.sendSignal(ComponentMemberElimination, memberId, Some(vertex.id))
+        })
         true
       }
       case _ => super.deliverSignal(signal, sourceId, graphEditor)
