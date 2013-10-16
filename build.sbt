@@ -14,14 +14,14 @@ scalacOptions ++= Seq("-optimize")
 
 organization := "com.signalcollect"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.3"
 
 EclipseKeys.createSrc := EclipseCreateSrc.Default + EclipseCreateSrc.Resource
 
 EclipseKeys.withSource := true
 
 libraryDependencies ++= Seq(
- "org.scala-lang" % "scala-library" % "2.10.2" % "compile",
+ "org.scala-lang" % "scala-library" % "2.10.3" % "compile",
  "junit" % "junit" % "4.8.2"  % "test",
  "org.specs2" %% "specs2" % "2.1.1" % "test",
  "org.specs2" % "classycle" % "1.4.1" % "test",
@@ -30,5 +30,7 @@ libraryDependencies ++= Seq(
 )
 
 jarName in assembly := "fraudppucchino.jar"
+
+//test in assembly := {} skips the tests
 
 mainClass in assembly := Some("com.signalcollect.fraudppucchino.evaluation.btc.BTCInputAddressMerger")

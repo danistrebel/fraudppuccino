@@ -8,6 +8,8 @@ import com.signalcollect.fraudppuccino.componentdetection.ComponentMember
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.componentdetection.ComponentMaster
 import com.signalcollect.fraudppuccino.componentdetection.ComponentSizeQuery
+import akka.event.Logging.LogLevel
+import akka.event.Logging
 
 @RunWith(classOf[JUnitRunner])
 class MemberAnnoucementSpec extends SpecificationWithJUnit {

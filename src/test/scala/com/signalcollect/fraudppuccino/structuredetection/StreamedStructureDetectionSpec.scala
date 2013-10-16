@@ -20,17 +20,21 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
     val execution = new QueryExecution
 
     "add Transactions to the transaction matcher " in {
-      val transactions = List((0, 100l, 0l, 100, 101), (1, 100l, 1l, 101, 102), (2, 300l, 0l, 100, 102), (3, 200l, 0l, 104, 105))
-      for (tx <- transactions) {
-        execution.loadTransaction(tx._1, tx._2, tx._3, tx._4, tx._5)
-      }
+      
+      execution.loadTransaction(0, 100l, 0l, 100, 101)
+      execution.loadTransaction(2, 300l, 0l, 100, 102)
+      execution.loadTransaction(3, 200l, 0l, 104, 105)
+      execution.graph.recalculateScores
+      execution.graph.execute
+      
+      execution.loadTransaction(1, 100l, 1l, 101, 102)
       execution.graph.recalculateScores
       execution.graph.execute
 
       execution.graph.forVertexWithId(vertexId = 0, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) }) === 1
       execution.graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) }) === 1
     }
-    
+
     "add transaction to the chain if within the time window" in {
       execution.sendPoisonPillToAllOlderThan(Array(0l, 0l));
       execution.loadTransaction(4, 300l, 5l, 102, 103)
@@ -39,7 +43,7 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
       execution.graph.forVertexWithId(vertexId = 2, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) }) === 1
       execution.graph.forVertexWithId(vertexId = 4, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) }) === 1
     }
-    
+
     "NOT add transaction to the chain if they are outside of the time window" in {
       execution.sendPoisonPillToAllOlderThan(Array(1l, 0l));
       execution.loadTransaction(5, 200l, 5l, 105, 106)

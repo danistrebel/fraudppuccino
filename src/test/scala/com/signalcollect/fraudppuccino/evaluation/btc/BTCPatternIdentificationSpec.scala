@@ -66,7 +66,7 @@ class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
       }
 
       graph.recalculateScores
-      println(graph.execute)
+      graph.execute
 
       assert(tx0.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
       assert(tx1.outgoingEdges.exists(_._2 == UpstreamTransactionPatternEdge))

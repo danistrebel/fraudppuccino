@@ -14,9 +14,8 @@ def getState = None
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    println("sign")
-	scoreSignal = 0.0
     graphEditor.sendSignal(ComponentMemberRegistration, vertex.getResult("component").get.asInstanceOf[Int], Some(vertex.id))
+    scoreSignal = 0.0
   }
 
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {  
