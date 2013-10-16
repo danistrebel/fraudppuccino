@@ -34,12 +34,7 @@ class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm
   //Delegate all algorithm specific methods to the wrapped algorithm
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) = embeddedAlgorithm.executeSignalOperation(graphEditor, outgoingEdges)
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = embeddedAlgorithm.executeCollectOperation(graphEditor)
-  var scoreSignal = embeddedAlgorithm.scoreSignal
-  var scoreCollect = embeddedAlgorithm.scoreCollect
+  def scoreSignal = embeddedAlgorithm.scoreSignal
+  def scoreCollect = embeddedAlgorithm.scoreCollect
   def notifyTopologyChange = embeddedAlgorithm.notifyTopologyChange
 }
-
-object ComponentMemberRegistration
-case class ComponentMemberQuery(key: String)
-case class ComponentMemberResponse(response: Option[Any])
-case class ComponentMemberAlgorithm(algorithmFactory: RepeatedAnalysisVertex[_] => VertexAlgorithm)

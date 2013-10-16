@@ -14,12 +14,15 @@ def getState = None
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
+    println("sign")
+	scoreSignal = 0.0
+    graphEditor.sendSignal(ComponentMemberRegistration, vertex.getResult("component").get.asInstanceOf[Int], Some(vertex.id))
   }
 
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {  
   }
 
-  var scoreSignal = 0.0
+  var scoreSignal = 1.0
 
   var scoreCollect = 0.0
 
