@@ -37,13 +37,16 @@ class ComponentSpecs extends SpecificationWithJUnit {
   "component members" should {
 
     "announce themselves at the component master" in {
-
+      
       //(ComponentMember ID, Component ID)
       val componentMembers = List((1, 1), (2, 1), (3, 1), (4, 4))
 
       componentMembers.foreach(componentMember => {
         val vertex = new RepeatedAnalysisVertex(componentMember._1)
         vertex.storeAttribute("component", componentMember._2)
+        vertex.storeAttribute("time", 0l)
+        vertex.storeAttribute("value", 1000l)
+
 
         if (componentMember._1 == componentMember._2) {
           vertex.setAlgorithmImplementation(v => new ComponentMaster(v))
@@ -56,6 +59,9 @@ class ComponentSpecs extends SpecificationWithJUnit {
 
       graph.recalculateScores
       graph.execute
+      
+      //give time to the component handler to recognize components and compute its size
+      Thread.sleep(2000l)
 
       graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.getResult("componentSize") }) === Some(3)
     }

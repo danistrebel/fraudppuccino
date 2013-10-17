@@ -24,7 +24,7 @@ class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm
    */ 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case ComponentMemberQuery(key) => graphEditor.sendSignal(ComponentMemberResponse(vertex.getResult(key)), sourceId.get, Some(vertex.id))
+      case ComponentMemberQuery(queryFunction) => graphEditor.sendSignal(queryFunction(vertex), sourceId.get, Some(vertex.id))
       case ComponentMemberAlgorithm(algorithmFactory) => embeddedAlgorithm = algorithmFactory(vertex)
       case ComponentMemberElimination => graphEditor.removeVertex(vertex.id )
       case _ => embeddedAlgorithm.deliverSignal(signal, sourceId, graphEditor)

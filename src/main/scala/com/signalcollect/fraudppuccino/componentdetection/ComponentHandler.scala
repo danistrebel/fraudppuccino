@@ -5,11 +5,14 @@ import com.signalcollect.configuration.ActorSystemRegistry
 import akka.actor.Props
 import scala.collection.mutable.ArrayBuffer
 import com.signalcollect.GraphEditor
+import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
 
 /**
  * Handles components that were found in the graph
  */
 class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
+  
+  val visualizationServer = FraudppuchinoServer()
 
   val components = ArrayBuffer[Any]()
 
@@ -20,9 +23,17 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
     }
     case ComponentSizeReply(componentId, componentSize) => {
       if(componentSize<2) {
-        graphEditor.sendSignal(ComponentElimination, componentId, None)
+        dropComponent(componentId)
+      } else {
+        graphEditor.sendSignal(ComponentSerialization, componentId, None)
+
       }
     }
+    
+    case ComponentSerializationReply(componentJSON) =>  {
+      visualizationServer.sendResult(componentJSON)
+    }
+    
   }
   
   def dropComponent(componentId: Any) {
