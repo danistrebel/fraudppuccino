@@ -39,7 +39,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
     "announce themselves at the component master" in {
       
       //(ComponentMember ID, Component ID)
-      val componentMembers = List((1, 1), (2, 1), (3, 1), (4, 4))
+      val componentMembers = List((1, 1), (2, 1), (3, 1), (4, 4), (5, 1), (6, 1), (7, 1), (8, 1))
 
       componentMembers.foreach(componentMember => {
         val vertex = new RepeatedAnalysisVertex(componentMember._1)
@@ -63,7 +63,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
       //give time to the component handler to recognize components and compute its size
       Thread.sleep(2000l)
 
-      graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.getResult("componentSize") }) === Some(3)
+      graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.getResult("componentSize") }) === Some(7)
     }
   }
 }

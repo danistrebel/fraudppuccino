@@ -3,7 +3,7 @@ package com.signalcollect.fraudppuccino.querylanguage
 import FRAUDPPUCCINO._
 
 object StreamingExecutionDemo extends App {
-
+  
   val windowsize = 86400 //1 day
   val maxTimeBetweenConnectedTransactions = 604800 // 1 Week
 
@@ -14,7 +14,6 @@ object StreamingExecutionDemo extends App {
 
     val start = System.currentTimeMillis
 
-    
     //Retire all transactions that are not relevant anymore
     RETIRE(lower - maxTimeBetweenConnectedTransactions)
 

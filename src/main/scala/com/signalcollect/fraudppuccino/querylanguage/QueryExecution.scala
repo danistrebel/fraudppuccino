@@ -11,6 +11,9 @@ import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionP
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 import scala.collection.mutable.HashMap
 import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
+import com.signalcollect.configuration.ActorSystemRegistry
+import akka.actor.Props
+import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
 
 class QueryExecution {
 
@@ -20,7 +23,9 @@ class QueryExecution {
   val graph = GraphBuilder.withStorageFactory(factory.storage.JavaMapStorage).build
   var iter: Iterator[String] = null
 
-  val visualizationServer = FraudppuchinoServer()
+  //Register a component handler
+  val system = ActorSystemRegistry.retrieve("SignalCollect").get
+  val componentHandler = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
 
   /**
    * Loads a new window of transactions.
@@ -60,32 +65,17 @@ class QueryExecution {
    * @param maxTime The max time stamp for unconnected transactions to survive
    */
   def retire(maxTime: Long) {
-	val maxComponentTime = maxTime - 1123200
+    val maxComponentTime = maxTime - 1123200
     sendPoisonPillToAllOlderThan(Array(maxTime, maxComponentTime))
-    graph.execute
-
-    //remove components that are entirely out of the window (i.e. the newest member of the component has expired)
-    components.foreach(component => {
-      val members = component._2
-      if (members.map(_.getResult("time").get.asInstanceOf[Long]).max < maxComponentTime) {
-        if (members.size > 8) {
-          visualizationServer.updateResult(component)
-        }
-        members.foreach(vertex => {
-          transactions -= vertex.id
-          graph.removeVertex(vertex.id)
-        })
-      }
-    })
   }
 
   def execute(transactionsAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm) {
     transactions.foreach(tx =>
-      if(tx._2==null) {
+      if (tx._2 == null) {
         println(transactions)
         println(tx)
       } else {
-    	  tx._2.setAlgorithmImplementation(transactionsAlgorithm)
+        tx._2.setAlgorithmImplementation(transactionsAlgorithm)
       })
     graph.recalculateScores
     graph.execute
@@ -120,7 +110,7 @@ class QueryExecution {
   def sendPoisonPillToAllOlderThan(maxTime: Array[Long]) {
     //Send a time stamped poison pill to all vertices    
     graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
-        vertex.deliverSignal(maxTime, None, graphEditor))
+      vertex.deliverSignal(maxTime, None, graphEditor))
   }
 
   def shutdown = graph.shutdown

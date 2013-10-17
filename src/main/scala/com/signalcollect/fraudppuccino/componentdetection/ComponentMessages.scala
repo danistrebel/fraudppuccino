@@ -3,11 +3,13 @@ package com.signalcollect.fraudppuccino.componentdetection
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 
 // ComponentHandler <-> Master Messages
-case object ComponentSizeQuery
-case class ComponentSizeReply(componentId: Any, componentSize: Int)
+abstract class HandlerRequest 
+
+case object ComponentSizeQuery extends HandlerRequest
+case class ComponentReply(componentId: Any, reply: Option[Any])
 case class ComponentAnnouncement(componentId: Any)
-case object ComponentElimination
-case object ComponentSerialization
+case object ComponentElimination extends HandlerRequest
+case object ComponentSerialization extends HandlerRequest
 case class ComponentSerializationReply(componentJSON: String)
 
 // Master <-> Member Messages
