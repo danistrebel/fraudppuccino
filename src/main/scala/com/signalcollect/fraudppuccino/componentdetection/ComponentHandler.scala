@@ -13,15 +13,15 @@ import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
  */
 class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
 
-  val visualizationServer = FraudppuchinoServer()
+  //Initialize the visualization server
+  val visualizationServer = FraudppuchinoServer(this)
 
   //Stores all the components and their current stage in the processing pipeline
   val components = Map[Any, Int]()
 
-  type ResultFilter = PartialFunction[Any, Boolean]
+  type ResultFilter = Any => Boolean
 
-  val sizeFilterStep = (ComponentSizeQuery, { case size: Int => size > 6; case _ => false }: PartialFunction[Any, Boolean])
-  val componentWorkFlow: IndexedSeq[(HandlerRequest, ResultFilter)] = ArrayBuffer(sizeFilterStep)
+  val componentWorkFlow: IndexedSeq[(HandlerRequest, ResultFilter)] = ArrayBuffer(ComponentAlgorithms.parseWorkFlowStep("size > 6"))
 
   def receive = {
     case ComponentAnnouncement(componentId) => {
@@ -51,7 +51,7 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
   
   def executeNextInWorkFlow(componentId: Any) {
     val nextIndex = components(componentId) + 1 
-    if(nextIndex>=componentWorkFlow.size) { //reached the last step in the workflow
+    if(nextIndex>=componentWorkFlow.size) { //reached the last step in the work flow
       graphEditor.sendSignal(ComponentSerialization, componentId, None)
     } 
     else {

@@ -16,9 +16,6 @@ import akka.actor.Props
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
 import akka.actor.Actor
 
-/**
- * 
- */ 
 @RunWith(classOf[JUnitRunner])
 class ComponentSpecs extends SpecificationWithJUnit {
 
