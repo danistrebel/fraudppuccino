@@ -2,6 +2,9 @@ package com.signalcollect.fraudppuccino.componentdetection
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 
+// SomeInstance -> ComponentHandler
+case class WorkFlowStep(s: String)
+
 // ComponentHandler <-> Master Messages
 abstract class HandlerRequest 
 

@@ -15,6 +15,7 @@ import com.signalcollect.configuration.ActorSystemRegistry
 import akka.actor.Props
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
 import akka.actor.Actor
+import com.signalcollect.fraudppuccino.componentdetection.WorkFlowStep
 
 @RunWith(classOf[JUnitRunner])
 class ComponentSpecs extends SpecificationWithJUnit {
@@ -33,7 +34,12 @@ class ComponentSpecs extends SpecificationWithJUnit {
 
   "component members" should {
 
-    "announce themselves at the component master" in {
+    "should remain in the graph iff they pass all steps the workflow " in {
+      
+      //Specify the work flow
+      val system = ActorSystemRegistry.retrieve("SignalCollect").get
+      val handlerRef = system.actorFor("akka://SignalCollect/user/componentHandler")
+      handlerRef ! WorkFlowStep("SIZE > 6")
       
       //(ComponentMember ID, Component ID)
       val componentMembers = List((1, 1), (2, 1), (3, 1), (4, 4), (5, 1), (6, 1), (7, 1), (8, 1))
