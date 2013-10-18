@@ -62,9 +62,6 @@ class ComponentSpecs extends SpecificationWithJUnit {
 
       graph.recalculateScores
       graph.execute
-      
-      //give time to the component handler to recognize components and compute its size
-      Thread.sleep(2000l)
 
       graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.getResult("componentSize") }) === Some(7)
     }

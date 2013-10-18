@@ -14,6 +14,7 @@ import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
 import com.signalcollect.configuration.ActorSystemRegistry
 import akka.actor.Props
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
+import com.signalcollect.fraudppuccino.componentdetection.WorkFlowStep
 
 class QueryExecution {
 
@@ -26,7 +27,7 @@ class QueryExecution {
   //Register a component handler
   val system = ActorSystemRegistry.retrieve("SignalCollect").get
   val componentHandler = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
-
+  componentHandler ! WorkFlowStep("SIZE > 6")
   /**
    * Loads a new window of transactions.
    * Assumes that the transactions are ordered by time in the input file.

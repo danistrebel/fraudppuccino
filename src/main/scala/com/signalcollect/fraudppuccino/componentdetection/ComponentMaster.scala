@@ -7,6 +7,7 @@ import com.signalcollect.configuration.ActorSystemRegistry
 import akka.actor.ActorRef
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import ch.epfl.lamp.compiler.msil.MemberInfo
+import scala.collection.mutable.HashSet
 
 /**
  *  Serves as the main point of access to a connected component.
@@ -16,27 +17,30 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
   //Stores the Ids of all the members of the component that it represents
   //will include itself as a member i.e. members.size >= 1
   val members = ArrayBuffer[Any]()
+  
+  //All the members that we know of during the registration phase 
+  //allows to decide when all members are registered with the master
+  val registeredMembersNeighborhood = HashSet[Any]() 
 
-  var handler: ActorRef = null
-
-  def registerComponentHandler {
-    val system = ActorSystemRegistry.retrieve("SignalCollect").get
-    handler = system.actorFor("akka://SignalCollect/user/componentHandler")
-  }
+  
+  val system = ActorSystemRegistry.retrieve("SignalCollect").get
+  val handler = system.actorFor("akka://SignalCollect/user/componentHandler")
 
   val repliesFromMembers = ArrayBuffer[ComponentMemberMessage]()
 
   override def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
 
-    if (handler == null) {
-      registerComponentHandler
-      graphEditor.sendToActor(handler, ComponentAnnouncement(vertex.id))
-    }
-
     signal match {
-
-      case ComponentMemberRegistration =>
-        members += sourceId.get; true
+      case ComponentMemberRegistration(neighborhood) => {
+    	registeredMembersNeighborhood++=neighborhood
+    	registeredMembersNeighborhood+=sourceId.get
+        members += sourceId.get
+        if (registeredMembersNeighborhood.size == members.size) {
+          registeredMembersNeighborhood.clear
+          graphEditor.sendToActor(handler, ComponentAnnouncement(vertex.id))
+        }
+        true
+      }
 
       case ComponentSizeQuery => {
         graphEditor.sendToActor(handler, ComponentReply(vertex.id, Some(members.size)))

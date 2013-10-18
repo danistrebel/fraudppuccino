@@ -21,16 +21,19 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
 
   def shouldSignalForEdgeType(edgeType: EdgeMarker): Boolean = edgeType.isInstanceOf[TransactionPatternEdge]
 
-  def handleTimeout(timeout: Array[Long]) = if (timeout(1) > this.label._2) {
-    vertex.storeAttribute("component", label._1)
+  def handleTimeout(timeout: Array[Long]) = { //Fix the component when the 2nd timeout is met by the most recent member of the component
 
-    //Test if this is the component head or a member
-    if (this.label._1 == vertex.id.asInstanceOf[Int]) {
-      vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMaster(v)
-    } else {
-      vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMember(v)
+    if (timeout(1) > this.label._2) {
+      vertex.storeAttribute("component", label._1)
+
+      //Test if this is the component head or a member
+      if (this.label._1 == vertex.id.asInstanceOf[Int]) {
+        vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMaster(v)
+      } else {
+        vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMember(v)
+      }
+
     }
-
   }
 
 }

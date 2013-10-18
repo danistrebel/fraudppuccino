@@ -2,6 +2,7 @@ package com.signalcollect.fraudppuccino.componentdetection
 
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.structuredetection._
 
 class ComponentMemberAnnoncer(vertex : RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 def getState = None
@@ -14,7 +15,8 @@ def getState = None
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    graphEditor.sendSignal(ComponentMemberRegistration, vertex.getResult("component").get.asInstanceOf[Int], Some(vertex.id))
+    graphEditor.sendSignal(ComponentMemberRegistration(vertex.outgoingEdges.filter(edge => edge._2.isInstanceOf[TransactionPatternEdge]).map(_._1)), 
+        vertex.getResult("component").get.asInstanceOf[Int], Some(vertex.id))
     scoreSignal = 0.0
   }
 
