@@ -10,9 +10,9 @@ case class RegisterResultHandler(handler: ComponentResultHandler)
 
 // ComponentHandler <-> Master Messages
 abstract class HandlerRequest //Handler requests some action at the master
-case class ComponentMasterQuery(query: ComponentMaster => Any, label: Option[String] = None) extends HandlerRequest
-case class ComponentMemberQueryExecution(query: ComponentMemberQuery, allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit)
-case class ComponentAlgorithmExecution(memberAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm) extends HandlerRequest
+case class ComponentMasterQuery(query: ComponentMaster => Any) extends HandlerRequest
+case class ComponentMemberQueryExecution(query: ComponentMemberQuery, allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit) extends HandlerRequest
+case class ComponentAlgorithmExecution(memberAlgorithm: ComponentMemberAlgorithm, allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit) extends HandlerRequest
 case object ComponentElimination extends HandlerRequest
 
 case class ComponentReply(componentId: Any, reply: Option[Any])
@@ -24,6 +24,7 @@ case class ComponentMemberRegistration(neighbors: Iterable[Any]) extends Compone
 case class ComponentMemberResponse(response: Option[Any]) extends ComponentMemberMessage
 case class ComponentMemberInfo(id: Any, results: collection.Map[String, Any], successors: Iterable[Int]) extends ComponentMemberMessage
 
-case class ComponentMemberAlgorithm(algorithmFactory: RepeatedAnalysisVertex[_] => VertexAlgorithm)
-case object ComponentMemberElimination
-case class ComponentMemberQuery(queryFunction: RepeatedAnalysisVertex[_] => ComponentMemberMessage)
+abstract class MasterRequest //Master requests some action from its members
+case class ComponentMemberQuery(queryFunction: RepeatedAnalysisVertex[_] => ComponentMemberMessage) extends MasterRequest
+case class ComponentMemberAlgorithm(algorithmFactory: RepeatedAnalysisVertex[_] => VertexAlgorithm) extends MasterRequest
+case object ComponentMemberElimination extends MasterRequest

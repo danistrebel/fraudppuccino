@@ -14,6 +14,8 @@ import scala.collection.mutable.HashSet
  */
 class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember(vertex) {
 
+  val componentId = vertex.id
+
   //Stores the Ids of all the members of the component that it represents
   //will include itself as a member i.e. members.size >= 1
   val members = ArrayBuffer[Any]()
@@ -27,43 +29,51 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
 
   val repliesFromMembers = ArrayBuffer[ComponentMemberMessage]()
   var allReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = null
+  var shouldRequestResults = false //has this master sent algorithms to its members and not yet received their results
 
   override def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
-
+    
     signal match {
+      case timeOut: Array[Long] => {
+        if (shouldRequestResults) {
+          val requestState = ComponentMemberQuery(vertex => ComponentMemberResponse(Some(vertex.state)))
+          members.foreach(memberId => {
+            graphEditor.sendSignal(requestState, memberId, Some(componentId))
+          })
+          shouldRequestResults = false
+        }
+        true
+      }
       case ComponentMemberRegistration(neighborhood) => {
         registeredMembersNeighborhood ++= neighborhood
         registeredMembersNeighborhood += sourceId.get
         members += sourceId.get
         if (registeredMembersNeighborhood.size == members.size) {
           registeredMembersNeighborhood.clear
-          graphEditor.sendToActor(handler, ComponentAnnouncement(vertex.id))
+          graphEditor.sendToActor(handler, ComponentAnnouncement(componentId))
         }
         true
       }
 
-      case ComponentMasterQuery(query, label) => {
-        graphEditor.sendToActor(handler, ComponentReply(vertex.id, Some(query(this))))
-        if (label.isDefined) {
-          vertex.storeAttribute(label.get, query(this))
-        }
+      case ComponentMasterQuery(query) => {
+        graphEditor.sendToActor(handler, ComponentReply(componentId, Some(query(this))))
         true
       }
 
       case ComponentMemberQueryExecution(memberQuery, resultsProcessing) => {
-        repliesFromMembers.clear
-        allReceived = resultsProcessing
+        executeAndExpectMemberReplies(memberQuery, resultsProcessing, graphEditor)
+        true
+      }
 
-        members.foreach(memberId => {
-          graphEditor.sendSignal(memberQuery, memberId, Some(vertex.id))
-        })
-
+      case ComponentAlgorithmExecution(algorithm, resultsProcessing) => {
+        executeAndExpectMemberReplies(algorithm, resultsProcessing, graphEditor)
+        shouldRequestResults = true
         true
       }
 
       case ComponentElimination => {
         members.foreach(memberId => {
-          graphEditor.sendSignal(ComponentMemberElimination, memberId, Some(vertex.id))
+          graphEditor.sendSignal(ComponentMemberElimination, memberId, Some(componentId))
         })
         true
       }
@@ -80,10 +90,20 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
     }
   }
 
+  def executeAndExpectMemberReplies(request: MasterRequest,
+    allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit,
+    graphEditor: GraphEditor[Any, Any]) {
+    repliesFromMembers.clear
+    allReceived = allRepliesReceived
+
+    members.foreach(memberId => {
+      graphEditor.sendSignal(request, memberId, Some(componentId))
+    })
+  }
+
   def serializeComponent(memberInfos: Iterable[ComponentMemberInfo]): String = {
-    val componentId = vertex.id.toString
     val component = "{" +
-      "\"id\" : " + componentId + "," +
+      "\"id\" : " + componentId.toString + "," +
       "\"start\":" + memberInfos.map(_.results("time").asInstanceOf[Long]).min * 1000l + "," +
       "\"end\":" + memberInfos.map(_.results("time").asInstanceOf[Long]).max * 1000l + "," +
       "\"flow\":" + memberInfos.map(_.results("value").asInstanceOf[Long]).max + "," +

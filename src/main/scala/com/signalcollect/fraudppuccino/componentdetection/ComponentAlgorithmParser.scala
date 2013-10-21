@@ -1,16 +1,30 @@
 package com.signalcollect.fraudppuccino.componentdetection
 
 import scala.collection.mutable.Map
+import com.signalcollect.fraudppuccino.patternanalysis._
+import com.signalcollect.GraphEditor
+import scala.collection.mutable.ArrayBuffer
 
 object ComponentAlgorithmParser {
 
+  //Default algorithm implementations
   val sizeQuery = ComponentMasterQuery(master => master.members.size)
-  val sizeRetainQuery = ComponentMasterQuery(master => master.members.size, Some("componentSize"))
+  
+  val depthMemberAlgorithm = ComponentMemberAlgorithm(vertex => new PatternDepthAnalyzer(vertex))
+  val maxDepthAggregator: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
+    (repliesFromMembers, master, graphEditor) =>
+        {
+          val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
+          val maxDepth = replies.map(_.response.getOrElse(0).asInstanceOf[Int]).max
+          graphEditor.sendToActor(master.handler, ComponentReply(master.componentId, Some(maxDepth)))
+        }
+  }
+  val depthAlgorithm = ComponentAlgorithmExecution(depthMemberAlgorithm, maxDepthAggregator)
 
 
   val algorithms = Map[String, HandlerRequest]()
   algorithms += (("size", sizeQuery))
-  algorithms += (("sizeretain", sizeRetainQuery)) //like "size" but retains the size as a vertex attribute
+  algorithms += (("depth", depthAlgorithm))
 
   def parseWorkFlowStep(s: String): (HandlerRequest, Any => Boolean) = {
     val WorkFlowStep = "([\\w]+)\\s*(<|>|<=|>=|=)\\s*([\\w]+)".r

@@ -45,9 +45,10 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
 
     // Reply from the component master after executing a request
     case ComponentReply(componentId, reply) => {
+      
       reply match {
         case Some(result) => {
-          
+                    
           val currentIndex = components(componentId)
 
           if (currentIndex >= componentWorkFlow.size) { //Work flow ends with a serialized version of the entire component
