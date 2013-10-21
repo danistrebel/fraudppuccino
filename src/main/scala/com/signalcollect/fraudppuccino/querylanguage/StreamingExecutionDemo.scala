@@ -7,7 +7,7 @@ object StreamingExecutionDemo extends App {
   val windowsize = 86400 //1 day
   val maxTimeBetweenConnectedTransactions = 604800 // 1 Week
 
-  val startUnixTime = 1331460000
+  val startUnixTime = 1231469665
   val endUnixTime = 1376839940
 
   for (lower <- startUnixTime to endUnixTime by windowsize) {

@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppucchino.componentdetection
+package com.signalcollect.fraudppuccino.componentdetection
 
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
@@ -7,7 +7,7 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.componentdetection.ComponentMember
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.componentdetection.ComponentMaster
-import com.signalcollect.fraudppuccino.componentdetection.ComponentSizeQuery
+import com.signalcollect.fraudppuccino.componentdetection.ComponentMasterQuery
 import akka.event.Logging.LogLevel
 import akka.event.Logging
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
@@ -39,7 +39,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
       //Specify the work flow
       val system = ActorSystemRegistry.retrieve("SignalCollect").get
       val handlerRef = system.actorFor("akka://SignalCollect/user/componentHandler")
-      handlerRef ! WorkFlowStep("SIZE > 6")
+      handlerRef ! WorkFlowStep("SIZERETAIN > 6")
       
       //(ComponentMember ID, Component ID)
       val componentMembers = List((1, 1), (2, 1), (3, 1), (4, 4), (5, 1), (6, 1), (7, 1), (8, 1))
@@ -62,7 +62,8 @@ class ComponentSpecs extends SpecificationWithJUnit {
 
       graph.recalculateScores
       graph.execute
-
+      
+      Thread.sleep(500l)
       graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.getResult("componentSize") }) === Some(7)
     }
   }

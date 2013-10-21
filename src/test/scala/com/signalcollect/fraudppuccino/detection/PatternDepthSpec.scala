@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppucchino.detection
+package com.signalcollect.fraudppuccino.detection
 
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

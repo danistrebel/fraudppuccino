@@ -50,7 +50,7 @@ class QueryExecution {
       val splitted = iter.next.split(",")
 
       if (splitted(5).toLong >= endTime) {
-        println(splitted(0))
+        print(splitted(0) + ",")
         return
       }
 

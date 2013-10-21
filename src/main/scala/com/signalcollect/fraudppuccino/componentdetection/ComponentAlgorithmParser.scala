@@ -2,12 +2,15 @@ package com.signalcollect.fraudppuccino.componentdetection
 
 import scala.collection.mutable.Map
 
-object ComponentAlgorithms {
+object ComponentAlgorithmParser {
 
-  val sizeQuery = ComponentSizeQuery
+  val sizeQuery = ComponentMasterQuery(master => master.members.size)
+  val sizeRetainQuery = ComponentMasterQuery(master => master.members.size, Some("componentSize"))
+
 
   val algorithms = Map[String, HandlerRequest]()
   algorithms += (("size", sizeQuery))
+  algorithms += (("sizeretain", sizeRetainQuery)) //like "size" but retains the size as a vertex attribute
 
   def parseWorkFlowStep(s: String): (HandlerRequest, Any => Boolean) = {
     val WorkFlowStep = "([\\w]+)\\s*(<|>|<=|>=|=)\\s*([\\w]+)".r
