@@ -2,6 +2,7 @@ package com.signalcollect.fraudppuccino.componentdetection
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.GraphEditor
+import com.signalcollect.fraudppuccino.resulthandling.ComponentResultHandler
 
 // SomeInstance -> ComponentHandler
 case class WorkFlowStep(s: String)

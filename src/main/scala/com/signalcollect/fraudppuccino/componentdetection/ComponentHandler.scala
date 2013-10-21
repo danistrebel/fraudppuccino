@@ -6,9 +6,9 @@ import akka.actor.Props
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Map
 import com.signalcollect.GraphEditor
-import com.signalcollect.fraudppuccino.visualization.FraudppuccinoServer
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection._
+import com.signalcollect.fraudppuccino.resulthandling.ComponentResultHandler
 
 /**
  * Handles components that were found in the graph

@@ -5,19 +5,13 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import scala.collection.mutable.ArrayBuffer
 import language.dynamics
-import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
-import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
-import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection._
 import scala.collection.mutable.HashMap
-import com.signalcollect.fraudppuccino.visualization.FraudppuccinoServer
+import com.signalcollect.fraudppuccino.resulthandling._
 import com.signalcollect.configuration.ActorSystemRegistry
 import akka.actor.Props
-import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
-import com.signalcollect.fraudppuccino.componentdetection.WorkFlowStep
-import com.signalcollect.fraudppuccino.componentdetection.RegisterResultHandler
-import com.signalcollect.fraudppuccino.visualization.FraudppuccinoServer
-import com.signalcollect.fraudppuccino.componentdetection.CommandLineResultHandler
+import com.signalcollect.fraudppuccino.componentdetection._
+import com.signalcollect.fraudppuccino.resulthandling.CommandLineResultHandler
 
 class QueryExecution {
 

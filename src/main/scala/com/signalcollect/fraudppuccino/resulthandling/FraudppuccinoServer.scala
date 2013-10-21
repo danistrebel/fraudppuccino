@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.visualization
+package com.signalcollect.fraudppuccino.resulthandling
 
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.infrastructure.Logger
@@ -14,7 +14,7 @@ import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
-import com.signalcollect.fraudppuccino.componentdetection.ComponentResultHandler
+import com.signalcollect.fraudppuccino.resulthandling.ComponentResultHandler
 
 /**
  * Visualization component to visually represent findings within the graph.

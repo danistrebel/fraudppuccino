@@ -11,6 +11,7 @@ import com.signalcollect.configuration.ActorSystemRegistry
 import akka.actor.Props
 import akka.actor.Actor
 import scala.util.parsing.json.JSON
+import com.signalcollect.fraudppuccino.resulthandling.ComponentResultHandler
 
 @RunWith(classOf[JUnitRunner])
 class ComponentSpecs extends SpecificationWithJUnit {

@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.visualization
+package com.signalcollect.fraudppuccino.resulthandling
 
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.WebSocketFrameEvent
