@@ -14,6 +14,7 @@ import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
+import com.signalcollect.fraudppuccino.componentdetection.ComponentResultHandler
 
 /**
  * Visualization component to visually represent findings within the graph.
@@ -22,7 +23,7 @@ import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
  * and broadcast new reports to all interested clients through a websocket connection.
  *
  */
-case class FraudppuchinoServer(componentHandler: ComponentHandler = null) {
+case class FraudppuccinoServer(componentHandler: ComponentHandler = null) extends ComponentResultHandler {
   
   /*
    * Web Server Configuration
@@ -99,7 +100,7 @@ case class FraudppuchinoServer(componentHandler: ComponentHandler = null) {
   /**
    * Broadcasts the result along all registered websockets
    */ 
-  def sendResult(jsonData: String) {
+  def processResult(jsonData: String) {
     webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
   }
 

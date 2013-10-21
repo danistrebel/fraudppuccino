@@ -10,11 +10,14 @@ import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 import scala.collection.mutable.HashMap
-import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
+import com.signalcollect.fraudppuccino.visualization.FraudppuccinoServer
 import com.signalcollect.configuration.ActorSystemRegistry
 import akka.actor.Props
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
 import com.signalcollect.fraudppuccino.componentdetection.WorkFlowStep
+import com.signalcollect.fraudppuccino.componentdetection.RegisterResultHandler
+import com.signalcollect.fraudppuccino.visualization.FraudppuccinoServer
+import com.signalcollect.fraudppuccino.componentdetection.CommandLineResultHandler
 
 class QueryExecution {
 
@@ -28,6 +31,10 @@ class QueryExecution {
   val system = ActorSystemRegistry.retrieve("SignalCollect").get
   val componentHandler = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
   componentHandler ! WorkFlowStep("SIZE > 6")
+  componentHandler ! RegisterResultHandler(new FraudppuccinoServer)
+  componentHandler ! RegisterResultHandler(CommandLineResultHandler)
+
+  
   /**
    * Loads a new window of transactions.
    * Assumes that the transactions are ordered by time in the input file.

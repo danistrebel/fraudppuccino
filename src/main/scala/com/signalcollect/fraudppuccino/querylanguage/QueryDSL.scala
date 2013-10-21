@@ -6,7 +6,7 @@ import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.patternanalysis._
 import scala.collection.mutable.HashMap
 import language.dynamics
-import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
+import com.signalcollect.fraudppuccino.visualization.FraudppuccinoServer
 import com.signalcollect.fraudppuccino.structuredetection.MatchingMode
 import com.signalcollect.fraudppuccino.structuredetection.MATCH_CHAIN
 import com.signalcollect.fraudppuccino.structuredetection.MATCH_ALL

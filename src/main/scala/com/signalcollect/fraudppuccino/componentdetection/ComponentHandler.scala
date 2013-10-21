@@ -6,7 +6,7 @@ import akka.actor.Props
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Map
 import com.signalcollect.GraphEditor
-import com.signalcollect.fraudppuccino.visualization.FraudppuchinoServer
+import com.signalcollect.fraudppuccino.visualization.FraudppuccinoServer
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection._
 
@@ -18,7 +18,7 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
   /**
    * Client interface to visualize the results to the user
    */
-  val visualizationServer = FraudppuchinoServer(this)
+  val resultHandler: ArrayBuffer[ComponentResultHandler] = ArrayBuffer()
 
   /**
    * Stores all the components and their current stage in the processing pipeline
@@ -31,6 +31,8 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
   val componentWorkFlow: ArrayBuffer[(HandlerRequest, Any => Boolean)] = ArrayBuffer()
 
   def receive = {
+    
+    case RegisterResultHandler(handler) => resultHandler += handler
 
     //Adds a new work flow step by parsing the work flow specification
     case WorkFlowStep(workFlow) => componentWorkFlow += ComponentAlgorithmParser.parseWorkFlowStep(workFlow)
@@ -49,9 +51,8 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
           val currentIndex = components(componentId)
 
           if (currentIndex >= componentWorkFlow.size) { //Work flow ends with a serialized version of the entire component
-            println(result)
-            visualizationServer.sendResult(result.asInstanceOf[String])
-            //dropComponent(componentId)
+            resultHandler.foreach(_.processResult(result.asInstanceOf[String]))
+            dropComponent(componentId)
 
           } else if (componentWorkFlow(currentIndex)._2(result)) { //if result is accepted by the filter move to the next step in the work flow
             executeNextInWorkFlow(componentId)

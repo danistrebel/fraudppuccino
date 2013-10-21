@@ -4,18 +4,13 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.SpecificationWithJUnit
 import com.signalcollect._
-import com.signalcollect.fraudppuccino.componentdetection.ComponentMember
 import com.signalcollect.fraudppuccino.repeatedanalysis._
-import com.signalcollect.fraudppuccino.componentdetection.ComponentMaster
-import com.signalcollect.fraudppuccino.componentdetection.ComponentMasterQuery
 import akka.event.Logging.LogLevel
 import akka.event.Logging
-import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
 import com.signalcollect.configuration.ActorSystemRegistry
 import akka.actor.Props
-import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
 import akka.actor.Actor
-import com.signalcollect.fraudppuccino.componentdetection.WorkFlowStep
+import scala.util.parsing.json.JSON
 
 @RunWith(classOf[JUnitRunner])
 class ComponentSpecs extends SpecificationWithJUnit {
@@ -40,6 +35,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
       val system = ActorSystemRegistry.retrieve("SignalCollect").get
       val handlerRef = system.actorFor("akka://SignalCollect/user/componentHandler")
       handlerRef ! WorkFlowStep("SIZERETAIN > 6")
+      handlerRef ! RegisterResultHandler(DummyResultsHandler)
       
       //(ComponentMember ID, Component ID)
       val componentMembers = List((1, 1), (2, 1), (3, 1), (4, 4), (5, 1), (6, 1), (7, 1), (8, 1))
@@ -64,7 +60,19 @@ class ComponentSpecs extends SpecificationWithJUnit {
       graph.execute
       
       Thread.sleep(500l)
-      graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.getResult("componentSize") }) === Some(7)
+      
+      DummyResultsHandler.reportedComponents(1) === 7
+      DummyResultsHandler.reportedComponents.get(4) === None
     }
+  }
+}
+
+case object DummyResultsHandler extends ComponentResultHandler {
+  
+  var reportedComponents: scala.collection.mutable.Map[Int, Int] = scala.collection.mutable.Map()
+  
+  def processResult(jsonData: String) {
+      val parsed = JSON.parseFull(jsonData).get.asInstanceOf[Map[String, Any]]
+      reportedComponents += ((parsed("id").asInstanceOf[Double].intValue, parsed("members").asInstanceOf[List[_]].size))
   }
 }

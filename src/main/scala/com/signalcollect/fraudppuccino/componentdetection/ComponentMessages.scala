@@ -5,11 +5,12 @@ import com.signalcollect.GraphEditor
 
 // SomeInstance -> ComponentHandler
 case class WorkFlowStep(s: String)
+case class RegisterResultHandler(handler: ComponentResultHandler)
 
 // ComponentHandler <-> Master Messages
 abstract class HandlerRequest //Handler requests some action at the master
 case class ComponentMasterQuery(query: ComponentMaster => Any, label: Option[String] = None) extends HandlerRequest
-case class ComponentMemberQueryExecution(query: ComponentMemberQuery, allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_,_]) => Unit)
+case class ComponentMemberQueryExecution(query: ComponentMemberQuery, allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit)
 case class ComponentAlgorithmExecution(memberAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm) extends HandlerRequest
 case object ComponentElimination extends HandlerRequest
 
