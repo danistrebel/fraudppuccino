@@ -93,7 +93,9 @@ function showDetailsForNode(node) {
 				+ '<tr><td>BTC Transactions out</td><td>' + node.account["out"]
 				/ 100000000 + ' BTC</td></tr>' + '</table>'
 		$('#inspector-content').empty().append(details);
-	} else if (node.transaction) {
+	} 
+	
+	else if (node.transaction) {
 		var transactionDate = new Date(node.transaction.time * 1000);
 		var details = '<h1>Transaction #' + Math.abs(node.name) + '</h1>'
 				+ '<table class="table table-striped">'
@@ -158,6 +160,10 @@ $(document).on('click', '.remove-report', function() {
 	$(this).parent().fadeOut(300, function() {
 		$(this).remove();
 	});
+});
+
+$(document).on('click', '#runAlgorithm', function() {
+	websocket.send($('textarea#query').val());
 });
 
 function loadTransactionGraph(id) {

@@ -8,7 +8,7 @@ object ComponentResultHandler {
   def apply(s: String): ComponentResultHandler = {
     s match {
       case "CONSOLE" => CommandLineResultHandler
-      case "WEBSERVER" => new FraudppuccinoServer
+      case "WEBSERVER" => FraudppuccinoServer
     }
   }
 }

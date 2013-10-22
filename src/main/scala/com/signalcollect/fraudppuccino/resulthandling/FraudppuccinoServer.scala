@@ -23,7 +23,7 @@ import sys.process._
  * and broadcast new reports to all interested clients through a websocket connection.
  *
  */
-case class FraudppuccinoServer(componentHandler: ComponentHandler = null) extends ComponentResultHandler {
+case object FraudppuccinoServer extends ComponentResultHandler {
 
   /*
    * Web Server Configuration
