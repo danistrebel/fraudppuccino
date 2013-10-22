@@ -8,7 +8,8 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import scala.collection.mutable.Map
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.patternanalysis._
-import com.signalcollect.fraudppuccino.querylanguage.QueryExecution
+import com.signalcollect.fraudppuccino.querylanguage.StreamingExecutionDemo
+import com.signalcollect.fraudppuccino.querylanguage.StreamingExecution
 
 @RunWith(classOf[JUnitRunner])
 class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
@@ -17,7 +18,7 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
 
     sequential
 
-    val execution = new QueryExecution
+    val execution = new StreamingExecution
 
     "add Transactions to the transaction matcher " in {
       
@@ -36,7 +37,7 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
     }
 
     "add transaction to the chain if within the time window" in {
-      execution.sendPoisonPillToAllOlderThan(Array(0l, 0l));
+      execution.retire(0l, 0L)
       execution.loadTransaction(4, 300l, 5l, 102, 103)
       execution.graph.recalculateScores
       execution.graph.execute
@@ -45,7 +46,7 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
     }
 
     "NOT add transaction to the chain if they are outside of the time window" in {
-      execution.sendPoisonPillToAllOlderThan(Array(1l, 0l));
+      execution.retire(1l, 0l)
       execution.loadTransaction(5, 200l, 5l, 105, 106)
       execution.graph.recalculateScores
       execution.graph.execute

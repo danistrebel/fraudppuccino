@@ -3,40 +3,31 @@ package com.signalcollect.fraudppuccino.querylanguage
 import FRAUDPPUCCINO._
 
 object StreamingExecutionDemo extends App {
+  val executionPlan = """
+  SOURCE """ + args(0) + """
   
-  val windowsize = 86400 //1 day
-  val maxTimeBetweenConnectedTransactions = 604800 // 1 Week
+  START 1231469665
+  END 1376839940
+  
+  STREAM WINDOW 1d
+  TX INTERVAL 1w
+  
+  FILTER
+  SIZE > 10
+  DEPTH > 5
+ 
+  RESULTS
+  WEBSERVER
+  CONSOLE
+  
+  DEBUG
+  WINDOWSTATS
+  """
 
-  val startUnixTime = 1231469665
-  val endUnixTime = 1376839940
+  execute(executionPlan)
 
-  for (lower <- startUnixTime to endUnixTime by windowsize) {
-
-    val start = System.currentTimeMillis
-
-    //Retire all transactions that are not relevant anymore
-    RETIRE(lower - maxTimeBetweenConnectedTransactions)
-
-    // Loading the transactions of the next window Step
-    val loadingStart = System.currentTimeMillis
-    LOAD SOURCE args(0) FROM lower TO lower + windowsize
-    val loadingTime = (System.currentTimeMillis - loadingStart)
-
-    //Run the matching of incoming and outgoing transactions
-    val matchingStart = System.currentTimeMillis
-    execution.graph.recalculateScores
-    execution.graph.execute
-    val matchingTime = (System.currentTimeMillis - matchingStart)
-
-    MKCOMPONENTS
-
-    LABEL TRANSACTIONS "depth" WITH DEPTH_EXPLORATION
-
-    print(lower + "," + (lower + windowsize))
-    print("," + (System.currentTimeMillis() - start))
-    print("," + loadingTime)
-    print("," + matchingTime)
-    print("," + TRANSACTIONS.size)
-    println("," + COMPONENTS.size)
-  }
+  //  var execution = StreamingExecution()
+  //  execution = execution SOURCE args(0) START 1231469665 END 1376839940 WINDOWSIZE 86400
+  //  execution = execution TXINTERVAL 604800 FILTER Array("SIZE > 10", "DEPTH> 5")
+  //  execution execute
 }

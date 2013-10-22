@@ -3,7 +3,6 @@ package com.signalcollect.fraudppuccino.componentdetection
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.SpecificationWithJUnit
-import com.signalcollect.fraudppuccino.componentdetection.ComponentAlgorithmParser
 
 @RunWith(classOf[JUnitRunner])
 class WorkFlowParserSpec extends SpecificationWithJUnit {
