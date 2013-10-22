@@ -41,9 +41,11 @@ case class StreamingExecution(
     for (filter <- filters) {
       handlerRef ! WorkFlowStep(filter)
     }
-    handlerRef ! RegisterResultHandler(CommandLineResultHandler)
-    handlerRef ! RegisterResultHandler(new FraudppuccinoServer)
     
+    for(handler <- resultHandlers) {
+      handlerRef ! RegisterResultHandler(ComponentResultHandler(handler))
+    }
+        
     for (lowerWindowBound <- startTime to endTime by windowSize) {
       retire(lowerWindowBound-maxTxInterval, lowerWindowBound-maxTxInterval-1123200)
       load(sourceFile, lowerWindowBound, lowerWindowBound + windowSize)
