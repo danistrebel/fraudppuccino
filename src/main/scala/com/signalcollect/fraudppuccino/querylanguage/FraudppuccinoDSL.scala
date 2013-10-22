@@ -27,6 +27,7 @@ object FRAUDPPUCCINO {
 
       if (!statementElements.isEmpty) {
         statementElements(0) match {
+          case x if x.startsWith("//") => //comment
           case "SOURCE" => execution = execution.SOURCE(statementElements(1))
           case "START" => execution = execution.START(statementElements(1).toLong)
           case "END" => execution = execution.END(statementElements(1).toLong)
@@ -80,7 +81,6 @@ object FRAUDPPUCCINO {
     if(iter.hasNext) {
       val line = iter.next.trim
       if(line.size > 0) {
-        println("reading:" + line)
         line :: readUntilEmptyLine(iter)
       } else {
         Nil

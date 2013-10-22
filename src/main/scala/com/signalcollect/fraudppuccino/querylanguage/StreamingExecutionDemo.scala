@@ -12,6 +12,7 @@ object StreamingExecutionDemo extends App {
   STREAM WINDOW 1d
   TX INTERVAL 1w
   
+  // Filter algorithms must already be registered  
   FILTER
   SIZE > 10
   DEPTH > 5
@@ -25,9 +26,4 @@ object StreamingExecutionDemo extends App {
   """
 
   execute(executionPlan)
-
-  //  var execution = StreamingExecution()
-  //  execution = execution SOURCE args(0) START 1231469665 END 1376839940 WINDOWSIZE 86400
-  //  execution = execution TXINTERVAL 604800 FILTER Array("SIZE > 10", "DEPTH> 5")
-  //  execution execute
 }
