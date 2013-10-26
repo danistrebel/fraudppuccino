@@ -19,7 +19,8 @@ object StreamingExecutionDemo extends App {
  
   RESULTS
   WEBSERVER
-  CONSOLE
+  
+  // CONSOLE
   
   DEBUG
   WINDOWSTATS

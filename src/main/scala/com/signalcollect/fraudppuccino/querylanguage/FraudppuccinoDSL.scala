@@ -32,7 +32,7 @@ object FRAUDPPUCCINO {
           case "START" => execution = execution.START(statementElements(1).toLong)
           case "END" => execution = execution.END(statementElements(1).toLong)
           case "STREAM" => if (statementElements(1) == "WINDOW") execution = execution.WINDOWSIZE(parseSec(statementElements(2)))
-          case "TX" => if (statementElements(1) == "INTERVAL") execution = execution.WINDOWSIZE(parseSec(statementElements(2)))
+          case "TX" => if (statementElements(1) == "INTERVAL") execution = execution.TXINTERVAL(parseSec(statementElements(2)))
           case "FILTER" => execution = execution.FILTER(readUntilEmptyLine(lineIter))
           case "RESULTS" => execution = execution.RESULTHANDER(readUntilEmptyLine(lineIter))
           case "DEBUG" => execution = execution.DEBUG(readUntilEmptyLine(lineIter))
