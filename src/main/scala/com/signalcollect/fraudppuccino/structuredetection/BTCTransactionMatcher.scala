@@ -91,7 +91,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     tolerance: Double = 0.1f,
     firstCandidateIsMandatory: Boolean = false): Iterable[TransactionSignal] = {
     
-    val indexedCandidates = candidates.toIndexedSeq
+    val indexedCandidates = candidates.toIndexedSeq.take(10) //take reduces the complexity for the expander
     
     var expandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)] = {
       if (firstCandidateIsMandatory) {
@@ -102,7 +102,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     }
 
     while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 8) { //expanding is stopped if the sum is reached or all possible combinations are expanded
-      val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value) < tolerance) //checks if a match is already found
+      val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value).toDouble/target.value < tolerance) //checks if a match is already found
       if (result.isDefined) {
         return result.get._1
       }
