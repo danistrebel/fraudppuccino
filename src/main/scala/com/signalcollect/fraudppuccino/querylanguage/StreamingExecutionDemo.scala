@@ -6,7 +6,7 @@ object StreamingExecutionDemo extends App {
   val executionPlan = """
   SOURCE """ + args(0) + """
   
-  START 1231469665
+  START 1304218465
   END 1376839940
   
   STREAM WINDOW 1d

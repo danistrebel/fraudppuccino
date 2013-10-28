@@ -17,11 +17,20 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     }
   }
 
+  
+  /**
+   * Finds connected components where the new output is part of either a chain, or a split or acts as an aggregation.
+   * Depending on the MatchingMode of the Matcher all or only a subset of the structures are tested.
+   */ 
   def findMatchingTransactions(newOutPut: TransactionOutput,
     outputs: Iterable[TransactionOutput],
     inputs: Iterable[TransactionInput]): (Iterable[TransactionInput], Iterable[TransactionOutput]) = {
 
-    val tolerance = 0.1f
+    //Reduces the search space because the subset sum matching problem is NP complete
+    val consideredInputs = inputs.take(10)
+    val consideredOutputs = outputs.take(10)
+
+    val tolerance = 0.1f //percentage within which a target is allowed to vary from the sum of the components
 
     if (matchingMode == MATCH_CHAIN) {
       inputs.filter(input => (input.time < newOutPut.time) && Math.abs(input.value - newOutPut.value) < tolerance) match {
@@ -32,7 +41,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
     //Finds chains and aggregations
     if (matchingMode == MATCH_AGGREGATION || matchingMode == MATCH_ALL) {
-      findAggregations(inputs.filter(_.time < newOutPut.time), newOutPut) match {
+      findAggregations(consideredInputs.filter(_.time < newOutPut.time), newOutPut) match {
         case Nil =>
         case matches: Iterable[TransactionSignal] => return (matches, List(newOutPut))
       }
@@ -40,9 +49,10 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
     //Finds splits where an input is split among the new output and possibly other outputs
     if (matchingMode == MATCH_SPLIT || matchingMode == MATCH_ALL) {
-      val splitCandidates = inputs.filter(input => input.time < newOutPut.time && input.value > newOutPut.value).take(10)  //possible inputs that could be split to the new output
-      if (splitCandidates.size > 0) {
-        findSplits(List(newOutPut) ++ outputs.filter(_.time > splitCandidates.map(_.time).min), splitCandidates, firstCandidateIsMandatory = true) match {
+      val inputCandidates = consideredInputs.filter(input => input.time < newOutPut.time && input.value > newOutPut.value)//possible inputs that could be split to the new output
+      if (inputCandidates.size > 0) {
+        val outputCandidates = consideredOutputs.filter(_.time > inputCandidates.map(_.time).min)
+        findSplits(List(newOutPut) ++ outputCandidates, inputCandidates, firstCandidateIsMandatory = true) match {
           case (Nil, Nil) =>
           case matches: (Iterable[TransactionInput], Iterable[TransactionOutput]) => return matches
         }
@@ -88,10 +98,10 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     target: TransactionOutput,
     tolerance: Double = 0.1f): Iterable[TransactionInput] = {
 
-    val indexedCandidates = candidates.toIndexedSeq.take(10) //take reduces the complexity for the expander
+    val indexedCandidates = candidates.toIndexedSeq
 
     var expandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)] =
-        indexedCandidates.map(elem => (List(elem), elem.value, indexedCandidates.indexOf(elem) + 1))
+      indexedCandidates.map(elem => (List(elem), elem.value, indexedCandidates.indexOf(elem) + 1))
 
     while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 8) { //expanding is stopped if the sum is reached or all possible combinations are expanded
       val result = expandedCandidates.find(subset => Math.abs(subset._2 - target.value).toDouble / target.value < tolerance) //checks if a match is already found
@@ -109,8 +119,8 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     targets: Iterable[TransactionInput],
     tolerance: Double = 0.1f,
     firstCandidateIsMandatory: Boolean = false): (Iterable[TransactionInput], Iterable[TransactionOutput]) = {
-	    
-    val indexedCandidates = candidates.toIndexedSeq.take(10) //take reduces the complexity for the expander
+
+    val indexedCandidates = candidates.toIndexedSeq
 
     var expandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)] = {
       if (firstCandidateIsMandatory) {
@@ -121,7 +131,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     }
 
     while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 8) { //expanding is stopped if the sum is reached or all possible combinations are expanded
-      
+
       targets.foreach(target => {
         val result = expandedCandidates.find(subset =>
           subset._1.map(_.time).min > target.time && Math.abs(subset._2 - target.value).toDouble / target.value < tolerance) //checks if a match is already found
@@ -133,7 +143,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
       expandedCandidates = expandedCandidates.filter(partialResult => partialResult._3 < indexedCandidates.size && partialResult._2 < targets.map(_.value).max) //drop all with no more remaining options
       expandedCandidates = expandCandidates(expandedCandidates, indexedCandidates)
     }
-    
+
     (Nil, Nil)
   }
 }

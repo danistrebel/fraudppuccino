@@ -48,10 +48,14 @@ case class StreamingExecution(
         
     for (lowerWindowBound <- startTime to endTime by windowSize) {
       retire(lowerWindowBound-maxTxInterval, lowerWindowBound-maxTxInterval-1123200)
+      
       load(sourceFile, lowerWindowBound, lowerWindowBound + windowSize)
+      
+      val startTime = System.currentTimeMillis
       graph.recalculateScores
       graph.execute
-      println(lowerWindowBound)
+      val executionTime = System.currentTimeMillis-startTime
+      println(executionTime + ","+ lowerWindowBound)
     }
 
   }
