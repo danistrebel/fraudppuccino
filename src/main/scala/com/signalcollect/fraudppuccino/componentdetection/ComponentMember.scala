@@ -2,13 +2,18 @@ package com.signalcollect.fraudppuccino.componentdetection
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
+import com.signalcollect.fraudppuccino.patternanalysis.TransactionRelationshipExplorer
 
 /**
  * Member of a connected component.
  * Serves as a wrapper for yet another VertexAlgorithm and reports it's results back to the master of the connected component.
  */
-class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
+class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
+  def id = vertex.id
+  def results = vertex.results
+  def outgoingEdges = vertex.outgoingEdges
+  
   //Underlying algorithm implementation
   var embeddedAlgorithm: VertexAlgorithm = new ComponentMemberAnnoncer(vertex)
 
@@ -18,7 +23,7 @@ class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm
    */
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case ComponentMemberQuery(queryFunction) => graphEditor.sendSignal(queryFunction(vertex), sourceId.get, Some(vertex.id))
+      case ComponentMemberQuery(queryFunction) => graphEditor.sendSignal(queryFunction(this), sourceId.get, Some(vertex.id))
       case ComponentMemberAlgorithm(algorithmFactory) => embeddedAlgorithm = algorithmFactory(vertex)
       case ComponentMemberElimination => graphEditor.removeVertex(vertex.id)
       case _ => embeddedAlgorithm.deliverSignal(signal, sourceId, graphEditor)

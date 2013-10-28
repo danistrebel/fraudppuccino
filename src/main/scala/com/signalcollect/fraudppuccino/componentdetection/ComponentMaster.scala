@@ -36,7 +36,7 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
     signal match {
       case timeOut: Array[Long] => {
         if (shouldRequestResults) {
-          val requestState = ComponentMemberQuery(vertex => ComponentMemberResponse(Some(vertex.state)))
+          val requestState = ComponentMemberQuery(vertex => ComponentMemberResponse(Some(vertex.getState)))
           members.foreach(memberId => {
             graphEditor.sendSignal(requestState, memberId, Some(componentId))
           })

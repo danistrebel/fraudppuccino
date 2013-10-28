@@ -4,6 +4,7 @@ import scala.collection.mutable.Map
 import com.signalcollect.fraudppuccino.patternanalysis._
 import com.signalcollect.GraphEditor
 import scala.collection.mutable.ArrayBuffer
+import com.signalcollect.fraudppuccino.componentdetection.ComponentAlgorithms._
 
 /**
  * Utility to facilitate the parsing of filter executions on reported transactions
@@ -15,31 +16,11 @@ object ComponentAlgorithmParser {
    */
   val algorithms = Map[String, HandlerRequest]()
 
-  //Default algorithm implementations
-
-  /**
-   * Queries the master for the size of its component
-   */
-  val sizeQuery = ComponentMasterQuery(master => master.members.size)
-
-  val depthMemberAlgorithm = ComponentMemberAlgorithm(vertex => new PatternDepthAnalyzer(vertex))
-  val maxDepthAggregator: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
-    (repliesFromMembers, master, graphEditor) =>
-      {
-        val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        val maxDepth = replies.map(_.response.getOrElse(0).asInstanceOf[Int]).max
-        graphEditor.sendToActor(master.handler, ComponentReply(master.componentId, Some(maxDepth)))
-      }
-  }
-
-  /**
-   * Queries the component for the max depth i.e. the longest path from any source to a sink transaction
-   */
-  val depthAlgorithm = ComponentAlgorithmExecution(depthMemberAlgorithm, maxDepthAggregator)
-
   // Register predefined algorithms
-  algorithms += (("size", sizeQuery))
-  algorithms += (("depth", depthAlgorithm))
+  algorithms += (("size", SizeQuery))
+  algorithms += (("depth", DepthAlgorithm))
+  algorithms += (("sinks", SinkCounter))
+
   
   /**
    * Registers an algorithm so that it can be used in a filter step

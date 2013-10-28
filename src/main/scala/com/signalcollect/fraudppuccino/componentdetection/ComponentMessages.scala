@@ -25,6 +25,6 @@ case class ComponentMemberResponse(response: Option[Any]) extends ComponentMembe
 case class ComponentMemberInfo(id: Any, results: collection.Map[String, Any], successors: Iterable[Int]) extends ComponentMemberMessage
 
 abstract class MasterRequest //Master requests some action from its members
-case class ComponentMemberQuery(queryFunction: RepeatedAnalysisVertex[_] => ComponentMemberMessage) extends MasterRequest
+case class ComponentMemberQuery(queryFunction: ComponentMember => ComponentMemberMessage) extends MasterRequest
 case class ComponentMemberAlgorithm(algorithmFactory: RepeatedAnalysisVertex[_] => VertexAlgorithm) extends MasterRequest
 case object ComponentMemberElimination extends MasterRequest
