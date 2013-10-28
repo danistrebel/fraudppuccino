@@ -15,8 +15,11 @@ object StreamingExecutionDemo extends App {
   // Filter algorithms must already be registered  
   FILTER
   SIZE > 5
-  DEPTH > 3
   SINKS = 1
+  SINKVALUE > 10000000000
+  DEPTH > 3
+  COUNTRYHOPS > 2
+  
  
   RESULTS
   WEBSERVER

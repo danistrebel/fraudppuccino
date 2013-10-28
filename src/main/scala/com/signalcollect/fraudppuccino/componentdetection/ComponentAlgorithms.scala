@@ -3,6 +3,7 @@ package com.signalcollect.fraudppuccino.componentdetection
 import com.signalcollect.fraudppuccino.patternanalysis.PatternDepthAnalyzer
 import com.signalcollect.GraphEditor
 import scala.collection.mutable.ArrayBuffer
+import com.signalcollect.fraudppuccino.patternanalysis.CountryHopCounter
 
 object ComponentAlgorithms {
 
@@ -15,16 +16,18 @@ object ComponentAlgorithms {
    * Queries the component for the max depth i.e. the longest path from any source to a sink transaction
    */
   val depthMemberAlgorithm = ComponentMemberAlgorithm(vertex => new PatternDepthAnalyzer(vertex))
-  val maxDepthAggregator: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
+  
+  //just gets the max returned integer from all component members
+  val maxReplyAggregator: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
     (repliesFromMembers, master, graphEditor) =>
       {
         val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        val maxDepth = replies.map(_.response.getOrElse(0).asInstanceOf[Int]).max
-        graphEditor.sendToActor(master.handler, ComponentReply(master.componentId, Some(maxDepth)))
+        val maxReply = replies.map(_.response.getOrElse(0).asInstanceOf[Int]).max
+        graphEditor.sendToActor(master.handler, ComponentReply(master.componentId, Some(maxReply)))
       }
   }
 
-  val DepthAlgorithm = ComponentAlgorithmExecution(depthMemberAlgorithm, maxDepthAggregator)
+  val DepthAlgorithm = ComponentAlgorithmExecution(depthMemberAlgorithm, maxReplyAggregator)
 
   /*
    * Counts the number of sink accounts 
@@ -39,5 +42,28 @@ object ComponentAlgorithms {
       }
   }
   val SinkCounter = ComponentMemberQueryExecution(sinkMemberAlgorithm, sinkCountAggregator)
+  
+  /**
+   * Looks at the value at the sink transactions
+   */ 
+   val sinkValueQuery = ComponentMemberQuery(vertex => if (vertex.isPatternSink) ComponentMemberResponse(vertex.getResult("value")) else ComponentMemberResponse(Some(0l)))
+   
+   //sums up all the longs returned by the component members
+  val longSumAggregator: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
+    (repliesFromMembers, master, graphEditor) =>
+      {
+        val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
+        val summedReplies = replies.map(_.response.getOrElse(0l).asInstanceOf[Long]).sum
+        graphEditor.sendToActor(master.handler, ComponentReply(master.componentId, Some(summedReplies)))
+      }
+  }
+  val SinkValue = ComponentMemberQueryExecution(sinkValueQuery, longSumAggregator)
+
+  
+  /*
+   * Queries the component for the max country hop count i.e. the max number of cross country transactions from any source to a sink transaction
+   */
+  val xCountryMemberAlgorithm = ComponentMemberAlgorithm(vertex => new CountryHopCounter(vertex))
+  val XCountryHops = ComponentAlgorithmExecution(xCountryMemberAlgorithm, maxReplyAggregator)
 
 }

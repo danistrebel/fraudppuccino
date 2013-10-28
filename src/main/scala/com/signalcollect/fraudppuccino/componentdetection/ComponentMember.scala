@@ -11,6 +11,7 @@ import com.signalcollect.fraudppuccino.patternanalysis.TransactionRelationshipEx
 class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
   def id = vertex.id
+  def getResult(key: String) = vertex.getResult(key)
   def results = vertex.results
   def outgoingEdges = vertex.outgoingEdges
   

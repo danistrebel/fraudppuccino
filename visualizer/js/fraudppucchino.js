@@ -106,7 +106,9 @@ function showDetailsForNode(node) {
 				+ transactionDate.toLocaleTimeString() + '</td></tr>'
 				+ '<tr><td>Source</td><td>' + node.transaction.src
 				+ '</td></tr>' + '<tr><td>Target</td><td>'
-				+ node.transaction.target + '</td></tr>' + '</table>'
+				+ node.transaction.target + '</td></tr>' 
+				+ '<tr><td>Cross Coutry</td><td>' + node.transaction.xCountry +'</td></tr>'
+				+ '</table>'
 		$('#inspector-content').empty().append(details);
 	}
 }
