@@ -6,9 +6,9 @@ import org.specs2.runner.JUnitRunner
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.repeatedanalysis._
-import com.signalcollect.fraudppuccino.detection._
-import com.signalcollect.fraudppuccino.patternanalysis.ConnectedComponentsIdentifier
+import com.signalcollect.fraudppuccino.componentdetection.ConnectedComponentsIdentifier
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
+import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
 
 @RunWith(classOf[JUnitRunner])
 class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
@@ -72,9 +72,9 @@ class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
       graph.recalculateScores
       graph.execute
 
-      tx0.state.asInstanceOf[Int] === 100
-      tx1.state.asInstanceOf[Int] === 100
-      tx2.state.asInstanceOf[Int] === 102
+      tx0.state.asInstanceOf[(Int, Long)]._1 === 101
+      tx1.state.asInstanceOf[(Int, Long)]._1 === 101
+      tx2.state.asInstanceOf[(Int, Long)]._1 === 102
 
     }
   }

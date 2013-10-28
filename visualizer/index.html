@@ -19,6 +19,7 @@
 		    <div class="col-md-9">
 			    <div id="visualizer">
 			    <svg id="patternVisualizer">
+			    <g id="visualizerPlaceholder">
 			    <text x="20"  y="40"
           style="font-family: Arial;
                  font-size  : 34;
@@ -28,6 +29,9 @@
           >Welcome to fraudppuccino!</text>
 			    <image x="100" y="60" width="283" height="450"
      xlink:href="img/fraudppuccino-logo.png" />
+			    
+			    </g>
+			    <g id="graphVisualization"></g>
 			    </svg>
 			    </div>
 			</div>
@@ -35,8 +39,10 @@
 				<div class="panel panel-default">
 				  <!-- Default panel contents -->
 				<div id="reportsHeader" class="panel-heading">Reports</div>
-				<ul id="reportsList" class="list-group">
-				</ul>
+				<div id="reportsContent">
+					<ul id="reportsList" class="list-group">
+					</ul>
+				</div>
 			  </div>
 		    </div>
 		</div>
@@ -49,8 +55,26 @@
 			</ul>
 			<div id="tabsWrapper">
 			<div id="tabs-1">
-				<textarea id="query" rows="15" placeholder="Start here.."></textarea>
-<a class="btn btn-primary" href="#">Run</a>			
+				<textarea id="query" rows="15" placeholder="Start here..">SOURCE /folder/BTCdataset.csv
+  
+  START 1231469665
+  END 1376839940
+  
+  STREAM WINDOW 1d
+  TX INTERVAL 1w
+  
+  // Filter algorithms must already be registered  
+  FILTER
+  SIZE > 10
+  DEPTH > 5
+ 
+  RESULTS
+  WEBSERVER
+  CONSOLE
+  
+  DEBUG
+  WINDOWSTATS</textarea>
+<a id="runAlgorithm" class="btn btn-primary" href="#">Run</a>			
 			</div>
 			<div id="tabs-2">
 				<div id="inspector-content">

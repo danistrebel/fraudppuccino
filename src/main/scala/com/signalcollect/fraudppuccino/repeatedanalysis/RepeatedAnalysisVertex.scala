@@ -35,12 +35,18 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
    * Pluggable Algorithm definition
    */
   var algorithm: VertexAlgorithm = new DummyVertexAlgorithm
+  var nextAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = null
 
   def setAlgorithmImplementation(algorithmFactory: (RepeatedAnalysisVertex[Id]) => VertexAlgorithm) {
     algorithm = algorithmFactory.apply(this)
   }
 
   def removeAlgorithmImplementation = algorithm = new DummyVertexAlgorithm
+
+  def loadNextAlgorithm = if (nextAlgorithm != null) {
+    algorithm = nextAlgorithm(this)
+    nextAlgorithm = null
+  }
 
   /**
    * Holds results from previous computations and makes them available
@@ -111,9 +117,18 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
   //Stuff that is delegated to the actual algorithm implementation
   def state(): Any = algorithm.getState
   def setState(state: Any): Unit = algorithm.setState(state)
-  def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean = algorithm.deliverSignal(signal, sourceId, graphEditor)
+
+  def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean = {
+    val hasCollected = algorithm.deliverSignal(signal, sourceId, graphEditor)
+    loadNextAlgorithm
+    hasCollected
+  }
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any]): Unit = algorithm.executeSignalOperation(graphEditor, outgoingEdges)
-  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]): Unit = algorithm.executeCollectOperation(graphEditor)
+
+  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]): Unit = {
+    algorithm.executeCollectOperation(graphEditor)
+    loadNextAlgorithm
+  }
   def scoreSignal(): Double = algorithm.scoreSignal
   def scoreCollect(): Double = algorithm.scoreCollect
 

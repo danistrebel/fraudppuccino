@@ -1,11 +1,10 @@
-package com.signalcollect.fraudppuccino.evaluation.btc
+package com.signalcollect.fraudppuccino.patternanalysis
 
 import com.signalcollect.fraudppuccino.patternanalysis.TransactionRelationshipExplorer
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.structuredetection.TransactionOutput
-import com.signalcollect.fraudppuccino.structuredetection.TransactionInput
 
 class PeelingChainIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
   val value = vertex.getResult("value").getOrElse(0l).asInstanceOf[Long]
@@ -44,7 +43,7 @@ class PeelingChainIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAl
 
   var scoreCollect = 0.0
 
-  def noitfyTopologyChange {
+  def notifyTopologyChange {
   }
 
 }

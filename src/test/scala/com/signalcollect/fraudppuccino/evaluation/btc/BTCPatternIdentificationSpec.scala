@@ -4,12 +4,12 @@ import org.specs2.mutable._
 import com.signalcollect.GraphBuilder
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import org.junit.runner.RunWith
-import com.signalcollect.fraudppuccino.detection._
 import org.specs2.runner.JUnitRunner
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
+import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
 
 @RunWith(classOf[JUnitRunner])
 class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
@@ -66,7 +66,7 @@ class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
       }
 
       graph.recalculateScores
-      println(graph.execute)
+      graph.execute
 
       assert(tx0.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
       assert(tx1.outgoingEdges.exists(_._2 == UpstreamTransactionPatternEdge))

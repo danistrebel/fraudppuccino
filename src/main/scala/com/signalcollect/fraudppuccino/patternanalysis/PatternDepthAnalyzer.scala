@@ -41,6 +41,6 @@ class PatternDepthAnalyzer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgo
 
   var scoreCollect = 0.0
 
-  def noitfyTopologyChange {
+  def notifyTopologyChange {
   }
 }

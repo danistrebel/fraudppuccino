@@ -9,7 +9,7 @@ class DummyVertexAlgorithm() extends VertexAlgorithm(null) {
   }
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
-   false
+   true
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
@@ -22,6 +22,6 @@ class DummyVertexAlgorithm() extends VertexAlgorithm(null) {
 
   var scoreCollect = 0.0
 
-  def noitfyTopologyChange {
+  def notifyTopologyChange {
   }
 }

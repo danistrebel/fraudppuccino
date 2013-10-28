@@ -48,7 +48,7 @@ class PathMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(ver
 
   def scoreCollect: Double = unmatchedPatterns.size
 
-  def noitfyTopologyChange {}
+  def notifyTopologyChange {}
 
 }
 

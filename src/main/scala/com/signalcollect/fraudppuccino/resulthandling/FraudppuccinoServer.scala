@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.visualization
+package com.signalcollect.fraudppuccino.resulthandling
 
 import org.mashupbots.socko.routes._
 import org.mashupbots.socko.infrastructure.Logger
@@ -13,13 +13,23 @@ import java.io.File
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
+import sys.process._
 
-case class FraudppuchinoServer {
+/**
+ * Visualization component to visually represent findings within the graph.
+ *
+ * The Component is responsible for serving the client side libraries in a static file server
+ * and broadcast new reports to all interested clients through a websocket connection.
+ *
+ */
+case object FraudppuccinoServer extends ComponentResultHandler {
 
-  /**
-   * Static file handling
+  /*
+   * Web Server Configuration
+   * 
+   * Uses a Socko Server for lightweight file serving and handling websocket connections to the clients
    */
-
   val visualizationActorConfig = """
       my-pinned-dispatcher {
         type=PinnedDispatcher
@@ -84,32 +94,20 @@ case class FraudppuchinoServer {
     override def run { webServer.stop() }
   })
 
-  def updateResults(components: Map[Int, Iterable[RepeatedAnalysisVertex[_]]]) {
-    if (components != null) {
-      for ((componentId, members) <- components) {
-        val component = "{" +
-          "\"start\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).min + "000," +
-          "\"end\":" + members.map(_.getResult("time").get.asInstanceOf[Long]).max + "000," +
-          "\"flow\":" + members.map(_.getResult("value").get.asInstanceOf[Long]).max + "," +
-          "\"members\":[" + serializeMembers(members) + "]}"
-        sendResult(component)
-      }
-    }
-  }
-
-  def serializeMembers(members: Iterable[RepeatedAnalysisVertex[_]]) = {
-    members.map(member => {
-      "{\"id\":" + member.id + "," +
-        member.results.map(result => "\"" + result._1 + "\":" + result._2.toString).mkString(",") +
-        ",\"successor\":[" + member.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1).mkString(",") + "]}"
-    }).toList.mkString(",")
-  }
-
-  def sendResult(jsonData: String) {
-    webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
-  }
-
   webServer.start()
   System.out.println("Open your browser and navigate to http://localhost:8888")
+
+  try {
+	  "open http://localhost:8888/index.html" !
+  } catch {
+    case t: Throwable => // Fail silently
+  }
+
+  /**
+   * Broadcasts the result along all registered websockets
+   */
+  def processResult(jsonData: String) {
+    webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
+  }
 
 }

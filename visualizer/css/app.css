@@ -41,3 +41,8 @@ marker#transaction {
 #patternVisualizer {
 	height:550px;
 }
+
+#reportsContent {
+	height:550px;
+	overflow-y: auto;
+}

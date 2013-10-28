@@ -3,10 +3,15 @@ var width = 960, height = 500;
 var color = d3.scale.linear().domain([ 0, 5, 10, 20 ]).range(
 		[ "green", "yellow", "orange", "red" ]);
 
-var force = d3.layout.force().charge(-500).linkDistance(5).size(
+var transactionValue = d3.scale.log().domain([ 1, 1000 ]).range([ 0, 20 ]);
+
+var force = d3.layout.force().charge(-500).linkDistance(50).size(
 		[ width, height ]);
 
 var svg = d3.select("svg#patternVisualizer");
+svg.attr("pointer-events", "all").call(d3.behavior.zoom().on("zoom", transformation));
+
+var graphVisualization = svg.append('svg:g').attr("id", "graphVisualization");
 
 var reports = []
 
@@ -24,29 +29,37 @@ $('.navTab a').click(function(e) {
 	$(this).parent().addClass('active');
 })
 
+function transformation() {
+	  graphVisualization.attr("transform",
+		      "translate(" + d3.event.translate + ")"
+		      + " scale(" + d3.event.scale + ")");
+}
+
 function updateVisualization() {
-
-	$('div #patternVisualizer').empty();
-
+	
+	$("g#visualizerPlaceholder").remove();
+	$("g#graphVisualization").empty();
+	
 	force.nodes(graph.nodes).links(graph.links).start();
 
-	svg.append("svg:defs").append("svg:marker").attr("id", "transaction").attr(
+	graphVisualization.append("svg:defs").append("svg:marker").attr("id", "transaction").attr(
 			"viewBox", "0 -5 10 10").attr("refX", 13).attr("refY", 0).attr(
 			"markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
 			.append("svg:path").attr("d", "M0,-5L10,0L0,5");
 
-	var link = svg.append("svg:g").selectAll(".link").data(graph.links).enter()
+	var link = graphVisualization.append("svg:g").selectAll(".link").data(graph.links).enter()
 			.append("svg:path").attr("class", "link").attr("marker-end",
 					"url(#transaction)")
 
-	var node = svg.append("svg:g").selectAll(".node").data(graph.nodes).enter()
-			.append("circle").attr("class", "node").attr("r", 5).style("fill",
-					function(d) {
-						return color(d.group);
-					}).call(force.drag).on("click", function(node) {
+	var node = graphVisualization.append("svg:g").selectAll(".node").data(graph.nodes).enter()
+			.append("circle").attr("class", "node").attr("r", function(d) {
+				return Math.min(20, transactionValue(d.value));
+			}).style("fill", function(d) {
+				return color(d.group);
+			}).call(force.drag).on("click", function(node) {
 				showDetailsForNode(node);
 			});
-	
+
 	force.on("tick", function() {
 		link.attr("d", function(d) {
 			var dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
@@ -80,7 +93,9 @@ function showDetailsForNode(node) {
 				+ '<tr><td>BTC Transactions out</td><td>' + node.account["out"]
 				/ 100000000 + ' BTC</td></tr>' + '</table>'
 		$('#inspector-content').empty().append(details);
-	} else if (node.transaction) {
+	} 
+	
+	else if (node.transaction) {
 		var transactionDate = new Date(node.transaction.time * 1000);
 		var details = '<h1>Transaction #' + Math.abs(node.name) + '</h1>'
 				+ '<table class="table table-striped">'
@@ -147,6 +162,10 @@ $(document).on('click', '.remove-report', function() {
 	});
 });
 
+$(document).on('click', '#runAlgorithm', function() {
+	websocket.send($('textarea#query').val());
+});
+
 function loadTransactionGraph(id) {
 
 	graph.nodes = [];
@@ -158,7 +177,8 @@ function loadTransactionGraph(id) {
 		var tx = {
 			"name" : transaction.id,
 			"group" : transaction.depth,
-			"transaction" : transaction
+			"transaction" : transaction,
+			"value" : 1 + (transaction.value / 100000000),
 		};
 		transactionLookUp[transaction.id] = tx;
 		graph.nodes.push(tx);
@@ -196,7 +216,8 @@ function loadAccountGraph(id) {
 							"out" : 0,
 							"in-count" : 0,
 							"out-count" : 0
-						}
+						},
+						"value" : 10
 					};
 					accountsLookup[transaction.src] = source;
 					graph.nodes.push(source);
@@ -214,7 +235,8 @@ function loadAccountGraph(id) {
 							"out" : 0,
 							"in-count" : 0,
 							"out-count" : 0
-						}
+						},
+						"value" : 10
 					};
 					accountsLookup[transaction.target] = target;
 					graph.nodes.push(target);
