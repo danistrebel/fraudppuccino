@@ -11,7 +11,6 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.componentdetection._
 import com.signalcollect.fraudppuccino.structuredetection._
 
-
 case class StreamingExecution(
   sourceFile: String = "",
   startTime: Long = 0l, //Unix time stamp
@@ -41,21 +40,21 @@ case class StreamingExecution(
     for (filter <- filters) {
       handlerRef ! WorkFlowStep(filter)
     }
-    
-    for(handler <- resultHandlers) {
+
+    for (handler <- resultHandlers) {
       handlerRef ! RegisterResultHandler(ComponentResultHandler(handler))
     }
-        
+
     for (lowerWindowBound <- startTime to endTime by windowSize) {
-      retire(lowerWindowBound-maxTxInterval, lowerWindowBound-maxTxInterval-1123200)
-      
+      retire(lowerWindowBound - maxTxInterval, lowerWindowBound - maxTxInterval - 1123200)
+
       load(sourceFile, lowerWindowBound, lowerWindowBound + windowSize)
-      
+
       val startTime = System.currentTimeMillis
       graph.recalculateScores
       graph.execute
-      val executionTime = System.currentTimeMillis-startTime
-      println(executionTime + ","+ lowerWindowBound)
+      val executionTime = System.currentTimeMillis - startTime
+      println(executionTime + "," + lowerWindowBound)
     }
 
   }
@@ -91,13 +90,18 @@ case class StreamingExecution(
       }
     }
   }
-  
+
+  /**
+   * Creates the required graph elements for the transaction
+   * i.e. a node for the transaction and nodes for the source and target account of the transaction.
+   */ 
   def loadTransaction(transactionId: Int, value: Long, time: Long, srcId: Int, targetId: Int) {
     val transaction = new RepeatedAnalysisVertex(transactionId)
     transaction.storeAttribute("value", value)
     transaction.storeAttribute("time", time)
     transaction.storeAttribute("src", srcId)
     transaction.storeAttribute("target", targetId)
+    transaction.storeAttribute("xCountry", srcId % 10 == targetId % 10) //true of the transaction spans 2 countries.
     transaction.setAlgorithmImplementation(v => TransactionAnnouncer(v))
 
     val sender = new RepeatedAnalysisVertex(srcId)
@@ -109,10 +113,17 @@ case class StreamingExecution(
     graph.addVertex(sender)
     graph.addVertex(receiver)
   }
-  
+
+  /**
+   * Sends a timeout to all vertices in the graph
+   * 
+   * @param txTimeout transactions with a lower time stamp that this value are excluded from further matching with other transactions
+   * @param componentTimeout components where the highest time stamp is lower than this value report themselves for further processing.
+   */ 
   def retire(txTimeout: Long, componentTimeout: Long) {
+    val timeout = Array[Long](txTimeout, componentTimeout)
     graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
-      vertex.deliverSignal(Array[Long](txTimeout, componentTimeout), None, graphEditor))
+      vertex.deliverSignal(timeout, None, graphEditor))
   }
 }
 

@@ -65,16 +65,19 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
   }
 
   def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {
-    unmatchedInputs.put(input.transactionID, input)
+    if(unmatchedInputs.size<10) {
+    	unmatchedInputs.put(input.transactionID, input)      
+    }
   }
 
   /**
    * Tries to find matching input and output transactions and then bi-connects them using pattern edges
    */
   def processOutputTransaction(output: TransactionOutput, graphEditor: GraphEditor[Any, Any]) {
+    
     val matchedCombination = findMatchingTransactions(output, unmatchedOutputs.values, unmatchedInputs.values) //Depends on the use case
     matchedCombination match {
-      case (Nil, Nil) => unmatchedOutputs.put(output.transactionID, output) //If no match -> add it to the unmatched outputs
+      case (Nil, Nil) => if(unmatchedOutputs.size < 10) unmatchedOutputs.put(output.transactionID, output) //If no match -> add it to the unmatched outputs
       case (ins, outs) => {
         matchesFound += ((ins, outs))
         unmatchedInputs --= ins.map(_.transactionID)

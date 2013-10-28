@@ -17,18 +17,13 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     }
   }
 
-  
   /**
    * Finds connected components where the new output is part of either a chain, or a split or acts as an aggregation.
    * Depending on the MatchingMode of the Matcher all or only a subset of the structures are tested.
-   */ 
+   */
   def findMatchingTransactions(newOutPut: TransactionOutput,
     outputs: Iterable[TransactionOutput],
     inputs: Iterable[TransactionInput]): (Iterable[TransactionInput], Iterable[TransactionOutput]) = {
-
-    //Reduces the search space because the subset sum matching problem is NP complete
-    val consideredInputs = inputs.take(10)
-    val consideredOutputs = outputs.take(10)
 
     val tolerance = 0.1f //percentage within which a target is allowed to vary from the sum of the components
 
@@ -41,7 +36,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
     //Finds chains and aggregations
     if (matchingMode == MATCH_AGGREGATION || matchingMode == MATCH_ALL) {
-      findAggregations(consideredInputs.filter(_.time < newOutPut.time), newOutPut) match {
+      findAggregations(inputs.filter(_.time < newOutPut.time), newOutPut) match {
         case Nil =>
         case matches: Iterable[TransactionSignal] => return (matches, List(newOutPut))
       }
@@ -49,12 +44,15 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
     //Finds splits where an input is split among the new output and possibly other outputs
     if (matchingMode == MATCH_SPLIT || matchingMode == MATCH_ALL) {
-      val inputCandidates = consideredInputs.filter(input => input.time < newOutPut.time && input.value > newOutPut.value)//possible inputs that could be split to the new output
+      val inputCandidates = inputs.filter(input => input.time < newOutPut.time && input.value > newOutPut.value) //possible inputs that could be split to the new output
       if (inputCandidates.size > 0) {
-        val outputCandidates = consideredOutputs.filter(_.time > inputCandidates.map(_.time).min)
-        findSplits(List(newOutPut) ++ outputCandidates, inputCandidates, firstCandidateIsMandatory = true) match {
-          case (Nil, Nil) =>
-          case matches: (Iterable[TransactionInput], Iterable[TransactionOutput]) => return matches
+        val outputCandidates = outputs.filter(_.time > inputCandidates.map(_.time).min)
+        if (outputCandidates.size > 0) { //otherwise it is a chain and would have been detected above
+          findSplits(List(newOutPut) ++ outputCandidates, inputCandidates) match {
+            case (Nil, Nil) =>
+            case matches: (Iterable[TransactionInput], Iterable[TransactionOutput]) => return matches
+          }
+
         }
       }
 
@@ -117,18 +115,12 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   def findSplits(
     candidates: Iterable[TransactionOutput],
     targets: Iterable[TransactionInput],
-    tolerance: Double = 0.1f,
-    firstCandidateIsMandatory: Boolean = false): (Iterable[TransactionInput], Iterable[TransactionOutput]) = {
+    tolerance: Double = 0.1f): (Iterable[TransactionInput], Iterable[TransactionOutput]) = {
 
     val indexedCandidates = candidates.toIndexedSeq
 
-    var expandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)] = {
-      if (firstCandidateIsMandatory) {
-        Array((List(indexedCandidates(0)), indexedCandidates(0).value, 1))
-      } else {
-        indexedCandidates.map(elem => (List(elem), elem.value, indexedCandidates.indexOf(elem) + 1))
-      }
-    }
+    var expandedCandidates: IndexedSeq[(List[TransactionSignal], Long, Int)] =
+      Array((List(indexedCandidates(0)), indexedCandidates(0).value, 1))
 
     while (!expandedCandidates.isEmpty && expandedCandidates.head._1.size < 8) { //expanding is stopped if the sum is reached or all possible combinations are expanded
 

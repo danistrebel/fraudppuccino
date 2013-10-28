@@ -17,24 +17,16 @@ import com.signalcollect.fraudppuccino.structuredetection._
 @RunWith(classOf[JUnitRunner])
 class ComponentSpecs extends SpecificationWithJUnit {
 
-  sequential
   val graph = GraphBuilder.build
 
   "the component handler" should {
-    "register itself in the actor system " in {
+    "register connected components with the handler " in {
       //Register a component handler
       val system = ActorSystemRegistry.retrieve("SignalCollect").get
       val componentHandler = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
       system.actorFor("akka://SignalCollect/user/componentHandler") === componentHandler
-    }
-  }
-
-  "component members" should {
-
-    "should remain in the graph iff they pass all steps the workflow " in {
 
       //Specify the work flow
-      val system = ActorSystemRegistry.retrieve("SignalCollect").get
       val handlerRef = system.actorFor("akka://SignalCollect/user/componentHandler")
       handlerRef ! WorkFlowStep("SIZE > 6")
       handlerRef ! WorkFlowStep("DEPTH > 5")
@@ -63,7 +55,6 @@ class ComponentSpecs extends SpecificationWithJUnit {
         graph.addVertex(vertex)
       })
 
-      Thread.sleep(500l)
 
       graph.recalculateScores
       graph.execute
@@ -75,7 +66,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
       graph.recalculateScores
       graph.execute
 
-      Thread.sleep(500l)
+      Thread.sleep(500l) //make sure the asynchronous messages are received.
 
       //Check the sizes of the reported components
       DummyResultsHandler.reportedComponents(1) === 7
