@@ -46,3 +46,7 @@ marker#transaction {
 	height:550px;
 	overflow-y: auto;
 }
+
+a#runAlgorithm {
+	margin-top:20px;
+}

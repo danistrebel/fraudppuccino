@@ -19,20 +19,21 @@ case class StreamingExecution(
   maxTxInterval: Long = 0l, // in s
   filters: Iterable[String] = List(),
   resultHandlers: Iterable[String] = List(),
-  debug: Iterable[String] = List()) {
-
-  def SOURCE(src: String) = this.copy(sourceFile = src)
-  def START(start: Long) = this.copy(startTime = start)
-  def END(end: Long) = this.copy(endTime = end)
-  def WINDOWSIZE(size: Long) = this.copy(windowSize = size)
-  def TXINTERVAL(length: Long) = this.copy(maxTxInterval = length)
-  def FILTER(conditions: Iterable[String]) = this.copy(filters = conditions)
-  def RESULTHANDER(handlers: Iterable[String]) = this.copy(resultHandlers = handlers)
-  def DEBUG(debuggers: Iterable[String]) = this.copy(debug = debuggers)
+  debug: Iterable[String] = List(),
+  transactionAttributes: Map[String, (Int, String => Any)] = Map[String, (Int, String => Any)]()) {
 
   val graph = GraphBuilder.withStorageFactory(JavaMapStorage).build
   var iter: Iterator[String] = null //Specify the work flow
 
+  val mandatoryTransactionAttributes = Array[String]("id", "src", "target", "time")
+  val indexOfId = transactionAttributes("id")._1
+  val indexOfTime = transactionAttributes("time")._1
+  val indexOfSrc = transactionAttributes("src")._1
+  val indexOfTarget =  transactionAttributes("target")._1
+  
+  val optionalAttributes = transactionAttributes.filter(attribute => !mandatoryTransactionAttributes.contains(attribute._1))
+  
+    
   def execute = {
 
     val system = ActorSystemRegistry.retrieve("SignalCollect").get
@@ -75,18 +76,19 @@ case class StreamingExecution(
     if (iter == null) {
       iter = Source.fromFile(filePath).getLines
     }
+    
 
     while (iter.hasNext) {
 
       val splitted = iter.next.split(",")
 
-      if (splitted(5).toLong >= endTime) {
-        print(splitted(0) + ",")
+      if (splitted(indexOfTime).toLong >= endTime) {
+        print(splitted(indexOfId) + ",")
         return
       }
 
-      if (splitted(5).toLong >= startTime && splitted(2).toInt != splitted(3).toInt) {
-        loadTransaction(splitted(0).toInt * -1, splitted(4).toLong, splitted(5).toLong, splitted(2).toInt, splitted(3).toInt)
+      if (splitted(indexOfTime).toLong >= startTime && splitted(indexOfSrc).toInt != splitted(indexOfTarget).toInt) {
+        loadTransaction(splitted)
       }
     }
   }
@@ -95,12 +97,19 @@ case class StreamingExecution(
    * Creates the required graph elements for the transaction
    * i.e. a node for the transaction and nodes for the source and target account of the transaction.
    */ 
-  def loadTransaction(transactionId: Int, value: Long, time: Long, srcId: Int, targetId: Int) {
-    val transaction = new RepeatedAnalysisVertex(transactionId)
-    transaction.storeAttribute("value", value)
-    transaction.storeAttribute("time", time)
+  def loadTransaction(transactionAttributes: IndexedSeq[String]) {
+    val transaction = new RepeatedAnalysisVertex(transactionAttributes(indexOfId).toInt*(-1))
+    val srcId = transactionAttributes(indexOfSrc).toInt
+    val targetId = transactionAttributes(indexOfTarget).toInt
+    transaction.storeAttribute("time", transactionAttributes(indexOfTime).toLong)
     transaction.storeAttribute("src", srcId)
     transaction.storeAttribute("target", targetId)
+    
+    for(attribute <- optionalAttributes) {
+      val attributeValue = attribute._2._2(transactionAttributes(attribute._2._1))
+      transaction.storeAttribute(attribute._1, attributeValue)
+    }
+        
     transaction.storeAttribute("xCountry", srcId % 10 == targetId % 10) //true of the transaction spans 2 countries.
     transaction.setAlgorithmImplementation(v => TransactionAnnouncer(v))
 

@@ -15,42 +15,55 @@ import com.signalcollect.fraudppuccino.querylanguage.StreamingExecution
 class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
 
   "A Streamed Structure Detection" should {
+    
+    val txAttributes = Map[String, (Int, String => Any)]()
+    txAttributes += (("id", (0, v => v.toInt)))
+    txAttributes += (("src", (2, v => v.toInt)))
+    txAttributes += (("target", (3, v => v.toInt)))
+    txAttributes += (("time", (5, v => v.toLong)))
+    txAttributes += (("value", (4, v => v.toLong)))
+
+
+
+
 
     sequential
 
-    val execution = new StreamingExecution
+    val execution = new StreamingExecution(transactionAttributes = txAttributes.toMap)
 
     "add Transactions to the transaction matcher " in {
-      
-      execution.loadTransaction(0, 100l, 0l, 100, 101)
-      execution.loadTransaction(2, 300l, 0l, 100, 102)
-      execution.loadTransaction(3, 200l, 0l, 104, 105)
+
+      execution.loadTransaction(Array("0", "0", "100", "101", "100", "0"))
+      execution.loadTransaction(Array("2", "0", "100", "102", "300", "0"))
+      execution.loadTransaction(Array("3", "0", "104", "105", "200", "0"))
+
       execution.graph.recalculateScores
       execution.graph.execute
-      
-      execution.loadTransaction(1, 100l, 1l, 101, 102)
+
+      execution.loadTransaction(Array("1", "0", "101", "102", "100", "1"))
       execution.graph.recalculateScores
       execution.graph.execute
 
       execution.graph.forVertexWithId(vertexId = 0, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) }) === 1
-      execution.graph.forVertexWithId(vertexId = 1, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) }) === 1
+      execution.graph.forVertexWithId(vertexId = -1, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) }) === 1
     }
 
     "add transaction to the chain if within the time window" in {
       execution.retire(0l, 0L)
-      execution.loadTransaction(4, 300l, 5l, 102, 103)
+      execution.loadTransaction(Array("4", "0", "102", "103", "300", "5"))
+
       execution.graph.recalculateScores
       execution.graph.execute
-      execution.graph.forVertexWithId(vertexId = 2, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) }) === 1
-      execution.graph.forVertexWithId(vertexId = 4, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) }) === 1
+      execution.graph.forVertexWithId(vertexId = -2, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) }) === 1
+      execution.graph.forVertexWithId(vertexId = -4, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) }) === 1
     }
 
     "NOT add transaction to the chain if they are outside of the time window" in {
       execution.retire(1l, 0l)
-      execution.loadTransaction(5, 200l, 5l, 105, 106)
+      execution.loadTransaction(Array("5", "0", "105", "106", "200", "6"))
       execution.graph.recalculateScores
       execution.graph.execute
-      execution.graph.forVertexWithId(vertexId = 5, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) }) === 0
+      execution.graph.forVertexWithId(vertexId = -5, f = { v: RepeatedAnalysisVertex[_] => v.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge) }) === 0
     }
   }
 }
