@@ -4,30 +4,20 @@ import FRAUDPPUCCINO._
 
 object StreamingExecutionDemo extends App {
   val executionPlan = """
-  SOURCE """ + args(0) + """
+    
+  source: """ + args(0) + """
+  start: 1231469665
+  end: 1376839940
   
-  START 1231469665
-  END 1376839940
+  window: 1d
+  transactionInterval: 1w
   
-  STREAM WINDOW 1d
-  TX INTERVAL 1w
+  filters: [SIZE > 5, SINKS = 1, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS > 2]
   
-  // Filter algorithms must already be registered  
-  FILTER
-  SIZE > 5
-  SINKS = 1
-  SINKVALUE > 10000000000
-  DEPTH > 3
-  COUNTRYHOPS > 2
+  handlers: [WEBSERVER, CONSOLE]
   
- 
-  RESULTS
-  WEBSERVER
+  debug: []
   
-  // CONSOLE
-  
-  DEBUG
-  WINDOWSTATS
   """
 
   execute(executionPlan)

@@ -5,6 +5,7 @@
     <title>Fraudppucchino</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/codemirror.css">
   </head>
   
   <body>
@@ -55,25 +56,20 @@
 			</ul>
 			<div id="tabsWrapper">
 			<div id="tabs-1">
-				<textarea id="query" rows="15" placeholder="Start here..">SOURCE /folder/BTCdataset.csv
-  
-  START 1231469665
-  END 1376839940
-  
-  STREAM WINDOW 1d
-  TX INTERVAL 1w
-  
-  // Filter algorithms must already be registered  
-  FILTER
-  SIZE > 10
-  DEPTH > 5
- 
-  RESULTS
-  WEBSERVER
-  CONSOLE
-  
-  DEBUG
-  WINDOWSTATS</textarea>
+				<textarea id="query" rows="15" placeholder="Start here..">
+source: /path/to/transactions.csv
+start: 1231469665
+end: 1376839940
+
+window: 1d
+transactionInterval: 1w
+
+filters: [SIZE > 5, SINKS = 1, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS > 2]
+
+handlers: [WEBSERVER, CONSOLE]
+
+debug: []
+</textarea>
 <a id="runAlgorithm" class="btn btn-primary" href="#">Run</a>			
 			</div>
 			<div id="tabs-2">
@@ -97,5 +93,7 @@
   <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>  
   <!-- D3 Drawing -->
   <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="js/codemirror.js"></script>
+  <script src="mode/yaml/yaml.js"></script>
   <script src="js/fraudppucchino.js"></script>
 </html>

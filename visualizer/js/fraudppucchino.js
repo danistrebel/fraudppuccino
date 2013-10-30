@@ -20,6 +20,10 @@ var graph = {
 	"links" : []
 }
 
+var editorDSL = CodeMirror.fromTextArea($("textarea#query")[0], {
+    mode: "text/x-yaml"
+  });
+
 $(function() {
 	$("#tabs").tabs(); // Initialize Tabs
 });
@@ -165,7 +169,7 @@ $(document).on('click', '.remove-report', function() {
 });
 
 $(document).on('click', '#runAlgorithm', function() {
-	websocket.send($('textarea#query').val());
+	websocket.send(editorDSL.getValue());
 });
 
 function loadTransactionGraph(id) {
