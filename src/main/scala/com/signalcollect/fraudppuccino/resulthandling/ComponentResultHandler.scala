@@ -9,6 +9,7 @@ object ComponentResultHandler {
     s match {
       case "CONSOLE" => CommandLineResultHandler
       case "WEBSERVER" => FraudppuccinoServer
+      case "MONGODB"=> MongoDBResultHandler
     }
   }
 }

@@ -27,7 +27,8 @@ libraryDependencies ++= Seq(
  "org.specs2" % "classycle" % "1.4.1" % "test",
  "org.mockito" % "mockito-all" % "1.9.0"  % "test",
  "org.mashupbots.socko" %% "socko-webserver" % "0.3.0",
- "org.yaml" % "snakeyaml" % "1.13"
+ "org.yaml" % "snakeyaml" % "1.13",
+ "org.mongodb" %% "casbah" % "2.5.0"
 )
 
 jarName in assembly := "fraudppucchino.jar"

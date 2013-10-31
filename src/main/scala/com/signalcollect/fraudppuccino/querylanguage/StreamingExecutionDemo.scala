@@ -21,7 +21,7 @@ transactionInterval: 1w
 
 filters: [SIZE > 5, SINKS = 1, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS > 2]
 
-handlers: [WEBSERVER, CONSOLE]
+handlers: [WEBSERVER, CONSOLE, MONGODB]
 
 debug: []
   
