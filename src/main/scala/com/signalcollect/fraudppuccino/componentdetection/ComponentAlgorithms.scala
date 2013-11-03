@@ -18,12 +18,11 @@ object ComponentAlgorithms {
   val depthMemberAlgorithm = ComponentMemberAlgorithm(vertex => new PatternDepthAnalyzer(vertex))
   
   //just gets the max returned integer from all component members
-  val maxReplyAggregator: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
-    (repliesFromMembers, master, graphEditor) =>
+  val maxReplyAggregator: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
+    (repliesFromMembers, master) =>
       {
         val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        val maxReply = replies.map(_.response.getOrElse(0).asInstanceOf[Int]).max
-        graphEditor.sendToActor(master.handler, ComponentReply(master.componentId, Some(maxReply)))
+        replies.map(_.response.getOrElse(0).asInstanceOf[Int]).max
       }
   }
 
@@ -33,12 +32,11 @@ object ComponentAlgorithms {
    * Counts the number of sink accounts 
    */
   val sinkMemberAlgorithm = ComponentMemberQuery(vertex => if (vertex.isPatternSink) ComponentMemberResponse(Some(1)) else ComponentMemberResponse(Some(0)))
-  val sinkCountAggregator: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
-    (repliesFromMembers, master, graphEditor) =>
+  val sinkCountAggregator: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
+    (repliesFromMembers, master) =>
       {
         val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        val maxDepth = replies.map(_.response.getOrElse(0).asInstanceOf[Int]).sum
-        graphEditor.sendToActor(master.handler, ComponentReply(master.componentId, Some(maxDepth)))
+        replies.map(_.response.getOrElse(0).asInstanceOf[Int]).sum
       }
   }
   val SinkCounter = ComponentMemberQueryExecution(sinkMemberAlgorithm, sinkCountAggregator)
@@ -49,12 +47,11 @@ object ComponentAlgorithms {
    val sinkValueQuery = ComponentMemberQuery(vertex => if (vertex.isPatternSink) ComponentMemberResponse(vertex.getResult("value")) else ComponentMemberResponse(Some(0l)))
    
    //sums up all the longs returned by the component members
-  val longSumAggregator: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
-    (repliesFromMembers, master, graphEditor) =>
+  val longSumAggregator: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
+    (repliesFromMembers, master) =>
       {
         val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        val summedReplies = replies.map(_.response.getOrElse(0l).asInstanceOf[Long]).sum
-        graphEditor.sendToActor(master.handler, ComponentReply(master.componentId, Some(summedReplies)))
+        replies.map(_.response.getOrElse(0l).asInstanceOf[Long]).sum
       }
   }
   val SinkValue = ComponentMemberQueryExecution(sinkValueQuery, longSumAggregator)

@@ -28,11 +28,10 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
   val handler = system.actorFor("akka://SignalCollect/user/componentHandler")
 
   val repliesFromMembers = ArrayBuffer[ComponentMemberMessage]()
-  var allReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = null
+  var allReceived: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = null
   var shouldRequestResults = false //has this master sent algorithms to its members and not yet received their results
 
   override def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
-    
     signal match {
       case timeOut: Array[Long] => {
         if (shouldRequestResults) {
@@ -81,7 +80,8 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
       case memberMessage: ComponentMemberMessage => {
         repliesFromMembers += memberMessage
         if (repliesFromMembers.size == members.size) {
-          allReceived(repliesFromMembers, this, graphEditor)
+          val result = allReceived(repliesFromMembers, this)
+          graphEditor.sendToActor(handler, ComponentReply(componentId, Some(result)))
         }
         true
       }
@@ -91,7 +91,7 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
   }
 
   def executeAndExpectMemberReplies(request: MasterRequest,
-    allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit,
+    allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster) => Any,
     graphEditor: GraphEditor[Any, Any]) {
     repliesFromMembers.clear
     allReceived = allRepliesReceived

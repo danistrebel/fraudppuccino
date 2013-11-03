@@ -90,12 +90,11 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
 
   def requestSerializedComponent(componentId: Any) {
     val memberInfoExtraction: ComponentMemberQuery = ComponentMemberQuery(vertex => ComponentMemberInfo(vertex.id, vertex.results, vertex.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1.asInstanceOf[Int])))
-    val membersSerializer: (Iterable[ComponentMemberMessage], ComponentMaster, GraphEditor[_, _]) => Unit = {
-      (repliesFromMembers, master, graphEditor) =>
+    val membersSerializer: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
+      (repliesFromMembers, master) =>
         {
           val infos = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberInfo]]
-          val serializedComponent = master.serializeComponent(infos)
-          graphEditor.sendToActor(master.handler, ComponentReply(componentId, Some(serializedComponent)))
+          master.serializeComponent(infos)
         }
     }
     graphEditor.sendSignal(ComponentMemberQueryExecution(memberInfoExtraction, membersSerializer), componentId, None)
