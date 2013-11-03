@@ -17,7 +17,7 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
 
   def initialLabel: (Int, Long) = (vertex.id.asInstanceOf[Int], vertex.getResult("time").get.asInstanceOf[Long])
 
-  def shouldSwitchToLabel(newLabel: (Int, Long)): Boolean = this.label._2 < newLabel._2 //switch to the id of the newer time stamp
+  def shouldSwitchToLabel(newLabel: (Int, Long)): Boolean = this.label._2 < newLabel._2  || (this.label._2 == newLabel._2 && this.label._1 < newLabel._1) //switch to the id of the newer time stamp
 
   def shouldSignalForEdgeType(edgeType: EdgeMarker): Boolean = edgeType.isInstanceOf[TransactionPatternEdge]
 
