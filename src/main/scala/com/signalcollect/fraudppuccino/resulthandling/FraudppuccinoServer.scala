@@ -36,7 +36,7 @@ case object FraudppuccinoServer extends ComponentResultHandler {
         executor=thread-pool-executor
       }
       my-static-content-handler {
-		    root-file-paths="/Users/strebel/Documents/workspace/PatternDetective/visualizer"
+		    root-file-paths="/Users/strebel/Documents/workspace/PatternDetective/src/main/resources/visualizer"
 		  }
       akka {
         event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
@@ -69,7 +69,11 @@ case object FraudppuccinoServer extends ComponentResultHandler {
   val routes = Routes({
     case HttpRequest(request) => request match {
       case GET(Path(file)) => {
-        staticContentHandlerRouter ! new StaticFileRequest(request, new File("/Users/strebel/Documents/workspace/PatternDetective/visualizer" + file))
+        if (file.size<=1) {
+          staticContentHandlerRouter ! new StaticFileRequest(request, new File("/Users/strebel/Documents/workspace/PatternDetective/src/main/resources/visualizer/index.html"))
+        } else {
+          staticContentHandlerRouter ! new StaticFileRequest(request, new File("/Users/strebel/Documents/workspace/PatternDetective/src/main/resources/visualizer" + file))
+        }
       }
     }
     case WebSocketHandshake(wsHandshake) => wsHandshake match {
@@ -98,7 +102,7 @@ case object FraudppuccinoServer extends ComponentResultHandler {
   System.out.println("Open your browser and navigate to http://localhost:8888")
 
   try {
-	  "open http://localhost:8888/index.html" !
+    "open http://localhost:8888/index.html" !
   } catch {
     case t: Throwable => // Fail silently
   }
