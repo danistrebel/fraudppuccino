@@ -56,10 +56,10 @@ class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
         transaction._1.storeAttribute("target", transaction._5)
         transaction._1.setAlgorithmImplementation(transactionAnnouncing)
         graph.addVertex(transaction._1)
+        graph.recalculateScores
+        graph.execute
       }
-
-      graph.recalculateScores
-      graph.execute
+      
 
       for (tx <- transactions) {
         tx.setAlgorithmImplementation(vertex => new ConnectedComponentsIdentifier(vertex))
@@ -71,6 +71,7 @@ class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
 
       graph.recalculateScores
       graph.execute
+      
 
       tx0.state.asInstanceOf[(Int, Long)]._1 === 101
       tx1.state.asInstanceOf[(Int, Long)]._1 === 101

@@ -5,11 +5,12 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import scala.collection.mutable.ArrayBuffer
 import java.util.HashMap
 import scala.collection.JavaConversions._
+import java.util.ArrayList
 
 abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
-  var matchableInputs = new ArrayBuffer[TransactionInput]() // Transactions that are received by this entity
-  var matchableOutputs = new ArrayBuffer[TransactionOutput]() // Transactions that are sent by this entity
+  var matchableInputs = new ArrayBuffer[ArrayBuffer[PartialInput]] // Transactions that are received by this entity
+  var matchableOutputs = new ArrayBuffer[ArrayBuffer[PartialOutput]] // Transactions that are sent by this entity
   val matchesFound = ArrayBuffer[(Iterable[TransactionInput], Iterable[TransactionOutput])]()
   val uncollectedOutputs = ArrayBuffer[TransactionOutput]()
 
@@ -27,8 +28,9 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
         false
       }
       case timeoutPill: Array[Long] => {
-        matchableInputs = matchableInputs.dropWhile(_.time < timeoutPill(0))
-        matchableOutputs = matchableOutputs.dropWhile(_.time < timeoutPill(0))
+        matchableInputs = matchableInputs.dropWhile(_.head.earliestTime < timeoutPill(0))
+        matchableOutputs = matchableOutputs.dropWhile(_.head.earliestTime < timeoutPill(0))
+
         if (matchableInputs.isEmpty && matchableOutputs.isEmpty) {
           graphEditor.removeVertex(vertex.id)
         }
@@ -56,6 +58,7 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
     for (output <- uncollectedOutputs) {
       processOutputTransaction(output, graphEditor);
     }
+    uncollectedOutputs.clear
     scoreCollect = 0.0
   }
 
@@ -68,7 +71,8 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
 
   def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {
     if (matchableInputs.size < 10) {
-      matchableInputs += input
+      matchableInputs.foreach(inputs => inputs ++= inputs.map(_.extend(input)))
+      matchableInputs += ArrayBuffer(PartialInput(Array(input), input.value))
     }
   }
 
@@ -77,16 +81,27 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
    */
   def processOutputTransaction(output: TransactionOutput, graphEditor: GraphEditor[Any, Any]) {
 
-    val matchedCombination = findMatchingTransactions(output, matchableOutputs, matchableInputs) //Depends on the use case
-    matchedCombination match {
-      case (ins, outs) => {
-        matchesFound += ((ins, outs))
-        scoreSignal = 1.0
-      }
-      case (Nil, Nil) =>
-    }
     if (matchableOutputs.size < 10) {
-      matchableOutputs += output //If no match -> add it to the unmatched outputs
+
+      matchableOutputs.foreach(outputs => outputs ++= outputs.map(partialOutput => {
+        val newPartialOutput = partialOutput.extend(output)
+        matchableInputs.foreach(inputs => inputs.foreach(input => {
+          if (input.latestTime < newPartialOutput.earliestTime && Math.abs(input.sum - newPartialOutput.sum).toDouble / newPartialOutput.sum < 0.1) {
+            matchesFound += ((input.members, newPartialOutput.members))
+            scoreSignal = 1.0
+          }
+        }))
+        newPartialOutput
+      }))
+
+      matchableInputs.foreach(inputs => inputs.foreach(input => {
+        if (input.latestTime < output.time && Math.abs(input.sum - output.value).toDouble / output.value < 0.1) {
+          matchesFound += ((input.members, List(output)))
+          scoreSignal = 1.0
+        }
+      }))
+      
+      matchableOutputs += ArrayBuffer(PartialOutput(Array(output), output.value))
     }
   }
 

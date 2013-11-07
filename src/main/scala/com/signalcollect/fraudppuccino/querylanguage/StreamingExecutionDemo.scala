@@ -19,9 +19,9 @@ end: 18/08/2013 17:30:00
 window: 1d
 transactionInterval: 1w
 
-filters: [SIZE > 5, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS > 2]
+filters: [SIZE > 5, SINKVALUE > 10000000000]
 
-handlers: [WEBSERVER, CONSOLE]
+handlers: [WEBSERVER]
 
 debug: []
   
