@@ -8,8 +8,8 @@ import scala.collection.JavaConversions._
 
 abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 
-  val unmatchedInputs = new HashMap[Int, TransactionInput]() // Transactions that could serve as inputs for this transaction
-  val unmatchedOutputs = new HashMap[Int, TransactionOutput]() // Transactions that could serve as outputs for this transactions
+  var matchableInputs = new ArrayBuffer[TransactionInput]() // Transactions that are received by this entity
+  var matchableOutputs = new ArrayBuffer[TransactionOutput]() // Transactions that are sent by this entity
   val matchesFound = ArrayBuffer[(Iterable[TransactionInput], Iterable[TransactionOutput])]()
   val uncollectedOutputs = ArrayBuffer[TransactionOutput]()
 
@@ -26,10 +26,12 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
         scoreCollect = 1.0
         false
       }
-      case TransactionTimedOut => {
-        val timedOutTransactionId = sourceId.get.asInstanceOf[Int]
-        unmatchedInputs.remove(timedOutTransactionId)
-        unmatchedOutputs.remove(timedOutTransactionId)
+      case timeoutPill: Array[Long] => {
+        matchableInputs = matchableInputs.dropWhile(_.time < timeoutPill(0))
+        matchableOutputs = matchableOutputs.dropWhile(_.time < timeoutPill(0))
+        if (matchableInputs.isEmpty && matchableOutputs.isEmpty) {
+          graphEditor.removeVertex(vertex.id)
+        }
         true
       }
       case _ => true // signal discarded and does not need to be collected.
@@ -65,8 +67,8 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
   }
 
   def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {
-    if(unmatchedInputs.size<10) {
-    	unmatchedInputs.put(input.transactionID, input)      
+    if (matchableInputs.size < 10) {
+      matchableInputs += input
     }
   }
 
@@ -74,16 +76,17 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
    * Tries to find matching input and output transactions and then bi-connects them using pattern edges
    */
   def processOutputTransaction(output: TransactionOutput, graphEditor: GraphEditor[Any, Any]) {
-    
-    val matchedCombination = findMatchingTransactions(output, unmatchedOutputs.values, unmatchedInputs.values) //Depends on the use case
+
+    val matchedCombination = findMatchingTransactions(output, matchableOutputs, matchableInputs) //Depends on the use case
     matchedCombination match {
-      case (Nil, Nil) => if(unmatchedOutputs.size < 10) unmatchedOutputs.put(output.transactionID, output) //If no match -> add it to the unmatched outputs
       case (ins, outs) => {
         matchesFound += ((ins, outs))
-        unmatchedInputs --= ins.map(_.transactionID)
-        unmatchedOutputs --= outs.map(_.transactionID)
         scoreSignal = 1.0
       }
+      case (Nil, Nil) =>
+    }
+    if (matchableOutputs.size < 10) {
+      matchableOutputs += output //If no match -> add it to the unmatched outputs
     }
   }
 

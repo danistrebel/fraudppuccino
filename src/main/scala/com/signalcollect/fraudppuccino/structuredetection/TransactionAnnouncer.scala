@@ -24,8 +24,6 @@ case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends Verte
       case (linkTarget: Int, edgeType: EdgeMarker) => vertex.outgoingEdges += ((linkTarget, edgeType))
       case timeoutPill: Array[Long] => //Timeout pill represents the maximum age that a transaction is allowed to have in order to stay in the graph.
         if (!timedout && (time < timeoutPill(0))) {
-        	graphEditor.sendSignal(TransactionTimedOut, source, Some(id))
-        	graphEditor.sendSignal(TransactionTimedOut, target, Some(id))
           timedout = true
           scoreCollect = 1.0
         }
