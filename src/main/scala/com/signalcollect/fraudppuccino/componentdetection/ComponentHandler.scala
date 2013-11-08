@@ -54,7 +54,6 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
           if (currentIndex >= componentWorkFlow.size) { //Work flow ends with a serialized version of the entire component
             resultHandler.foreach(_.processResult(result.asInstanceOf[String]))
             dropComponent(componentId)
-
           } else if (componentWorkFlow(currentIndex)._2(result)) { //if result is accepted by the filter move to the next step in the work flow
             executeNextInWorkFlow(componentId)
           } else { //Result is filtered out

@@ -1,3 +1,4 @@
+
 package com.signalcollect.fraudppuccino.patternanalysis
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
@@ -5,31 +6,23 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 
-/**
- * This counts the number of cross country transactions within a pattern. 
- * In back and forth hopping each spanning transaction is counted.
- */ 
-class CountryHopCounter(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
+class PatternDepthAnalyzer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
-  val isXcountry = vertex.getResult("xCountry").getOrElse(false).asInstanceOf[Boolean] //is this transaction cross country
-  
-  var countryHops = if(isXcountry) 1 else 0
+  var depth = 0
 
-  def getState = countryHops
+  def getState = depth
 
   def setState(state: Any) = {
     state match {
-      case newHop: Int => countryHops = newHop
+      case newDepth: Int => depth = newDepth
       case _ =>
     }
   }
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case signaledHops: Int => 
-        val newHops = if(isXcountry) signaledHops +1 else signaledHops
-        if (newHops > countryHops) {
-        countryHops = newHops
+      case signaledDepth: Int => if (signaledDepth > depth) {
+        depth = signaledDepth
         scoreSignal = 1.0
       }
       case _ =>
@@ -38,7 +31,7 @@ class CountryHopCounter(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(countryHops, edge._1, Some(vertex.id)))
+    outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(depth+1, edge._1, Some(vertex.id)))
     scoreSignal = 0
   }
 
