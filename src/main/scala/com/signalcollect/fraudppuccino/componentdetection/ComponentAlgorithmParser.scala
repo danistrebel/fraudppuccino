@@ -14,7 +14,7 @@ object ComponentAlgorithmParser {
   /**
    * Registered algorithms that can be used by the parser
    */
-  val algorithms = Map[String, HandlerRequest]()
+  val algorithms = Map[String, ConditionAlgorithm]()
 
   // Register predefined algorithms
   algorithms += (("size", SizeQuery))
@@ -27,13 +27,13 @@ object ComponentAlgorithmParser {
   /**
    * Registers an algorithm so that it can be used in a filter step
    */ 
-  def registerAlgorithm(key: String, request: HandlerRequest) = algorithms += ((key, request))
+  def registerAlgorithm(key: String, request: ConditionAlgorithm) = algorithms += ((key, request))
 
   /**
    * Generates a work flow step that consists of the request that is sent to the component master
    * and the condition to determine whether the returned result is accepted or not.
    */
-  def parseWorkFlowStep(s: String): (HandlerRequest, Any => Boolean) = {
+  def parseWorkFlowStep(s: String): (ConditionAlgorithm, Any => Boolean) = {
     val WorkFlowStep = "([\\w]+)\\s*(<|>|<=|>=|=)\\s*([\\w]+)".r
     try {
       val WorkFlowStep(algorithm, operator, value) = s
