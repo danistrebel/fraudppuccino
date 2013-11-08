@@ -71,7 +71,7 @@ class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
       assert(tx0.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
       assert(tx1.outgoingEdges.exists(_._2 == UpstreamTransactionPatternEdge))
       assert(!tx2.outgoingEdges.exists(_._2 == DownstreamTransactionPatternEdge))
-
+      
       tx0.outgoingEdges.size === 1
     }
 
