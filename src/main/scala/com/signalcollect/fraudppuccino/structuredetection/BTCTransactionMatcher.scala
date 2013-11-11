@@ -124,7 +124,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   def inputSmallerThanOrEqual(inputValue: Long, outputValue: Long): Boolean = ((inputValue - outputValue).toDouble / outputValue) < 0.1
 
   def inputBeforeOutput(input: TransactionInput, output: PartialOutput): Boolean = {
-    output.earliestTime - input.time > windowSize || (output.earliestTime - input.time > 0 && input.time < output.members.map(_.time).max)
+    output.earliestTime - input.time > windowSize || (output.earliestTime - input.time > 0 && input.time < output.members.map(_.time).min)
   }
 
 }
