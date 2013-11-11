@@ -20,7 +20,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
   val graph = GraphBuilder.build
 
   "the component handler" should {
-    "register connected components with the handler " in {
+    "report the component master of a chain " in {
       //Register a component handler
       val system = ActorSystemRegistry.retrieve("SignalCollect").get
       val componentHandler = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
@@ -69,7 +69,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
       Thread.sleep(500l) //make sure the asynchronous messages are received.
 
       //Check the sizes of the reported components
-     // DummyResultsHandler.reportedComponents(1) === 7
+      DummyResultsHandler.reportedComponents(1) === 7
       DummyResultsHandler.reportedComponents.get(4) === None
     }
   }

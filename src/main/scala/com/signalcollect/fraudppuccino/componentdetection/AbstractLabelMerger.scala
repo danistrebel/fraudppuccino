@@ -19,6 +19,9 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
           label = newLabel
           scoreSignal = 1.0
         }
+        else if (newLabel != label){
+          graphEditor.sendSignal(label, sourceId.get, Some(vertex.id))
+        }
       }
     }
     true
@@ -28,7 +31,8 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
    * Signal along all edges where specified
    */ 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    vertex.outgoingEdges.filter(edge => shouldSignalForEdgeType(edge._2)).foreach(edge => graphEditor.sendSignal(label, edge._1, Some(vertex.id)))
+    val edgesToSignal = vertex.outgoingEdges.filter(edge => shouldSignalForEdgeType(edge._2))
+    edgesToSignal.foreach(edge => graphEditor.sendSignal(label, edge._1, Some(vertex.id)))
     scoreSignal = 0.0
   }
 
