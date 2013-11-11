@@ -22,7 +22,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case input: TransactionInput =>
-        processInputTransaction(input, graphEditor); true
+        processInputTransaction(input); true
       case output: TransactionOutput => {
         uncollectedOutputs += output
         scoreCollect = 1.0
@@ -70,7 +70,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   def notifyTopologyChange {
   }
 
-  def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {
+  def processInputTransaction(input: TransactionInput) {
     if (matchableInputs.size < 10) {
       matchableInputs.foreach(inputBranch => inputBranch.extend(input))
       matchableInputs += PartialInput(Array(input.transactionID), input.value, input.time)
