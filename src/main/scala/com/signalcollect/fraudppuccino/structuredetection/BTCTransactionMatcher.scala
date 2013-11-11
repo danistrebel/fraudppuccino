@@ -11,7 +11,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
   var matchableInputs = new ArrayBuffer[PartialInput] // Transactions that are received by this entity
   var matchableOutputs = new ArrayBuffer[PartialOutput] // Transactions that are sent by this entity
-  val matchesFound = ArrayBuffer[(Iterable[TransactionInput], Iterable[TransactionOutput])]()
+  val matchesFound = ArrayBuffer[(Iterable[Int], Iterable[Int])]()
   val uncollectedOutputs = ArrayBuffer[TransactionOutput]()
   val windowSize = 86400 //TODO make this dynamic
 
@@ -29,7 +29,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
         false
       }
       case timeoutPill: Array[Long] => {
-        matchableInputs = matchableInputs.dropWhile(_.earliestTime < timeoutPill(0))
+        matchableInputs = matchableInputs.dropWhile(_.latestTime < timeoutPill(0))
         matchableOutputs = matchableOutputs.dropWhile(_.earliestTime < timeoutPill(0))
 
         if (matchableInputs.isEmpty && matchableOutputs.isEmpty) {
@@ -46,8 +46,8 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     for ((ins, outs) <- matchesFound) {
       for (in <- ins) {
         for (out <- outs) {
-          graphEditor.sendSignal((out.transactionID, DownstreamTransactionPatternEdge), in.transactionID, None)
-          graphEditor.sendSignal((in.transactionID, UpstreamTransactionPatternEdge), out.transactionID, None)
+          graphEditor.sendSignal((out, DownstreamTransactionPatternEdge), in, None)
+          graphEditor.sendSignal((in, UpstreamTransactionPatternEdge), out, None)
         }
       }
     }
@@ -73,7 +73,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {
     if (matchableInputs.size < 10) {
       matchableInputs.foreach(inputBranch => inputBranch.extend(input))
-      matchableInputs += PartialInput(Array(input), input.value)
+      matchableInputs += PartialInput(Array(input.transactionID), input.value, input.time)
     }
   }
 
@@ -89,19 +89,18 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
       //matches splits 
       //i.e. is there an input that matches a subset of outputs where the output subset contains the new output
-      matchableOutputs.foreach(partialOutputs => partialOutputs.extend(output, tryPartialOutputResult(matchableInputs.map(_.members.head), _)))
+      matchableOutputs.foreach(partialOutputs => partialOutputs.extend(output, tryPartialOutputResult(matchableInputs, _)))
 
       //appends the new output
-      matchableOutputs += PartialOutput(Array(output), output.value)
+      matchableOutputs += PartialOutput(Array(output.transactionID), output.value, output.time)
     }
   }
 
   def tryPartialInputResult(partialInputs: PartialInput, output: TransactionOutput) {
-    val approxInputTime = partialInputs.latestTime
-    if (output.time - approxInputTime > windowSize || (output.time - approxInputTime > 0 && partialInputs.members.map(_.time).max < output.time)) {
+    if (output.time > partialInputs.latestTime) {
       val ratioInputsOuputs = (partialInputs.sum - output.value).toDouble / output.value
       if (Math.abs(ratioInputsOuputs) < 0.1) {
-        matchesFound += ((partialInputs.members, List(output)))
+        matchesFound += ((partialInputs.members, Array(output.transactionID)))
         scoreSignal = 1.0
       } else if (ratioInputsOuputs < 0.1) {
         partialInputs.extensions.foreach(partial => tryPartialInputResult(partial, output))
@@ -109,22 +108,16 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     }
   }
 
-  def tryPartialOutputResult(inputs: Iterable[TransactionInput], partialOutputs: PartialOutput): Iterable[TransactionInput] = {
+  def tryPartialOutputResult(inputs: Iterable[PartialInput], partialOutputs: PartialOutput): Iterable[PartialInput] = {
     //inputs that happened before the outputs and are smaller or equal in their value
-    val candidateInputs = inputs.filter(input => inputSmallerThanOrEqual(input.value, partialOutputs.sum) && inputBeforeOutput(input, partialOutputs))
+    val candidateInputs = inputs.filter(input => ((input.sum - partialOutputs.sum).toDouble / partialOutputs.sum) < 0.1 && partialOutputs.earliestTime > input.latestTime)
     for (input <- candidateInputs) {
-      if ((input.value - partialOutputs.sum).toDouble/partialOutputs.sum > -0.1) {
-        matchesFound += ((List(input), partialOutputs.members))
+      if ((input.sum - partialOutputs.sum).toDouble/partialOutputs.sum > -0.1) {
+        matchesFound += ((input.members, partialOutputs.members))
         scoreSignal = 1.0
       }
     }
     candidateInputs
-  }
-
-  def inputSmallerThanOrEqual(inputValue: Long, outputValue: Long): Boolean = ((inputValue - outputValue).toDouble / outputValue) < 0.1
-
-  def inputBeforeOutput(input: TransactionInput, output: PartialOutput): Boolean = {
-    output.earliestTime - input.time > windowSize || (output.earliestTime - input.time > 0 && input.time < output.members.map(_.time).min)
   }
 
 }
