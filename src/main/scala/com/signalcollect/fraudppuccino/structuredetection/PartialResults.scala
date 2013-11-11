@@ -14,12 +14,19 @@ case class PartialInput(members: Array[TransactionInput], sum: Long) {
 
 case class PartialOutput(members: Array[TransactionOutput], sum: Long) {
   val extensions = ArrayBuffer[PartialOutput]()
-  def extend(newOutput: TransactionOutput, testForOutput: PartialOutput => Boolean): Unit = {
+
+  def extend(newOutput: TransactionOutput, testForOutput: PartialOutput => Iterable[TransactionInput]): Unit = {
     val newExtension = this.copy(members = members :+ newOutput, sum = sum + newOutput.value)
-    if(testForOutput(newExtension)) {
-      return
+    testForOutput(newExtension) match {
+      case Nil => extensions.foreach(_.extend(newOutput))
+      case _ => extensions.foreach(_.extend(newOutput, testForOutput))
     }
-    extensions.foreach(_.extend(newOutput, testForOutput))
+    extensions += (newExtension)
+  }
+
+  def extend(newOutput: TransactionOutput): Unit = {
+    val newExtension = this.copy(members = members :+ newOutput, sum = sum + newOutput.value)
+    extensions.foreach(_.extend(newOutput))
     extensions += (newExtension)
   }
   def earliestTime = members.head.time

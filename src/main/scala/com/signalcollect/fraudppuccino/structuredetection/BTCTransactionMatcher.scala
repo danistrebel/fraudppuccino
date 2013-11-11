@@ -103,26 +103,28 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
       if (Math.abs(ratioInputsOuputs) < 0.1) {
         matchesFound += ((partialInputs.members, List(output)))
         scoreSignal = 1.0
-        return
       } else if (ratioInputsOuputs < 0.1) {
         partialInputs.extensions.foreach(partial => tryPartialInputResult(partial, output))
       }
     }
   }
 
-  def tryPartialOutputResult(inputs: Iterable[TransactionInput], partialOutputs: PartialOutput): Boolean = {
-    val approxOutputTime = partialOutputs.earliestTime
-    for (input <- inputs) {
-      if (approxOutputTime - input.time > windowSize || (approxOutputTime - input.time > 0 && input.time < partialOutputs.members.map(_.time).max)) {
-        val ratioInputsOuputs = (input.value - partialOutputs.sum).toDouble / partialOutputs.sum
-        if (Math.abs(ratioInputsOuputs) < 0.1) {
-          matchesFound += ((List(input), partialOutputs.members))
-          scoreSignal = 1.0
-          return true
-        }
+  def tryPartialOutputResult(inputs: Iterable[TransactionInput], partialOutputs: PartialOutput): Iterable[TransactionInput] = {
+    //inputs that happened before the outputs and are smaller or equal in their value
+    val candidateInputs = inputs.filter(input => inputSmallerThanOrEqual(input.value, partialOutputs.sum) && inputBeforeOutput(input, partialOutputs))
+    for (input <- candidateInputs) {
+      if ((input.value - partialOutputs.sum).toDouble/partialOutputs.sum > -0.1) {
+        matchesFound += ((List(input), partialOutputs.members))
+        scoreSignal = 1.0
       }
     }
-    false
+    candidateInputs
+  }
+
+  def inputSmallerThanOrEqual(inputValue: Long, outputValue: Long): Boolean = ((inputValue - outputValue).toDouble / outputValue) < 0.1
+
+  def inputBeforeOutput(input: TransactionInput, output: PartialOutput): Boolean = {
+    output.earliestTime - input.time > windowSize || (output.earliestTime - input.time > 0 && input.time < output.members.map(_.time).max)
   }
 
 }
