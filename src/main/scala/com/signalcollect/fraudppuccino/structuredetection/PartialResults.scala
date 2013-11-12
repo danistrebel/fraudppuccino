@@ -17,7 +17,7 @@ case class PartialOutput(members: Array[Int], sum: Long, earliestTime: Long) {
     val newExtension = this.copy(members = members :+ newOutput.transactionID, sum = sum + newOutput.value, earliestTime = Math.min(earliestTime, newOutput.time))
     testForOutput(newExtension) match {
       case Nil => extensions.foreach(_.extend(newOutput))
-      case _ => extensions.foreach(_.extend(newOutput, testForOutput))
+      case _ => //extensions.foreach(_.extend(newOutput, testForOutput))
     }
     extensions += (newExtension)
   }

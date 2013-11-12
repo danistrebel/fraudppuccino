@@ -19,6 +19,8 @@ end: 18/08/2013 17:30:00
 window: 1d
 transactionInterval: 1w
 
+exhaustiveMatching: true
+
 filters: [SIZE > 5, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS > 2]
 
 handlers: [WEBSERVER]

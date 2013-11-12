@@ -24,8 +24,7 @@ case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends Verte
       case (linkTarget: Int, edgeType: EdgeMarker) => vertex.outgoingEdges += ((linkTarget, edgeType))
       case timeoutPill: Array[Long] => //Timeout pill represents the maximum age that a transaction is allowed to have in order to stay in the graph.
         if (!timedout && (time < timeoutPill(0))) {
-          timedout = true
-          scoreCollect = 1.0
+          handleTimeout(graphEditor)
         }
       case _ =>
     }
@@ -54,6 +53,11 @@ case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends Verte
   var scoreCollect = 0.0
 
   def notifyTopologyChange {
+  }
+
+  def handleTimeout(graphEditor: GraphEditor[Any, Any]) = {
+    timedout = true
+    scoreCollect = 1.0
   }
 
 }
