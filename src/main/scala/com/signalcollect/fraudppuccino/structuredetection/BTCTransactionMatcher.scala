@@ -13,7 +13,6 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   var matchableOutputs = new ArrayBuffer[PartialOutput] // Transactions that are sent by this entity
   val matchesFound = ArrayBuffer[(Iterable[Int], Iterable[Int])]()
   val uncollectedOutputs = ArrayBuffer[TransactionOutput]()
-  val windowSize = 86400 //TODO make this dynamic
 
   def getState = None
 

@@ -108,17 +108,21 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
    * Else the component will be removed from the graph
    */
   def testWorkflowCondition(result: Any, graphEditor: GraphEditor[Any, Any]) {
-    if(workflowIndex >= componentWorkFlow.size) { //In case the entire work flow is passed the serialized component is returned
+    if (workflowIndex >= componentWorkFlow.size) { //In case the entire work flow is passed the serialized component is returned
       graphEditor.sendToActor(handler, ComponentResult(result.asInstanceOf[String]))
-    }
-	else if (componentWorkFlow(workflowIndex)._2(result)) { //proceed to the next step of the work flow
+      dropComponent(graphEditor)
+    } else if (componentWorkFlow(workflowIndex)._2(result)) { //proceed to the next step of the work flow
       workflowIndex += 1
       executeWorkflowStep(graphEditor)
     } else { // drop this component
-      members.foreach(memberId => {
-        graphEditor.sendSignal(ComponentMemberElimination, memberId, Some(componentId))
-      })
+      dropComponent(graphEditor)
     }
+  }
+
+  def dropComponent(graphEditor: GraphEditor[Any, Any]) = {
+    members.foreach(memberId => {
+      graphEditor.sendSignal(ComponentMemberElimination, memberId, Some(componentId))
+    })
   }
 
   /**
@@ -141,7 +145,8 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
   val memberInfoExtraction: ComponentMemberQuery = ComponentMemberQuery(vertex => ComponentMemberInfo(vertex.id, vertex.results, vertex.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1.asInstanceOf[Int])))
 
   /**
-   *
+   * Combines the serialized information about the component member
+   * to the serialized component description.
    */
   val membersSerializer: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
     (repliesFromMembers, master) =>
