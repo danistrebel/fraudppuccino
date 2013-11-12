@@ -32,17 +32,19 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
 
   val repliesFromMembers = ArrayBuffer[ComponentMemberMessage]()
   var allReceived: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = null
-  var shouldRequestResults = false //has this master sent algorithms to its members and not yet received their results
+  var stepsUntilResultRequest = -1 //has this master sent algorithms to its members and not yet received their results
 
   override def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case timeOut: Array[Long] => {
-        if (shouldRequestResults) {
+        if (stepsUntilResultRequest==0) {
           val requestState = ComponentMemberQuery(vertex => ComponentMemberResponse(Some(vertex.getState)))
           members.foreach(memberId => {
             graphEditor.sendSignal(requestState, memberId, Some(componentId))
           })
-          shouldRequestResults = false
+          stepsUntilResultRequest = -1
+        } else if(stepsUntilResultRequest > 0) {
+          stepsUntilResultRequest -= 1
         }
         true
       }
@@ -93,10 +95,9 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
         case ComponentMemberQueryExecution(memberQuery, resultsProcessing) => {
           executeAndExpectMemberReplies(memberQuery, resultsProcessing, graphEditor)
         }
-
         case ComponentAlgorithmExecution(algorithm, resultsProcessing) => {
           executeAndExpectMemberReplies(algorithm, resultsProcessing, graphEditor)
-          shouldRequestResults = true
+          stepsUntilResultRequest = 1
         }
       }
     }

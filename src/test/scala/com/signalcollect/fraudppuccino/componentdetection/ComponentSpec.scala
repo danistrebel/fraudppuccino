@@ -51,10 +51,18 @@ class ComponentSpecs extends SpecificationWithJUnit {
         } else {
           vertex.setAlgorithmImplementation(v => new ComponentMember(v))
         }
-        
+
         graph.addVertex(vertex)
       })
 
+      graph.recalculateScores
+      graph.execute
+      graph.recalculateScores
+      graph.execute
+
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
 
       graph.recalculateScores
       graph.execute
