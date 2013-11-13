@@ -138,6 +138,7 @@ case class StreamingExecution(
     val timeout = Array[Long](txTimeout, componentTimeout)
     graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
       vertex.deliverSignal(timeout, None, graphEditor))
+    graph.awaitIdle
   }
 }
 
