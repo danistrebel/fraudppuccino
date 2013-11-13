@@ -41,7 +41,7 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
         vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMember(v)
       }
     } // terminate the component if the oldest member is older than 60days
-    else if (timeout(1) - 5184000 > ownTimeStamp) {
+    else if (!isTerminated && timeout(1) - 5184000 > ownTimeStamp) {
       graphEditor.sendSignal(CutComponent, this.label._1, Some(vertex.id))
     }
   }
@@ -50,24 +50,27 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
     signal match {
       case timeout: Array[Long] => handleTimeout(timeout, graphEditor)
       case newLabel: (Int, Long) => {
-        unconnectedChildren -= sourceId.get
-        if (shouldSwitchToLabel(newLabel)) {
-          label = newLabel
-          scoreSignal = 1.0
-        } else if (newLabel != label) {
-          graphEditor.sendSignal(label, sourceId.get, Some(vertex.id))
+        if (!isTerminated) {
+          unconnectedChildren -= sourceId.get
+          if (shouldSwitchToLabel(newLabel)) {
+            label = newLabel
+            scoreSignal = 1.0
+          } else if (newLabel != label) {
+            graphEditor.sendSignal(label, sourceId.get, Some(vertex.id))
+          }
         }
       }
       case CutComponent => {
-        cutOffLeaf(graphEditor)
-        vertex.outgoingEdges.foreach(edge => graphEditor.sendSignal(ComponentTerminated, edge._1, Some(vertex.id)))
+        if (!isTerminated) {
+          isTerminated = true
+          cutOffLeafs(graphEditor)
+          vertex.outgoingEdges.foreach(edge => graphEditor.sendSignal(ComponentTerminated, edge._1, Some(vertex.id)))
+        }
       }
       case ComponentTerminated => {
         if (!isTerminated) {
           isTerminated = true
-          if (unconnectedChildren.size != 0 && label._2 - ownTimeStamp < 604800) {
-            cutOffLeaf(graphEditor)
-          }
+          cutOffLeafs(graphEditor)
           vertex.outgoingEdges.foreach(edge => if (edge._1 != sourceId.get) graphEditor.sendSignal(ComponentTerminated, edge._1, Some(vertex.id)))
         }
 
@@ -76,9 +79,11 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
     true
   }
 
-  def cutOffLeaf(graphEditor: GraphEditor[Any, Any]) = {
-    vertex.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.removeEdge(EdgeId(edge._1, vertex.id)))
-    vertex.removeEdgesOfType(DownstreamTransactionPatternEdge)
+  def cutOffLeafs(graphEditor: GraphEditor[Any, Any]) = {
+    unconnectedChildren.foreach(leaf => {
+      graphEditor.removeEdge(EdgeId(leaf, vertex.id))
+      vertex.removeEdge(leaf, graphEditor)
+    })
   }
 
 }
