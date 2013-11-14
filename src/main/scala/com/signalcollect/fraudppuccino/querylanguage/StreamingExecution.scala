@@ -18,9 +18,10 @@ case class StreamingExecution(
   endTime: Long = 0l, //Unix time stamp
   windowSize: Long = 0l, //in s
   maxTxInterval: Long = 0l, // in s
-  exhaustiveMatching: Boolean = true,// should the matcher consider more than one possible matching combination
+  exhaustiveMatching: Boolean = true, // should the matcher consider more than one possible matching combination
   matchingComplexity: Integer = 10, //number Of inputs and outputs that are considered in the matching
-  matchingMode: MatchingMode = MATCH_ALL, 
+  matchingMode: MatchingMode = MATCH_ALL,
+  maxComponentDuration: Long = 0l,
   filters: Iterable[String] = List(),
   resultHandlers: Iterable[String] = List(),
   debug: Iterable[String] = List(),
@@ -33,14 +34,13 @@ case class StreamingExecution(
   val indexOfId = transactionAttributes("id")._1
   val indexOfTime = transactionAttributes("time")._1
   val indexOfSrc = transactionAttributes("src")._1
-  val indexOfTarget =  transactionAttributes("target")._1
-  
-  val optionalAttributes = transactionAttributes.filter(attribute => !mandatoryTransactionAttributes.contains(attribute._1))
-  
-  val transactionAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if(exhaustiveMatching) v => TransactionAnnouncer(v) else v => new UnsubscribingTransactionAnnouncer(v)
-  val matcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if(exhaustiveMatching) v => BTCTransactionMatcher(v, matchingMode, matchingComplexity) else v => GreedyBitcoinMatcher(v, matchingMode, matchingComplexity)
+  val indexOfTarget = transactionAttributes("target")._1
 
-  
+  val optionalAttributes = transactionAttributes.filter(attribute => !mandatoryTransactionAttributes.contains(attribute._1))
+
+  val transactionAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if (exhaustiveMatching) v => TransactionAnnouncer(v) else v => new UnsubscribingTransactionAnnouncer(v)
+  val matcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if (exhaustiveMatching) v => BTCTransactionMatcher(v, matchingMode, matchingComplexity) else v => GreedyBitcoinMatcher(v, matchingMode, matchingComplexity)
+
   def execute = {
 
     val system = ActorSystemRegistry.retrieve("SignalCollect").get
@@ -54,7 +54,12 @@ case class StreamingExecution(
     }
 
     for (lowerWindowBound <- startTime to endTime by windowSize) {
-      retire(lowerWindowBound - maxTxInterval, lowerWindowBound - maxTxInterval - 1123200)
+      if (maxComponentDuration > 0) { //signal maxComponentDuration if it is set
+        retire(Array(lowerWindowBound - maxTxInterval, lowerWindowBound - 2 * maxTxInterval, lowerWindowBound - maxComponentDuration))
+      } else {
+        retire(Array(lowerWindowBound - maxTxInterval, lowerWindowBound - 2 * maxTxInterval))
+
+      }
 
       load(sourceFile, lowerWindowBound, lowerWindowBound + windowSize)
 
@@ -83,7 +88,6 @@ case class StreamingExecution(
     if (iter == null) {
       iter = Source.fromFile(filePath).getLines
     }
-    
 
     while (iter.hasNext) {
 
@@ -103,20 +107,20 @@ case class StreamingExecution(
   /**
    * Creates the required graph elements for the transaction
    * i.e. a node for the transaction and nodes for the source and target account of the transaction.
-   */ 
+   */
   def loadTransaction(transactionAttributes: IndexedSeq[String]) {
-    val transaction = new RepeatedAnalysisVertex(transactionAttributes(indexOfId).toInt*(-1))
+    val transaction = new RepeatedAnalysisVertex(transactionAttributes(indexOfId).toInt * (-1))
     val srcId = transactionAttributes(indexOfSrc).toInt
     val targetId = transactionAttributes(indexOfTarget).toInt
     transaction.storeAttribute("time", transactionAttributes(indexOfTime).toLong)
     transaction.storeAttribute("src", srcId)
     transaction.storeAttribute("target", targetId)
-    
-    for(attribute <- optionalAttributes) {
+
+    for (attribute <- optionalAttributes) {
       val attributeValue = attribute._2._2(transactionAttributes(attribute._2._1))
       transaction.storeAttribute(attribute._1, attributeValue)
     }
-        
+
     transaction.storeAttribute("xCountry", srcId % 10 == targetId % 10) //true of the transaction spans 2 countries.
     transaction.setAlgorithmImplementation(transactionAlgorithm)
 
@@ -132,12 +136,11 @@ case class StreamingExecution(
 
   /**
    * Sends a timeout to all vertices in the graph
-   * 
+   *
    * @param txTimeout transactions with a lower time stamp that this value are excluded from further matching with other transactions
    * @param componentTimeout components where the highest time stamp is lower than this value report themselves for further processing.
-   */ 
-  def retire(txTimeout: Long, componentTimeout: Long) {
-    val timeout = Array[Long](txTimeout, componentTimeout)
+   */
+  def retire(timeout: Array[Long]) {
     graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
       vertex.deliverSignal(timeout, None, graphEditor))
     graph.awaitIdle

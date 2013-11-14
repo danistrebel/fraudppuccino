@@ -15,6 +15,7 @@ class ExecutionModel {
   @BeanProperty var transactionInterval: String = null
   @BeanProperty var exhaustiveMatching = true
   @BeanProperty var matchingComplexity = 10
+  @BeanProperty var maxComponentDuration: String = "0"
   @BeanProperty var filters = new java.util.ArrayList[String]()
   @BeanProperty var handlers = new java.util.ArrayList[String]()
   @BeanProperty var debug = new java.util.ArrayList[String]()
@@ -27,6 +28,7 @@ class ExecutionModel {
         exhaustiveMatching, 
         matchingComplexity,
         MATCH_ALL,
+        parseSec(maxComponentDuration),
         filters, 
         handlers, 
         debug, 

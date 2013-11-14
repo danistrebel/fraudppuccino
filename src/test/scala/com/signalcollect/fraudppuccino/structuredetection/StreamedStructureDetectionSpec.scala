@@ -49,7 +49,7 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
     }
 
     "add transaction to the chain if within the time window" in {
-      execution.retire(0l, 0L)
+      execution.retire(Array(0l, 0L))
       execution.loadTransaction(Array("4", "0", "102", "103", "300", "5"))
 
       execution.graph.recalculateScores
@@ -59,7 +59,7 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
     }
 
     "NOT add transaction to the chain if they are outside of the time window" in {
-      execution.retire(1l, 0l)
+      execution.retire(Array(1l, 0l))
       execution.loadTransaction(Array("5", "0", "105", "106", "200", "6"))
       execution.graph.recalculateScores
       execution.graph.execute

@@ -31,7 +31,7 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
 
   def handleTimeout(timeout: Array[Long], graphEditor: GraphEditor[Any, Any]) = { //Fix the component when the 2nd timeout is met by the most recent member of the component
 
-    if (timeout(1) > this.label._2) {
+    if (timeout(1) > this.label._2) { //an entire component times out if the most recent element timed out.
       vertex.storeAttribute("component", label._1)
 
       //Test if this is the component head or a member
@@ -40,8 +40,9 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
       } else {
         vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMember(v)
       }
-    } // terminate the component if the oldest member is older than 60days
-    else if (!isTerminated && timeout(1) - 5184000 > ownTimeStamp) {
+    } 
+    // to prevent infinitely large components the component can be cut at a specific point in time.
+    else if (!isTerminated && timeout.length == 3 && timeout(2) > ownTimeStamp) {
       graphEditor.sendSignal(CutComponent, this.label._1, Some(vertex.id))
     }
   }
