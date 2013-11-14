@@ -1,53 +1,70 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Fraudppuccino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet'>
-    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" >
-    <link rel="stylesheet" href="css/app.css">
-    <link rel="stylesheet" href="http://cdn.jsdelivr.net/codemirror/3.14.0/codemirror.css">
-  </head>
-  
-  <body>
-	  <div id="header">
-  		<div id="branding"><img src="img/fraudppuccino-icon.png"/><span>THE <b>DOG</b> AND <b>PONY</b> SHOW</span></div>
-  		<div id="notifications"><div id="computationStatus" class="alert alert-info" style="display: none;">computation has started</div></div>
-	  </div>
-	  <div class="container">
-		  <div class="row">
-		    <div class="col-md-9">
-			    <div id="visualizer">
-			    <svg id="patternVisualizer">
+<head>
+<meta charset="utf-8">
+<title>Fraudppuccino</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href='http://fonts.googleapis.com/css?family=Lato:400,700'
+	rel='stylesheet'>
+<link rel="stylesheet"
+	href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet"
+	href="http://cdn.jsdelivr.net/codemirror/3.14.0/codemirror.css">
+</head>
+
+<body>
+	<div id="header">
+		<div id="branding">
+			<img src="img/fraudppuccino-icon.png" /><span>THE <b>DOG</b>
+				AND <b>PONY</b> SHOW
+			</span>
+		</div>
+		<div id="notifications">
+			<div id="computationStatus" class="alert alert-info"
+				style="display: none;">computation has started</div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-9">
+				<div id="visualizer">
+					<svg id="patternVisualizer">
 			    <g id="graphVisualization"></g>
 			    </svg>
-			    </div>
-			</div>
-		    <div class="col-md-3">
-		    <div class="progress">
-		    	<div id="computationProgress" class="progress-bar" style="width: 0%;"></div>
-		    </div>
-				<div class="panel panel-default">
-				  <!-- Default panel contents -->
-				<div id="reportsHeader" class="panel-heading">Reports</div>
-				<div id="reportsContent">
-					<ul id="reportsList" class="list-group">
-					</ul>
 				</div>
-			  </div>
-		    </div>
+			</div>
+			<div class="col-md-3">
+				<div class="progress">
+					<div id="computationProgress" class="progress-bar"
+						style="width: 0%;"></div>
+				</div>
+				<div class="panel panel-default">
+					<div id="reportsHeader" class="panel-heading">
+						<div id="reportsTitle"><span>Reports</span></div>
+						<div id="reportingOptions">
+							<a href="#" id="importReports"><span class="glyphicon glyphicon-import"></span></a>
+							<a href="#" id="exportReports"><span class="glyphicon glyphicon-export"></span></a>
+						</div>
+						<div style="display: block; clear: both;"></div>
+					</div>
+					<div id="reportsContent">
+						<ul id="reportsList" class="list-group">
+						</ul>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="row">
-		<div class="col-md-12">
-		<div id="tabs">
-			<ul class="nav nav-tabs nav-justified">
-				<li id="queryNavTab" class="navTab active"><a href="#tabs-1">Query</a></li>
-				<li id="inspectorNavTab" class="navTab"><a href="#tabs-2">Inspector</a></li>
-			</ul>
-			<div id="tabsWrapper">
-			<div id="tabs-1">
-				<textarea id="query" rows="15" placeholder="Start here..">
+			<div class="col-md-12">
+				<div id="tabs">
+					<ul class="nav nav-tabs nav-justified">
+						<li id="queryNavTab" class="navTab active"><a href="#tabs-1">Query</a></li>
+						<li id="inspectorNavTab" class="navTab"><a href="#tabs-2">Inspector</a></li>
+					</ul>
+					<div id="tabsWrapper">
+						<div id="tabs-1">
+							<textarea id="query" rows="15" placeholder="Start here..">
 #path of the input data
 source: /Volumes/Data/BTC_August2013/user-user-tx.csv
 
@@ -85,29 +102,33 @@ handlers: [WEBSERVER]
 
 debug: true
 </textarea>
-<a id="runAlgorithm" class="btn btn-primary" href="#">Run</a>			
-			</div>
-			<div id="tabs-2">
-				<div id="inspector-content">
-					Please click on a node in the graph to obtain more information about it
+							<a id="runAlgorithm" class="btn btn-primary" href="#">Run</a>
+						</div>
+						<div id="tabs-2">
+							<div id="inspector-content">Please click on a node in the
+								graph to obtain more information about it</div>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>	
 		</div>
-		</div>
-		</div> <!-- row -->
-      </div> <!-- container -->
-  </body>
+		<!-- row -->
+	</div>
+	<!-- container -->
+</body>
 
-  <!-- jQuery -->
-  <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-  <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-  <!-- Bootstrap -->
-  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>  
-  <!-- D3 Drawing -->
-  <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script src="http://cdn.jsdelivr.net/codemirror/3.14.0/codemirror.min.js"></script>
-  <script src="http://cdn.jsdelivr.net/codemirror/3.14.0/mode/yaml/yaml.js"></script>
-  <script src="js/fraudppuccino.js"></script>
+<!-- jQuery -->
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<!-- Bootstrap -->
+<script
+	src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+<!-- D3 Drawing -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script
+	src="http://cdn.jsdelivr.net/codemirror/3.14.0/codemirror.min.js"></script>
+<script
+	src="http://cdn.jsdelivr.net/codemirror/3.14.0/mode/yaml/yaml.js"></script>
+<script src="js/fraudppuccino.js"></script>
 </html>

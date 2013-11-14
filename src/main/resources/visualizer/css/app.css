@@ -1,37 +1,45 @@
-@media (min-width: 1200px) {
-    .container{
-        max-width: 100%;
-    }
+@media ( min-width : 1200px) {
+	.container {
+		max-width: 100%;
+	}
+}
+
+@media ( min-width : 992px) {
+	.container {
+		max-width: 100%;
+	}
 }
 
 div#header {
-   width: 100%;
-   padding:20px;
+	width: 100%;
+	padding: 20px;
 }
 
 div#branding {
 	float: left;
-	position:relative;
-	width:500px;
+	position: relative;
+	width: 500px;
 }
 
 div#notifications {
-    float: left;
+	float: left;
 }
 
 div#branding span {
 	font-family: 'Lato', sans-serif;
-	font-size:30px;
-	margin-left:30px;
-	position: absolute; 
-	bottom: 0px; 
+	font-size: 30px;
+	margin-left: 30px;
+	position: absolute;
+	bottom: 0px;
 }
 
 .container {
-	top:20px;
-	position:absolute;
+	top: 20px;
+	position: absolute;
 	width: 100%;
-	float:clear;
+	height: 100%; float : clear;
+	position: absolute;
+	float: clear;
 }
 
 .node {
@@ -85,4 +93,26 @@ marker#transaction {
 
 a#runAlgorithm {
 	margin-top: 20px;
+}
+
+.nav-tabs>li.active>a,.nav-tabs>li.active>a:hover,.nav-tabs>li.active>a:focus
+	{
+	color: #fff;
+	background-color: #428bca;
+}
+
+.nav-tabs>li>a {
+	border: 1px solid #ddd;
+}
+
+div#reportsTitle {
+	float:left;
+}
+
+div#reportingOptions {
+	float: right;
+}
+
+div#reportsHeader {
+	position: relative;
 }

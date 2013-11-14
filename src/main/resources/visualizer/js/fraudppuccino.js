@@ -169,8 +169,12 @@ $(document).on('click', '#runAlgorithm', function() {
 	websocket.send(editorDSL.getValue());
 });
 
+function exportReports() {
+    window.open("data:application/json;charset=utf-8," + escape(JSON.stringify(reports))) 
+};
+
 function updateReportsCount() {
-	$("div#reportsHeader").text("Reports(" + Object.keys(reports).length + ")");
+	$("div#reportsTitle span").text("Reports(" + Object.keys(reports).length + ")");
 }
 
 function displayStatus(message) {
