@@ -3,8 +3,9 @@ package com.signalcollect.fraudppuccino.structuredetection
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
+import com.signalcollect.fraudppuccino.querylanguage._
 
-case class GreedyBitcoinMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL) extends AbstractTransactionMatcher(vertex) {
+case class GreedyBitcoinMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL, matchingComplexity: Int = 10) extends AbstractTransactionMatcher(vertex, matchingComplexity) {
 
   var balance: Long = 0l
 

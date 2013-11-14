@@ -18,7 +18,9 @@ case class StreamingExecution(
   endTime: Long = 0l, //Unix time stamp
   windowSize: Long = 0l, //in s
   maxTxInterval: Long = 0l, // in s
-  exhaustiveMatching: Boolean = true,// 
+  exhaustiveMatching: Boolean = true,// should the matcher consider more than one possible matching combination
+  matchingComplexity: Integer = 10, //number Of inputs and outputs that are considered in the matching
+  matchingMode: MatchingMode = MATCH_ALL, 
   filters: Iterable[String] = List(),
   resultHandlers: Iterable[String] = List(),
   debug: Iterable[String] = List(),
@@ -36,7 +38,7 @@ case class StreamingExecution(
   val optionalAttributes = transactionAttributes.filter(attribute => !mandatoryTransactionAttributes.contains(attribute._1))
   
   val transactionAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if(exhaustiveMatching) v => TransactionAnnouncer(v) else v => new UnsubscribingTransactionAnnouncer(v)
-  val matcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if(exhaustiveMatching) v => BTCTransactionMatcher(v) else v => GreedyBitcoinMatcher(v)
+  val matcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if(exhaustiveMatching) v => BTCTransactionMatcher(v, matchingMode, matchingComplexity) else v => GreedyBitcoinMatcher(v, matchingMode, matchingComplexity)
 
   
   def execute = {
@@ -142,4 +144,10 @@ case class StreamingExecution(
   }
 }
 
+abstract class MatchingMode
+
+case object MATCH_ALL extends MatchingMode
+case object MATCH_CHAIN extends MatchingMode
+case object MATCH_AGGREGATION extends MatchingMode
+case object MATCH_SPLIT extends MatchingMode
 

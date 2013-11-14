@@ -14,12 +14,23 @@ class ExecutionModel {
   @BeanProperty var window: String = null
   @BeanProperty var transactionInterval: String = null
   @BeanProperty var exhaustiveMatching = true
+  @BeanProperty var matchingComplexity = 10
   @BeanProperty var filters = new java.util.ArrayList[String]()
   @BeanProperty var handlers = new java.util.ArrayList[String]()
   @BeanProperty var debug = new java.util.ArrayList[String]()
 
   def parseExecution: StreamingExecution = {
-    StreamingExecution(source, parseUnixDate(start), parseUnixDate(end), parseSec(window), parseSec(transactionInterval), exhaustiveMatching, filters, handlers, debug, attributeMapper(parse))
+    StreamingExecution(source, 
+        parseUnixDate(start), 
+        parseUnixDate(end), parseSec(window), 
+        parseSec(transactionInterval), 
+        exhaustiveMatching, 
+        matchingComplexity,
+        MATCH_ALL,
+        filters, 
+        handlers, 
+        debug, 
+        attributeMapper(parse))
   }
 
   def attributeMapper(parsed: java.util.Map[String, java.util.List[Object]]): Map[String, (Int, String => Any)] = {
@@ -40,15 +51,15 @@ class ExecutionModel {
         case "double" => doubleParser
         case _ => throw new Exception("can't recognize type " + typeName + " please use a primitive type or the keyword \"ignore\".")
       }
-    }    
+    }
     parsed.toMap.map(parsingEntry => ((parsingEntry._1.toLowerCase, (parsingEntry._2(0).asInstanceOf[Int], getTypeParserForType(parsingEntry._2(1).asInstanceOf[String])))))
   }
 
   //helpers
-  
+
   /**
    * parses time units and converts them to seconds
-   */ 
+   */
   def parseSec(s: String): Long = {
     val TimeWithUnit = "\\s*([\\d]+)\\s*([\\w]+)?\\s*".r
     s match {
@@ -76,29 +87,29 @@ class ExecutionModel {
       }
     }
   }
-  
+
   /**
    * parses date times and transfers them to unix time stamps
-   * 
+   *
    * accepts either unix time stamps or date times in the format
-   * 
+   *
    * "MM/DD/YYYY" or "MM/DD/YYYY HH:mm:ss" UTC
-   */ 
+   */
   def parseUnixDate(s: String): Long = {
     val Date = "\\s*(\\d[\\d]?)/(\\d[\\d]?)/(\\d{4})\\s*".r
     val DateTime = "\\s*(\\d[\\d]?)/(\\d[\\d]?)/(\\d{4})\\s*(\\d{2}):(\\d{2}):(\\d{2})\\s*".r
     s match {
-      case Date(month,day,year) => toUnixTimeStamp(month.toInt, day.toInt, year.toInt, 0 , 0 ,0)
-      case DateTime(month,day,year,hour,minute,second)=>toUnixTimeStamp(month.toInt, day.toInt, year.toInt, hour.toInt,minute.toInt, second.toInt)
+      case Date(month, day, year) => toUnixTimeStamp(month.toInt, day.toInt, year.toInt, 0, 0, 0)
+      case DateTime(month, day, year, hour, minute, second) => toUnixTimeStamp(month.toInt, day.toInt, year.toInt, hour.toInt, minute.toInt, second.toInt)
       case _ => s.toInt
-      }
-    
+    }
+
   }
-  
-  def toUnixTimeStamp(month: Int, day: Int, year: Int, hours:Int, minutes:Int, seconds:Int) : Long = {
+
+  def toUnixTimeStamp(month: Int, day: Int, year: Int, hours: Int, minutes: Int, seconds: Int): Long = {
     val date = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-    date.set(year, month-1, day, hours, minutes, seconds)
-    date.getTimeInMillis/1000
+    date.set(year, month - 1, day, hours, minutes, seconds)
+    date.getTimeInMillis / 1000
   }
 }
 

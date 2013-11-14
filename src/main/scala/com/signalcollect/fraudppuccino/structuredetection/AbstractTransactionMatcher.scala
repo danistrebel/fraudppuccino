@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 import java.util.HashMap
 import scala.collection.JavaConversions._
 
-abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
+abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingComplexity: Int) extends VertexAlgorithm(vertex) {
 
   val unmatchedInputs = new HashMap[Int, TransactionInput]() // Transactions that could serve as inputs for this transaction
   val unmatchedOutputs = new HashMap[Int, TransactionOutput]() // Transactions that could serve as outputs for this transactions
@@ -65,7 +65,7 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
   }
 
   def processInputTransaction(input: TransactionInput, graphEditor: GraphEditor[Any, Any]) {
-    if(unmatchedInputs.size<10) {
+    if(unmatchedInputs.size<matchingComplexity) {
     	unmatchedInputs.put(input.transactionID, input)      
     }
   }
@@ -77,7 +77,7 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_]) ext
     
     val matchedCombination = findMatchingTransactions(output, unmatchedOutputs.values, unmatchedInputs.values) //Depends on the use case
     matchedCombination match {
-      case (Nil, Nil) => if(unmatchedOutputs.size < 10) unmatchedOutputs.put(output.transactionID, output) //If no match -> add it to the unmatched outputs
+      case (Nil, Nil) => if(unmatchedOutputs.size < matchingComplexity) unmatchedOutputs.put(output.transactionID, output) //If no match -> add it to the unmatched outputs
       case (ins, outs) => {
         matchesFound += ((ins, outs))
         unmatchedInputs --= ins.map(_.transactionID)

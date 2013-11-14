@@ -6,8 +6,9 @@ import scala.collection.mutable.ArrayBuffer
 import java.util.HashMap
 import scala.collection.JavaConversions._
 import java.util.ArrayList
+import com.signalcollect.fraudppuccino.querylanguage._
 
-case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL) extends VertexAlgorithm(vertex) {
+case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL, matchingComplexity: Int = 10) extends VertexAlgorithm(vertex) {
 
   var matchableInputs = new ArrayBuffer[PartialInput] // Transactions that are received by this entity
   var matchableOutputs = new ArrayBuffer[PartialOutput] // Transactions that are sent by this entity
@@ -70,7 +71,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   }
 
   def processInputTransaction(input: TransactionInput) {
-    if (matchableInputs.size < 10) {
+    if (matchableInputs.size < matchingComplexity) {
       matchableInputs.foreach(inputBranch => inputBranch.extend(input))
       matchableInputs += PartialInput(Array(input.transactionID), input.value, input.time)
     }
@@ -81,7 +82,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
    */
   def processOutputTransaction(output: TransactionOutput, graphEditor: GraphEditor[Any, Any]) {
 
-    if (matchableOutputs.size < 10) {
+    if (matchableOutputs.size < matchingComplexity) {
       //matches aggregations and chains
       //i.e. is there a subset of inputs that matches the new output
       matchableInputs.foreach(partialInputs => tryPartialInputResult(partialInputs, output))
@@ -120,10 +121,3 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   }
 
 }
-
-abstract class MatchingMode
-
-case object MATCH_ALL extends MatchingMode
-case object MATCH_CHAIN extends MatchingMode
-case object MATCH_AGGREGATION extends MatchingMode
-case object MATCH_SPLIT extends MatchingMode

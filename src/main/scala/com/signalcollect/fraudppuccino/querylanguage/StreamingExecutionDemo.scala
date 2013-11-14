@@ -27,6 +27,9 @@ transactionInterval: 1w
 #set to true if the matcher should follow all possible matching possibilites
 exhaustiveMatching: true
 
+#set the max number of inputs and outputs that are matched against each other
+matchingComplexity: 10
+
 #conditions that a component has to fulfil to be reported
 filters: [SIZE > 5, SIZE<1000, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS > 2]
 
