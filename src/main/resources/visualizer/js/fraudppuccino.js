@@ -13,7 +13,9 @@ svg.attr("pointer-events", "all").call(d3.behavior.zoom().on("zoom", transformat
 
 var graphVisualization = svg.append('svg:g').attr("id", "graphVisualization");
 
-var reports = []
+var reports = {}
+var reportsCounter = 0 //supplier of unique report IDs
+
 
 var graph = {
 	"nodes" : [],
@@ -117,20 +119,12 @@ function showDetailsForNode(node) {
 	}
 }
 
-function updateReports() {
-	$("div #reportsList").empty();
-	reports.forEach(function(report, index) {
-		appendReport(report);
-	});
-}
-
 function appendReport(report) {
-	var index = reports.length;
-	reports.push(report);
+	reports[reportsCounter] = report
 	var startDate = new Date(report.start);
 	var endDate = new Date(report.end);
 	var reportListEntry = '<li data-component-id="'
-			+ index
+			+ reportsCounter
 			+ '" class="list-group-item"><span class="glyphicon glyphicon-remove remove-report"></span>'
 			+ startDate.toLocaleDateString()
 			+ '-'
@@ -143,9 +137,9 @@ function appendReport(report) {
 			+ report.members.length
 			+ ' transactions<br/>'
 			+ '<button type="button" class="btn btn-default btn-xs showAccountGraph">Account Graph</button> <button type="button" class="btn btn-default btn-xs showTransactionGraph">Transaction Graph</button></li>';
-
+	reportsCounter++;
 	$("div #reportsList").append(reportListEntry);
-	$("div #reportsHeader").text("Reports(" + reports.length + ")");
+	updateReportsCount();
 }
 
 $(document).on('click', '.showAccountGraph', function() {
@@ -163,14 +157,21 @@ $(document).on('click', '.showTransactionGraph', function() {
 });
 
 $(document).on('click', '.remove-report', function() {
+	var idOfReport = $(this).parent().attr('data-component-id');
 	$(this).parent().fadeOut(300, function() {
 		$(this).remove();
 	});
+	delete reports[idOfReport];
+	updateReportsCount();
 });
 
 $(document).on('click', '#runAlgorithm', function() {
 	websocket.send(editorDSL.getValue());
 });
+
+function updateReportsCount() {
+	$("div #reportsHeader").text("Reports(" + Object.keys(reports).length + ")");
+}
 
 function loadTransactionGraph(id) {
 
