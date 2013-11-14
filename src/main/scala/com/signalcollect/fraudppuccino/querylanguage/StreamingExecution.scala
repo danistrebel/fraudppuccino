@@ -24,7 +24,7 @@ case class StreamingExecution(
   maxComponentDuration: Long = 0l,
   filters: Iterable[String] = List(),
   resultHandlers: Iterable[String] = List(),
-  debug: Iterable[String] = List(),
+  debug: Boolean = false,
   transactionAttributes: Map[String, (Int, String => Any)] = Map[String, (Int, String => Any)]()) {
 
   val graph = GraphBuilder.withStorageFactory(JavaMapStorage).build
@@ -67,7 +67,9 @@ case class StreamingExecution(
       graph.recalculateScores
       graph.execute
       val executionTime = System.currentTimeMillis - startTime
-      println(executionTime + "," + lowerWindowBound)
+      if (debug) {
+        println(executionTime + "," + lowerWindowBound)
+      }
     }
 
   }
@@ -94,7 +96,9 @@ case class StreamingExecution(
       val splitted = iter.next.split(",")
 
       if (splitted(indexOfTime).toLong >= endTime) {
-        print(splitted(indexOfId) + ",")
+        if (debug) {
+          print(splitted(indexOfId) + ",")
+        }
         return
       }
 

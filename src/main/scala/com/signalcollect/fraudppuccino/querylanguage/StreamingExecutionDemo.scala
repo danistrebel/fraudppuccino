@@ -24,7 +24,7 @@ end: 18/08/2013 17:30:00
 window: 1d
 transactionInterval: 1w
 
-#set to true if the matcher should follow all possible matching possibilites
+#set to true if the matcher should follow all possible matching possibilities
 exhaustiveMatching: true
 
 #set the max number of inputs and outputs that are matched against each other
@@ -40,7 +40,7 @@ filters: [SIZE > 5, SIZE<1000, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS >
 #e.g. WEBSERVER, CONSOLE, MONGODB
 handlers: [WEBSERVER]
 
-debug: []
+debug: true
   
   """
 

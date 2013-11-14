@@ -57,25 +57,42 @@
 			<div id="tabsWrapper">
 			<div id="tabs-1">
 				<textarea id="query" rows="15" placeholder="Start here..">
-source: /path/to/transactions.csv
-parse:
+#path of the input data
+source: /Volumes/Data/BTC_August2013/user-user-tx.csv
+
+#tells the parser about the semantics of the entries in the
+#input data
+parse: 
   id: [0, Int]
   src: [2, Int]
   target: [3, Int]
   value: [4, Long]
   time: [5, Long]
 
+#The sections of the input data that should be processed
 start: 01/09/2009 02:50:00
 end: 18/08/2013 17:30:00
 
 window: 1d
 transactionInterval: 1w
 
-filters: [SIZE > 5, SINKS = 1, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS > 2]
+#set to true if the matcher should follow all possible matching possibilities
+exhaustiveMatching: true
 
-handlers: [WEBSERVER, CONSOLE]
+#set the max number of inputs and outputs that are matched against each other
+matchingComplexity: 10
 
-debug: []
+#sets the max duration of components to prevent them from lasting for the entire streaming period.
+maxComponentDuration: 8w
+
+#conditions that a component has to fulfil to be reported
+filters: [SIZE > 5, SIZE<1000, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS > 2]
+
+#handlers that receive the reported components
+#e.g. WEBSERVER, CONSOLE, MONGODB
+handlers: [WEBSERVER]
+
+debug: true
 </textarea>
 <a id="runAlgorithm" class="btn btn-primary" href="#">Run</a>			
 			</div>

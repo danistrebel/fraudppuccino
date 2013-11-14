@@ -18,8 +18,8 @@ class ExecutionModel {
   @BeanProperty var maxComponentDuration: String = "0"
   @BeanProperty var filters = new java.util.ArrayList[String]()
   @BeanProperty var handlers = new java.util.ArrayList[String]()
-  @BeanProperty var debug = new java.util.ArrayList[String]()
-
+  @BeanProperty var debug: Boolean = false
+  
   def parseExecution: StreamingExecution = {
     StreamingExecution(source, 
         parseUnixDate(start), 
