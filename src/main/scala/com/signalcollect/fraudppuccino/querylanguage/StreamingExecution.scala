@@ -10,6 +10,7 @@ import akka.actor.Props
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.componentdetection._
 import com.signalcollect.fraudppuccino.structuredetection._
+import com.signalcollect.Vertex
 
 case class StreamingExecution(
   sourceFile: String = "",
@@ -17,6 +18,7 @@ case class StreamingExecution(
   endTime: Long = 0l, //Unix time stamp
   windowSize: Long = 0l, //in s
   maxTxInterval: Long = 0l, // in s
+  exhaustiveMatching: Boolean = true,// 
   filters: Iterable[String] = List(),
   resultHandlers: Iterable[String] = List(),
   debug: Iterable[String] = List(),
@@ -33,7 +35,10 @@ case class StreamingExecution(
   
   val optionalAttributes = transactionAttributes.filter(attribute => !mandatoryTransactionAttributes.contains(attribute._1))
   
-    
+  val transactionAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if(exhaustiveMatching) v => TransactionAnnouncer(v) else v => new UnsubscribingTransactionAnnouncer(v)
+  val matcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if(exhaustiveMatching) v => BTCTransactionMatcher(v) else v => GreedyBitcoinMatcher(v)
+
+  
   def execute = {
 
     val system = ActorSystemRegistry.retrieve("SignalCollect").get
@@ -111,12 +116,12 @@ case class StreamingExecution(
     }
         
     transaction.storeAttribute("xCountry", srcId % 10 == targetId % 10) //true of the transaction spans 2 countries.
-    transaction.setAlgorithmImplementation(v => TransactionAnnouncer(v))
+    transaction.setAlgorithmImplementation(transactionAlgorithm)
 
     val sender = new RepeatedAnalysisVertex(srcId)
-    sender.setAlgorithmImplementation(v => BTCTransactionMatcher(v))
+    sender.setAlgorithmImplementation(matcherAlgorithm)
     val receiver = new RepeatedAnalysisVertex(targetId)
-    receiver.setAlgorithmImplementation(v => BTCTransactionMatcher(v))
+    receiver.setAlgorithmImplementation(matcherAlgorithm)
 
     graph.addVertex(transaction)
     graph.addVertex(sender)
@@ -133,6 +138,7 @@ case class StreamingExecution(
     val timeout = Array[Long](txTimeout, componentTimeout)
     graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
       vertex.deliverSignal(timeout, None, graphEditor))
+    graph.awaitIdle
   }
 }
 

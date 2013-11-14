@@ -20,7 +20,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
   val graph = GraphBuilder.build
 
   "the component handler" should {
-    "register connected components with the handler " in {
+    "report the component master of a chain " in {
       //Register a component handler
       val system = ActorSystemRegistry.retrieve("SignalCollect").get
       val componentHandler = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
@@ -51,10 +51,18 @@ class ComponentSpecs extends SpecificationWithJUnit {
         } else {
           vertex.setAlgorithmImplementation(v => new ComponentMember(v))
         }
-        
+
         graph.addVertex(vertex)
       })
 
+      graph.recalculateScores
+      graph.execute
+      graph.recalculateScores
+      graph.execute
+
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
 
       graph.recalculateScores
       graph.execute

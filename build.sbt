@@ -33,6 +33,4 @@ libraryDependencies ++= Seq(
 
 jarName in assembly := "fraudppucchino.jar"
 
-//test in assembly := {} skips the tests
-
-mainClass in assembly := Some("com.signalcollect.fraudppucchino.evaluation.btc.BTCInputAddressMerger")
+test in assembly := {}// skips the tests

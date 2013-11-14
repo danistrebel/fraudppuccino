@@ -13,11 +13,13 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case timeout: Array[Long] => handleTimeout(timeout)
+      case timeout: Array[Long] => handleTimeout(timeout, graphEditor)
       case newLabel: LabelType => {
         if (shouldSwitchToLabel(newLabel)) {
           label = newLabel
           scoreSignal = 1.0
+        } else if (newLabel != label) {
+          graphEditor.sendSignal(label, sourceId.get, Some(vertex.id))
         }
       }
     }
@@ -26,9 +28,10 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
 
   /**
    * Signal along all edges where specified
-   */ 
+   */
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    vertex.outgoingEdges.filter(edge => shouldSignalForEdgeType(edge._2)).foreach(edge => graphEditor.sendSignal(label, edge._1, Some(vertex.id)))
+    val edgesToSignal = vertex.outgoingEdges.filter(edge => shouldSignalForEdgeType(edge._2))
+    edgesToSignal.foreach(edge => graphEditor.sendSignal(label, edge._1, Some(vertex.id)))
     scoreSignal = 0.0
   }
 
@@ -47,6 +50,6 @@ abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_])
   def shouldSwitchToLabel(newLabel: LabelType): Boolean
 
   def shouldSignalForEdgeType(edgeType: EdgeMarker): Boolean
-  
-  def handleTimeout(timeout: Array[Long])
+
+  def handleTimeout(timeout: Array[Long], graphEditor: GraphEditor[Any, Any])
 }

@@ -13,12 +13,13 @@ class ExecutionModel {
   @BeanProperty var end: String = null
   @BeanProperty var window: String = null
   @BeanProperty var transactionInterval: String = null
+  @BeanProperty var exhaustiveMatching = true
   @BeanProperty var filters = new java.util.ArrayList[String]()
   @BeanProperty var handlers = new java.util.ArrayList[String]()
   @BeanProperty var debug = new java.util.ArrayList[String]()
 
   def parseExecution: StreamingExecution = {
-    StreamingExecution(source, parseUnixDate(start), parseUnixDate(end), parseSec(window), parseSec(transactionInterval), filters, handlers, debug, attributeMapper(parse))
+    StreamingExecution(source, parseUnixDate(start), parseUnixDate(end), parseSec(window), parseSec(transactionInterval), exhaustiveMatching, filters, handlers, debug, attributeMapper(parse))
   }
 
   def attributeMapper(parsed: java.util.Map[String, java.util.List[Object]]): Map[String, (Int, String => Any)] = {
