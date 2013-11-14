@@ -11,6 +11,7 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.componentdetection._
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.Vertex
+import akka.actor.ActorRef
 
 case class StreamingExecution(
   sourceFile: String = "",
@@ -29,12 +30,12 @@ case class StreamingExecution(
 
   val graph = GraphBuilder.withStorageFactory(JavaMapStorage).build
   var iter: Iterator[String] = null //Specify the work flow
-
   val mandatoryTransactionAttributes = Array[String]("id", "src", "target", "time")
   val indexOfId = transactionAttributes("id")._1
   val indexOfTime = transactionAttributes("time")._1
   val indexOfSrc = transactionAttributes("src")._1
   val indexOfTarget = transactionAttributes("target")._1
+  var handlerRef: ActorRef = null
 
   val optionalAttributes = transactionAttributes.filter(attribute => !mandatoryTransactionAttributes.contains(attribute._1))
 
@@ -44,14 +45,16 @@ case class StreamingExecution(
   def execute = {
 
     val system = ActorSystemRegistry.retrieve("SignalCollect").get
-    val handlerRef = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
+    handlerRef = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
+    for (handler <- resultHandlers) {
+      handlerRef ! RegisterResultHandler(ComponentResultHandler(handler))
+    }
+
     for (filter <- filters) {
       handlerRef ! WorkFlowStep(filter)
     }
 
-    for (handler <- resultHandlers) {
-      handlerRef ! RegisterResultHandler(ComponentResultHandler(handler))
-    }
+    sendStatusUpdate("update", "computation has started")
 
     for (lowerWindowBound <- startTime to endTime by windowSize) {
       if (maxComponentDuration > 0) { //signal maxComponentDuration if it is set
@@ -61,14 +64,17 @@ case class StreamingExecution(
 
       }
 
+      val loadingStartTime = System.currentTimeMillis
       load(sourceFile, lowerWindowBound, lowerWindowBound + windowSize)
-
-      val startTime = System.currentTimeMillis
+      val loadingTime = System.currentTimeMillis - loadingStartTime
+      
+      val executionStartTime = System.currentTimeMillis
       graph.recalculateScores
       graph.execute
-      val executionTime = System.currentTimeMillis - startTime
+      val executionTime = System.currentTimeMillis - executionStartTime
       if (debug) {
-        println(executionTime + "," + lowerWindowBound)
+        sendStatusUpdate("progress", ((lowerWindowBound - startTime) * 100 / (endTime - startTime)).toString)
+        println(loadingTime + "," + executionTime + "," + lowerWindowBound)
       }
     }
 
@@ -87,6 +93,7 @@ case class StreamingExecution(
     filePath: String,
     startTime: Long,
     endTime: Long) {
+
     if (iter == null) {
       iter = Source.fromFile(filePath).getLines
     }
@@ -98,6 +105,7 @@ case class StreamingExecution(
       if (splitted(indexOfTime).toLong >= endTime) {
         if (debug) {
           print(splitted(indexOfId) + ",")
+
         }
         return
       }
@@ -148,6 +156,10 @@ case class StreamingExecution(
     graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
       vertex.deliverSignal(timeout, None, graphEditor))
     graph.awaitIdle
+  }
+
+  def sendStatusUpdate(status: String, msg: String) {
+    handlerRef ! ComputationStatus("{\"status\":\"" + status + "\", \"msg\":\"" + msg + "\"}")
   }
 }
 

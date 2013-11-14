@@ -170,7 +170,19 @@ $(document).on('click', '#runAlgorithm', function() {
 });
 
 function updateReportsCount() {
-	$("div #reportsHeader").text("Reports(" + Object.keys(reports).length + ")");
+	$("div#reportsHeader").text("Reports(" + Object.keys(reports).length + ")");
+}
+
+function displayStatus(message) {
+	$("div#notifications").empty();
+	$("div#notifications").append('<div id="computationStatus" class="alert alert-info">'+message.msg+'</div>');
+    setTimeout(function() {
+	    $('div#computationStatus').fadeOut('fast');
+	}, 1500);
+}
+
+function updateProgess(progress) {
+	$("div#computationProgress").width(progress + "%");
 }
 
 function loadTransactionGraph(id) {
@@ -270,6 +282,18 @@ var wsUri = "ws://localhost:8888/websocket/";
 var websocket = new WebSocket(wsUri);
 
 websocket.onmessage = function(msg) {
-	report = JSON.parse(msg.data);
-	appendReport(report);
+	message = JSON.parse(msg.data);
+	if(message.hasOwnProperty("id") && message.hasOwnProperty("members")) {
+		appendReport(message);		
+	} else if (message.hasOwnProperty("status")) {
+		if(message.status == "progress") {
+			updateProgess(message.msg);
+		} else {
+			displayStatus(message);	
+		}
+		
+	} else {
+		console.log("received: " + message)
+	}
+		
 }

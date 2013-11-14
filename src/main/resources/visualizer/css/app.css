@@ -1,17 +1,53 @@
+@media (min-width: 1200px) {
+    .container{
+        max-width: 100%;
+    }
+}
+
+div#header {
+   width: 100%;
+   padding:20px;
+}
+
+div#branding {
+	float: left;
+	position:relative;
+	width:500px;
+}
+
+div#notifications {
+    float: left;
+}
+
+div#branding span {
+	font-family: 'Lato', sans-serif;
+	font-size:30px;
+	margin-left:30px;
+	position: absolute; 
+	bottom: 0px; 
+}
+
+.container {
+	top:20px;
+	position:absolute;
+	width: 100%;
+	float:clear;
+}
+
 .node {
-  stroke: #fff;
-  stroke-width: 1.5px;
+	stroke: #fff;
+	stroke-width: 1.5px;
 }
 
 .selected {
-  stroke: #FF6600;
-  stroke-width: 3px;
+	stroke: #FF6600;
+	stroke-width: 3px;
 }
 
 .link {
-  stroke: #999;
-  stroke-width: 3px;
-  stroke-opacity: .6;
+	stroke: #999;
+	stroke-width: 3px;
+	stroke-opacity: .6;
 }
 
 textarea#query {
@@ -25,28 +61,28 @@ textarea#query {
 }
 
 #tabsWrapper {
-	background-color: rgba(233,233,233,0.6);
-	padding:20px;
-	height:450px;
+	background-color: rgba(233, 233, 233, 0.6);
+	padding: 20px;
+	height: 450px;
 }
 
 marker#transaction {
-   fill: #555;
+	fill: #555;
 }
 
 .remove-report {
-   float:right;
+	float: right;
 }
 
 #patternVisualizer {
-	height:550px;
+	height: 550px;
 }
 
 #reportsContent {
-	height:550px;
+	height: 550px;
 	overflow-y: auto;
 }
 
 a#runAlgorithm {
-	margin-top:20px;
+	margin-top: 20px;
 }

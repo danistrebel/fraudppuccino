@@ -101,6 +101,8 @@ case object FraudppuccinoServer extends ComponentResultHandler {
   webServer.start()
   System.out.println("Open your browser and navigate to http://localhost:8888")
 
+  
+  //try to open the default browser showing the evaluation front end
   try {
     "open http://localhost:8888/index.html" !
   } catch {
@@ -108,10 +110,18 @@ case object FraudppuccinoServer extends ComponentResultHandler {
   }
 
   /**
-   * Broadcasts the result along all registered websockets
+   * Broadcasts the result along all registered web sockets
    */
   def processResult(jsonData: String) {
     webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
   }
+  
+  /**
+   * Broadcasts the computation state along all registered web sockets
+   */ 
+  override def processStatusMessage(jsonStatus: String) = {
+    webSocketBroadcaster ! WebSocketBroadcastText(jsonStatus)
+  }
+
 
 }

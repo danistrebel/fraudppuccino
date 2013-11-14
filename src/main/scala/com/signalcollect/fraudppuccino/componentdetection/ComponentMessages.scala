@@ -18,6 +18,7 @@ case class ComponentAlgorithmExecution(memberAlgorithm: ComponentMemberAlgorithm
 // Component Master --> Component Handler
 case class ComponentAnnouncement(componentId: Any)
 case class ComponentResult(serializedComponent: String)
+case class ComputationStatus(serializedStatus: String)
 
 // Component Member --> Component Master
 abstract class ComponentMemberMessage //Message sent from the component member to the master

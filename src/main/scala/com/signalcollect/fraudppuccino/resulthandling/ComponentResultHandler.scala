@@ -2,6 +2,7 @@ package com.signalcollect.fraudppuccino.resulthandling
 
 abstract class ComponentResultHandler {
   def processResult(jsonData: String): Unit
+  def processStatusMessage(jsonStatus: String) = {}
 }
 
 object ComponentResultHandler {

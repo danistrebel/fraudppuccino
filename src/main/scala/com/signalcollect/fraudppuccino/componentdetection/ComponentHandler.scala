@@ -40,5 +40,9 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
     case ComponentResult(serializedComponent) => {
       resultHandler.foreach(_.processResult(serializedComponent))
     }
+    
+    case ComputationStatus(serializedStatus) => {
+      resultHandler.foreach(_.processStatusMessage(serializedStatus))
+    }
   }
 }
