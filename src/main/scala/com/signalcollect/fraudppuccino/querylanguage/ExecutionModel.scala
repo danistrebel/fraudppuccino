@@ -6,6 +6,10 @@ import java.util.HashMap
 import java.util.Calendar
 import java.util.TimeZone
 
+/**
+ * Captures all relevant information for issuing matcher executions.
+ * This also serves as the model for parsing the YAML execution definition. 
+ */ 
 class ExecutionModel {
   @BeanProperty var source: String = null
   @BeanProperty var parse = new HashMap[String, java.util.List[Object]]()
@@ -20,6 +24,9 @@ class ExecutionModel {
   @BeanProperty var handlers = new java.util.ArrayList[String]()
   @BeanProperty var debug: Boolean = false
   
+  /**
+   * Converts the model in an executable execution plan.
+   */ 
   def parseExecution: StreamingExecution = {
     StreamingExecution(source, 
         parseUnixDate(start), 
@@ -35,8 +42,11 @@ class ExecutionModel {
         attributeMapper(parse))
   }
 
+  /**
+   * Gets the appropriate converter based on the type name.
+   */ 
   def attributeMapper(parsed: java.util.Map[String, java.util.List[Object]]): Map[String, (Int, String => Any)] = {
-
+    
     val intParser: String => Any = intValue => intValue.toInt
     val longParser: String => Any = longValue => longValue.toLong
     val doubleParser: String => Any = doubleValue => doubleValue.toDouble

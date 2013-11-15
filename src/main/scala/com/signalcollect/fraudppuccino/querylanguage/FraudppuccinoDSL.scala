@@ -11,7 +11,7 @@ import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.Constructor
 
 /**
- * DSL to control a fraudppuccino analysis session
+ * parses a YAML execution specification and starts its execution.
  */
 object FRAUDPPUCCINO {
 

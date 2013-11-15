@@ -4,6 +4,11 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection._
 
+/**
+ * Lets the component members report themselves at the component master.
+ * Requires that the vertex already learned about the id of its component
+ * master and stored it in a "component" field.
+ */ 
 class ComponentMemberAnnoncer(vertex : RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
 def getState = None
 

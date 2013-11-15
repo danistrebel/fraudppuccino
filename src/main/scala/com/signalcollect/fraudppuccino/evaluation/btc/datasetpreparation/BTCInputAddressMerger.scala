@@ -39,6 +39,10 @@ class BTCTransaction(id: Int) extends DataGraphVertex(id, Int.MaxValue) {
   }
 }
 
+/**
+ * Merges Bitcoin addresses if they are known to belong to the same user.
+ * This is the case when addresses appear as aggregated inputs in a single transaction.
+ */ 
 object BTCInputAddressMerger extends App {
   val graph = GraphBuilder.build
 

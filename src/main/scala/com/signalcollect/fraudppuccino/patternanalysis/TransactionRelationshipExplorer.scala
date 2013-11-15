@@ -4,6 +4,9 @@ import com.signalcollect.fraudppuccino.repeatedanalysis.VertexAlgorithm
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection._
 
+/**
+ * Utility to explore node properties about nodes and their direct environment 
+ */ 
 trait TransactionRelationshipExplorer extends VertexAlgorithm {
 
   /**

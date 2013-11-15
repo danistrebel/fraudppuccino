@@ -6,6 +6,10 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 
+/**
+ * Explores the depth of this vertex. I.e. their longest distance from a
+ * source vertex within this component.
+ */
 class PatternDepthAnalyzer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
   var depth = 0
@@ -31,17 +35,15 @@ class PatternDepthAnalyzer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgo
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(depth+1, edge._1, Some(vertex.id)))
+    outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(depth + 1, edge._1, Some(vertex.id)))
     scoreSignal = 0
   }
 
-  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
-  }
+  def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {}
 
   var scoreSignal = if (isPatternSource) 1.0 else 0.0
 
   var scoreCollect = 0.0
 
-  def notifyTopologyChange {
-  }
+  def notifyTopologyChange {}
 }

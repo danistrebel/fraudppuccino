@@ -13,21 +13,25 @@ import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.Vertex
 import akka.actor.ActorRef
 
+/**
+ * A streamed execution that reads transactions from an input source and matches them
+ * according to the conditions specified by the user.
+ */ 
 case class StreamingExecution(
-  sourceFile: String = "",
+  sourceFile: String = "", //Path to the input source file
   startTime: Long = 0l, //Unix time stamp
   endTime: Long = 0l, //Unix time stamp
   windowSize: Long = 0l, //in s
   maxTxInterval: Long = 0l, // in s
   exhaustiveMatching: Boolean = true, // should the matcher consider more than one possible matching combination
   matchingComplexity: Integer = 10, //number Of inputs and outputs that are considered in the matching
-  matchingMode: MatchingMode = MATCH_ALL,
-  maxComponentDuration: Long = 0l,
-  filters: Iterable[String] = List(),
-  resultHandlers: Iterable[String] = List(),
-  debug: Boolean = false,
-  transactionAttributes: Map[String, (Int, String => Any)] = Map[String, (Int, String => Any)]()) {
-
+  matchingMode: MatchingMode = MATCH_ALL, //what kinds of transaction associations should be captured
+  maxComponentDuration: Long = 0l, //maximum length of a component
+  filters: Iterable[String] = List(), //List of filters that components have to comply with in order to be reported
+  resultHandlers: Iterable[String] = List(), // handlers that receive the reported components
+  debug: Boolean = false, // prints additional information about the execution if true
+  transactionAttributes: Map[String, (Int, String => Any)] = Map[String, (Int, String => Any)]()) //Attributes that should be parsed from the input file. Format (Name, (Index, Parser))
+  {
   val graph = GraphBuilder.withStorageFactory(JavaMapStorage).build
   var iter: Iterator[String] = null //Specify the work flow
   val mandatoryTransactionAttributes = Array[String]("id", "src", "target", "time")

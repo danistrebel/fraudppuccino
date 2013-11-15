@@ -5,6 +5,10 @@ import com.signalcollect.GraphEditor
 import scala.collection.mutable.ArrayBuffer
 import com.signalcollect.fraudppuccino.patternanalysis.CountryHopCounter
 
+/**
+ * Provides a number of predefined component algorithms that are used
+ * to prune the reported components.
+ */ 
 object ComponentAlgorithms {
 
   /*
