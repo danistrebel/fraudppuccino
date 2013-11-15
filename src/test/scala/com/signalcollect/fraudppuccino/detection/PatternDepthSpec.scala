@@ -37,20 +37,20 @@ class PatternDepthSpec extends SpecificationWithJUnit {
       transactionsMap += ((tx.id, tx))
     }
 
-    graph.addEdge(100, new DownstreamTransactionEdge(101))
-    graph.addEdge(100, new DownstreamTransactionEdge(102))
-    graph.addEdge(101, new UpstreamTransactionEdge(100))
-    graph.addEdge(102, new UpstreamTransactionEdge(100))
+    graph.addEdge(100, new DownstreamTransactionEdgeWrapper(101))
+    graph.addEdge(100, new DownstreamTransactionEdgeWrapper(102))
+    graph.addEdge(101, new UpstreamTransactionEdgeWrapper(100))
+    graph.addEdge(102, new UpstreamTransactionEdgeWrapper(100))
 
-    graph.addEdge(101, new DownstreamTransactionEdge(103))
-    graph.addEdge(101, new DownstreamTransactionEdge(104))
-    graph.addEdge(103, new UpstreamTransactionEdge(101))
-    graph.addEdge(104, new UpstreamTransactionEdge(101))
+    graph.addEdge(101, new DownstreamTransactionEdgeWrapper(103))
+    graph.addEdge(101, new DownstreamTransactionEdgeWrapper(104))
+    graph.addEdge(103, new UpstreamTransactionEdgeWrapper(101))
+    graph.addEdge(104, new UpstreamTransactionEdgeWrapper(101))
 
-    graph.addEdge(103, new DownstreamTransactionEdge(105))
-    graph.addEdge(103, new DownstreamTransactionEdge(106))
-    graph.addEdge(105, new UpstreamTransactionEdge(103))
-    graph.addEdge(106, new UpstreamTransactionEdge(103))
+    graph.addEdge(103, new DownstreamTransactionEdgeWrapper(105))
+    graph.addEdge(103, new DownstreamTransactionEdgeWrapper(106))
+    graph.addEdge(105, new UpstreamTransactionEdgeWrapper(103))
+    graph.addEdge(106, new UpstreamTransactionEdgeWrapper(103))
 
     " be found" in {
 

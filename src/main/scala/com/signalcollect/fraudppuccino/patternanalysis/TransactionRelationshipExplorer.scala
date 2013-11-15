@@ -2,10 +2,7 @@ package com.signalcollect.fraudppuccino.patternanalysis
 
 import com.signalcollect.fraudppuccino.repeatedanalysis.VertexAlgorithm
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
-import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
-import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionEdge
-import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection._
 
 trait TransactionRelationshipExplorer extends VertexAlgorithm {
 

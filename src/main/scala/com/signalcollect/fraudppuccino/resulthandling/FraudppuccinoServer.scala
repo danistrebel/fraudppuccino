@@ -31,13 +31,11 @@ case object FraudppuccinoServer extends ComponentResultHandler {
    * Uses a Socko Server for lightweight file serving and handling websocket connections to the clients
    */
   val visualizationActorConfig = """
+           
       my-pinned-dispatcher {
         type=PinnedDispatcher
         executor=thread-pool-executor
       }
-      my-static-content-handler {
-		    root-file-paths="/Users/strebel/Documents/workspace/PatternDetective/src/main/resources/visualizer"
-		  }
       akka {
         event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
         loglevel=DEBUG
@@ -51,36 +49,17 @@ case object FraudppuccinoServer extends ComponentResultHandler {
         }
       }"""
 
-  object MyStaticHandlerConfig extends ExtensionId[StaticContentHandlerConfig] with ExtensionIdProvider {
-    override def lookup = MyStaticHandlerConfig
-    override def createExtension(system: ExtendedActorSystem) =
-      new StaticContentHandlerConfig(system.settings.config, "my-static-content-handler")
-  }
-
   val actorSystem = ActorSystem("VisualizationActorSystem", ConfigFactory.parseString(visualizationActorConfig))
-
-  val handlerConfig = MyStaticHandlerConfig(actorSystem)
 
   val webSocketBroadcaster = actorSystem.actorOf(Props[WebSocketBroadcaster], "webSocketBroadcaster")
 
-  val staticContentHandlerRouter = actorSystem.actorOf(Props(new StaticContentHandler(handlerConfig))
-    .withRouter(FromConfig()).withDispatcher("my-pinned-dispatcher"), "static-file-router")
-
   val routes = Routes({
-    case HttpRequest(request) => request match {
-      case GET(Path(file)) => {
-        if (file.size<=1) {
-          staticContentHandlerRouter ! new StaticFileRequest(request, new File("/Users/strebel/Documents/workspace/PatternDetective/src/main/resources/visualizer/index.html"))
-        } else {
-          staticContentHandlerRouter ! new StaticFileRequest(request, new File("/Users/strebel/Documents/workspace/PatternDetective/src/main/resources/visualizer" + file))
-        }
-      }
-    }
     case WebSocketHandshake(wsHandshake) => wsHandshake match {
       //Add the client to the list of broadcast subscribers
       case Path("/websocket/") => {
         wsHandshake.authorize(onComplete = Some((event: WebSocketHandshakeEvent) => {
           webSocketBroadcaster ! new WebSocketBroadcasterRegistration(event)
+          println("added")
         }))
       }
     }
@@ -90,24 +69,12 @@ case object FraudppuccinoServer extends ComponentResultHandler {
       actorSystem.actorOf(Props[WebSocketHandler]) ! wsFrame
     }
 
+    case _ =>
+
   })
 
-  val webServer = new WebServer(WebServerConfig(), routes, actorSystem)
-
-  Runtime.getRuntime.addShutdownHook(new Thread {
-    override def run { webServer.stop() }
-  })
-
+  val webServer = new WebServer(WebServerConfig(hostname = "0.0.0.0"), routes, actorSystem)
   webServer.start()
-  System.out.println("Open your browser and navigate to http://localhost:8888")
-
-  
-  //try to open the default browser showing the evaluation front end
-  try {
-    "open http://localhost:8888/index.html" !
-  } catch {
-    case t: Throwable => // Fail silently
-  }
 
   /**
    * Broadcasts the result along all registered web sockets
@@ -115,13 +82,12 @@ case object FraudppuccinoServer extends ComponentResultHandler {
   def processResult(jsonData: String) {
     webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
   }
-  
+
   /**
    * Broadcasts the computation state along all registered web sockets
-   */ 
+   */
   override def processStatusMessage(jsonStatus: String) = {
     webSocketBroadcaster ! WebSocketBroadcastText(jsonStatus)
   }
-
 
 }

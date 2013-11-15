@@ -175,7 +175,7 @@ $(document).on('click', '#exportReports', function() {
 
 $(document).on('click', '#updateSettings', function() {
     var newWebSocketURI = $('#wsURI').val();
-    websocket = new WebSocket(newWebSocketURI);
+    initializeWebSocket(newWebSocketURI);
 });
 
 function updateReportsCount() {
@@ -288,21 +288,27 @@ function loadAccountGraph(id) {
  * Websocket Communication
  */
 var wsUri = "ws://localhost:8888/websocket/";
-var websocket = new WebSocket(wsUri);
 
-websocket.onmessage = function(msg) {
-	message = JSON.parse(msg.data);
-	if(message.hasOwnProperty("id") && message.hasOwnProperty("members")) {
-		appendReport(message);		
-	} else if (message.hasOwnProperty("status")) {
-		if(message.status == "progress") {
-			updateProgess(message.msg);
+var websocket = null
+
+function initializeWebSocket(wsUri) {
+	websocket = new WebSocket(wsUri);
+	websocket.onmessage = function(msg) {
+		message = JSON.parse(msg.data);
+		if(message.hasOwnProperty("id") && message.hasOwnProperty("members")) {
+			appendReport(message);		
+		} else if (message.hasOwnProperty("status")) {
+			if(message.status == "progress") {
+				updateProgess(message.msg);
+			} else {
+				displayStatus(message);	
+			}
+			
 		} else {
-			displayStatus(message);	
+			console.log("received: " + message)
 		}
-		
-	} else {
-		console.log("received: " + message)
 	}
-		
 }
+
+initializeWebSocket(wsUri);
+
