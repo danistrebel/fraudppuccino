@@ -14,7 +14,7 @@ svg.attr("pointer-events", "all").call(d3.behavior.zoom().on("zoom", transformat
 var graphVisualization = svg.append('svg:g').attr("id", "graphVisualization");
 
 var reports = {}
-var reportsCounter = 0 //supplier of unique report IDs
+var reportsCounter = 0 // supplier of unique report IDs
 
 
 var graph = {
@@ -293,20 +293,37 @@ var websocket = null
 
 function initializeWebSocket(wsUri) {
 	websocket = new WebSocket(wsUri);
+	
+	websocket.onopen = function() {
+		websocket.send("getpreviousresults");	
+	}
+
 	websocket.onmessage = function(msg) {
 		message = JSON.parse(msg.data);
-		if(message.hasOwnProperty("id") && message.hasOwnProperty("members")) {
-			appendReport(message);		
-		} else if (message.hasOwnProperty("status")) {
-			if(message.status == "progress") {
-				updateProgess(message.msg);
-			} else {
-				displayStatus(message);	
-			}
-			
-		} else {
-			console.log("received: " + message)
+		if(message instanceof Array) {
+			$.each(message, function(i, m ) {
+				  processMessage(m);
+			});
 		}
+		else {
+			processMessage(message)
+		}
+	}
+	
+}
+
+function processMessage(message) {
+	if(message.hasOwnProperty("id") && message.hasOwnProperty("members")) {
+		appendReport(message);		
+	} else if (message.hasOwnProperty("status")) {
+		if(message.status == "progress") {
+			updateProgess(message.msg);
+		} else {
+			displayStatus(message);	
+		}
+		
+	} else {
+		console.log("received: " + message)
 	}
 }
 

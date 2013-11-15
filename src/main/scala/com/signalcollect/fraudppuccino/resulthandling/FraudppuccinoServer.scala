@@ -15,6 +15,7 @@ import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.componentdetection.ComponentHandler
 import sys.process._
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Visualization component to visually represent findings within the graph.
@@ -59,14 +60,14 @@ case object FraudppuccinoServer extends ComponentResultHandler {
       case Path("/websocket/") => {
         wsHandshake.authorize(onComplete = Some((event: WebSocketHandshakeEvent) => {
           webSocketBroadcaster ! new WebSocketBroadcasterRegistration(event)
-          println("added")
         }))
       }
     }
 
     case WebSocketFrame(wsFrame) => {
       // Process websocket frames sent from the client
-      actorSystem.actorOf(Props[WebSocketHandler]) ! wsFrame
+      val webSocketHandler = actorSystem.actorOf(Props[WebSocketHandler])
+      webSocketHandler ! wsFrame
     }
 
     case _ =>
@@ -76,10 +77,15 @@ case object FraudppuccinoServer extends ComponentResultHandler {
   val webServer = new WebServer(WebServerConfig(hostname = "0.0.0.0"), routes, actorSystem)
   webServer.start()
 
+  
+  val previouslySentReports = ArrayBuffer[String]()
+
+  
   /**
    * Broadcasts the result along all registered web sockets
    */
   def processResult(jsonData: String) {
+    previouslySentReports += jsonData
     webSocketBroadcaster ! WebSocketBroadcastText(jsonData)
   }
 
