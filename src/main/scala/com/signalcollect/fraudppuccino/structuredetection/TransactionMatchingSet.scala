@@ -13,13 +13,13 @@ trait IntputMatchingSet {
 }
 
 /**
- * Holds input transactions that can be used for matching output transactions
+ * Holds output transactions that can be used for matching input transactions
  */ 
 trait OutputMatchingSet {
   def extendMatchingSet(transaction: TransactionOutput): Unit
   
   /**
-   * Returns inputs that can be summed up to the target transaction
+   * Returns outputs that can be summed up to the target transaction
    */ 
   def findMatchFor(targetTransaction: TransactionInput): Iterable[Iterable[Any]]
 }

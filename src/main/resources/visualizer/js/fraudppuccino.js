@@ -169,9 +169,14 @@ $(document).on('click', '#runAlgorithm', function() {
 	websocket.send(editorDSL.getValue());
 });
 
-function exportReports() {
-    window.open("data:application/json;charset=utf-8," + escape(JSON.stringify(reports))) 
-};
+$(document).on('click', '#exportReports', function() {
+    window.open("data:application/json;charset=utf-8," + escape(JSON.stringify(reports)));
+});
+
+$(document).on('click', '#updateSettings', function() {
+    var newWebSocketURI = $('#wsURI').val();
+    websocket = new WebSocket(newWebSocketURI);
+});
 
 function updateReportsCount() {
 	$("div#reportsTitle span").text("Reports(" + Object.keys(reports).length + ")");
