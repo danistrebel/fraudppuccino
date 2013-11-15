@@ -45,7 +45,8 @@
 							<span>Reports</span>
 						</div>
 						<div id="reportingOptions">
-							<a href="#" id="importReports"><span
+							<a href="#" data-toggle="modal"
+								data-target="#importModal"><span
 								class="glyphicon glyphicon-import"></span></a> 
 								<a href="#"
 								id="exportReports"><span class="glyphicon glyphicon-export"></span></a>
@@ -123,7 +124,7 @@ debug: true
 		<!-- row -->
 	</div>
 	<!-- container -->
-	<!-- Modal -->
+	<!-- Modals -->
 	<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog"
 		aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -150,7 +151,33 @@ debug: true
 		</div>
 		<!-- /.modal-dialog -->
 	</div>
-	<!-- /.modal -->
+	<div class="modal fade" id="importModal" tabindex="-1" role="dialog"
+		aria-labelledby="UploadModal" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">Reports Import</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form">
+						<div class="form-group">
+							<label for="fileInput">Reports JSON File:</label> 
+							<input type="file" id="fileInput">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+					<button id="importReports" type="button" class="btn btn-primary" data-dismiss="modal">Import</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	<!-- /.modals -->
 </body>
 
 <!-- jQuery -->

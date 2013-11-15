@@ -9,13 +9,13 @@ var force = d3.layout.force().charge(-500).linkDistance(50).size(
 		[ width, height ]);
 
 var svg = d3.select("svg#patternVisualizer");
-svg.attr("pointer-events", "all").call(d3.behavior.zoom().on("zoom", transformation));
+svg.attr("pointer-events", "all").call(
+		d3.behavior.zoom().on("zoom", transformation));
 
 var graphVisualization = svg.append('svg:g').attr("id", "graphVisualization");
 
 var reports = {}
 var reportsCounter = 0 // supplier of unique report IDs
-
 
 var graph = {
 	"nodes" : [],
@@ -23,8 +23,8 @@ var graph = {
 }
 
 var editorDSL = CodeMirror.fromTextArea($("textarea#query")[0], {
-    mode: "text/x-yaml"
-  });
+	mode : "text/x-yaml"
+});
 
 $(function() {
 	$("#tabs").tabs(); // Initialize Tabs
@@ -36,35 +36,35 @@ $('.navTab a').click(function(e) {
 })
 
 function transformation() {
-	  graphVisualization.attr("transform",
-		      "translate(" + d3.event.translate + ")"
-		      + " scale(" + d3.event.scale + ")");
+	graphVisualization.attr("transform", "translate(" + d3.event.translate
+			+ ")" + " scale(" + d3.event.scale + ")");
 }
 
 function updateVisualization() {
-	
+
 	$("g#visualizerPlaceholder").remove();
 	$("g#graphVisualization").empty();
-	
+
 	force.nodes(graph.nodes).links(graph.links).start();
 
-	graphVisualization.append("svg:defs").append("svg:marker").attr("id", "transaction").attr(
-			"viewBox", "0 -5 10 10").attr("refX", 13).attr("refY", 0).attr(
-			"markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
-			.append("svg:path").attr("d", "M0,-5L10,0L0,5");
+	graphVisualization.append("svg:defs").append("svg:marker").attr("id",
+			"transaction").attr("viewBox", "0 -5 10 10").attr("refX", 13).attr(
+			"refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr(
+			"orient", "auto").append("svg:path").attr("d", "M0,-5L10,0L0,5");
 
-	var link = graphVisualization.append("svg:g").selectAll(".link").data(graph.links).enter()
-			.append("svg:path").attr("class", "link").attr("marker-end",
-					"url(#transaction)")
+	var link = graphVisualization.append("svg:g").selectAll(".link").data(
+			graph.links).enter().append("svg:path").attr("class", "link").attr(
+			"marker-end", "url(#transaction)")
 
-	var node = graphVisualization.append("svg:g").selectAll(".node").data(graph.nodes).enter()
-			.append("circle").attr("class", "node").attr("r", function(d) {
+	var node = graphVisualization.append("svg:g").selectAll(".node").data(
+			graph.nodes).enter().append("circle").attr("class", "node").attr(
+			"r", function(d) {
 				return Math.min(20, transactionValue(d.value));
 			}).style("fill", function(d) {
-				return color(d.group);
-			}).call(force.drag).on("click", function(node) {
-				showDetailsForNode(node);
-			});
+		return color(d.group);
+	}).call(force.drag).on("click", function(node) {
+		showDetailsForNode(node);
+	});
 
 	force.on("tick", function() {
 		link.attr("d", function(d) {
@@ -99,8 +99,8 @@ function showDetailsForNode(node) {
 				+ '<tr><td>BTC Transactions out</td><td>' + node.account["out"]
 				/ 100000000 + ' BTC</td></tr>' + '</table>'
 		$('#inspector-content').empty().append(details);
-	} 
-	
+	}
+
 	else if (node.transaction) {
 		var transactionDate = new Date(node.transaction.time * 1000);
 		var details = '<h1>Transaction #' + Math.abs(node.name) + '</h1>'
@@ -112,9 +112,9 @@ function showDetailsForNode(node) {
 				+ transactionDate.toLocaleTimeString() + '</td></tr>'
 				+ '<tr><td>Source</td><td>' + node.transaction.src
 				+ '</td></tr>' + '<tr><td>Target</td><td>'
-				+ node.transaction.target + '</td></tr>' 
-				+ '<tr><td>Cross Coutry</td><td>' + node.transaction.xCountry +'</td></tr>'
-				+ '</table>'
+				+ node.transaction.target + '</td></tr>'
+				+ '<tr><td>Cross Coutry</td><td>' + node.transaction.xCountry
+				+ '</td></tr>' + '</table>'
 		$('#inspector-content').empty().append(details);
 	}
 }
@@ -169,24 +169,52 @@ $(document).on('click', '#runAlgorithm', function() {
 	websocket.send(editorDSL.getValue());
 });
 
-$(document).on('click', '#exportReports', function() {
-    window.open("data:application/json;charset=utf-8," + escape(JSON.stringify(reports)));
-});
+$(document).on(
+		'click',
+		'#exportReports',
+		function() {
+			window.open("data:application/json;charset=utf-8,"
+					+ escape(JSON.stringify(reports)));
+		});
 
 $(document).on('click', '#updateSettings', function() {
-    var newWebSocketURI = $('#wsURI').val();
-    initializeWebSocket(newWebSocketURI);
+	var newWebSocketURI = $('#wsURI').val();
+	initializeWebSocket(newWebSocketURI);
+});
+
+$(document).on('click', '#importReports', function() {
+	var file = $('input#fileInput').get(0).files[0];
+	var textType = /json/;
+
+	if (file.type.match(textType)) {
+		var reader = new FileReader();
+
+		reader.onload = function(e) {
+			var parsedResults = jQuery.parseJSON(reader.result);
+			console.log(parsedResults);
+			$.each(parsedResults, function(id, report) {
+				appendReport(report);
+			});
+		}
+
+		reader.readAsText(file);
+	} else {
+		console.log(file.type)
+	}
 });
 
 function updateReportsCount() {
-	$("div#reportsTitle span").text("Reports(" + Object.keys(reports).length + ")");
+	$("div#reportsTitle span").text(
+			"Reports(" + Object.keys(reports).length + ")");
 }
 
 function displayStatus(message) {
 	$("div#notifications").empty();
-	$("div#notifications").append('<div id="computationStatus" class="alert alert-info">'+message.msg+'</div>');
-    setTimeout(function() {
-	    $('div#computationStatus').fadeOut('fast');
+	$("div#notifications").append(
+			'<div id="computationStatus" class="alert alert-info">'
+					+ message.msg + '</div>');
+	setTimeout(function() {
+		$('div#computationStatus').fadeOut('fast');
 	}, 1500);
 }
 
@@ -293,39 +321,37 @@ var websocket = null
 
 function initializeWebSocket(wsUri) {
 	websocket = new WebSocket(wsUri);
-	
-	websocket.onopen = function() {
-		websocket.send("getpreviousresults");	
+
+	websocket.onopen = function(e) {
+		websocket.send("getpreviousresults");
 	}
 
 	websocket.onmessage = function(msg) {
 		message = JSON.parse(msg.data);
-		if(message instanceof Array) {
-			$.each(message, function(i, m ) {
-				  processMessage(m);
+		if (message instanceof Array) {
+			$.each(message, function(i, m) {
+				processMessage(m);
 			});
-		}
-		else {
+		} else {
 			processMessage(message)
 		}
 	}
-	
+
 }
 
 function processMessage(message) {
-	if(message.hasOwnProperty("id") && message.hasOwnProperty("members")) {
-		appendReport(message);		
+	if (message.hasOwnProperty("id") && message.hasOwnProperty("members")) {
+		appendReport(message);
 	} else if (message.hasOwnProperty("status")) {
-		if(message.status == "progress") {
+		if (message.status == "progress") {
 			updateProgess(message.msg);
 		} else {
-			displayStatus(message);	
+			displayStatus(message);
 		}
-		
+
 	} else {
 		console.log("received: " + message)
 	}
 }
 
 initializeWebSocket(wsUri);
-
