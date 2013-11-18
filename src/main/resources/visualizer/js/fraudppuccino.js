@@ -68,27 +68,43 @@ function updateVisualization() {
 			"refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr(
 			"orient", "auto").append("svg:path").attr("d", "M0,-5L10,0L0,5");
 
-	var link = graphVisualization.append("svg:g").selectAll(".link").data(
-			graph.links).enter().append("svg:path").attr("class", "link").attr(
+	var linkContainer = graphVisualization.selectAll(".link").data(
+			graph.links).enter().append("svg:g").attr("class", "linkContainer");
+	
+	var link = linkContainer.append("svg:path").attr("class", "link").attr(
 			"marker-end", "url(#transaction)").style("stroke", function(link) {
 				return linkColor(link);
-			})
+			});
+	
+	var linkLabel = linkContainer.append("svg:text").text(function(d) {
+		if(d.cardinality > 1) {
+			return d.cardinality
+		}
+	}).style("fill", "#555").style("font-family", "Arial").style("font-size", 12);
 
-	var node = graphVisualization.append("svg:g").selectAll(".node").data(
-			graph.nodes).enter().append("circle").attr("class", "node").attr(
-			"r", function(d) {
-				return Math.min(20, transactionValue(d.value));
-			}).style("fill", function(d) {
-		return nodeColor(d);
-	}).call(force.drag).on("click", function(node) {
-		showDetailsForNode(node);
-	});
+	var nodeContainer = graphVisualization.selectAll(".node").data(
+			graph.nodes).enter().append("svg:g").attr("class", "nodeContainer");
+	
+	var node = nodeContainer.append("circle").attr("class", "node").attr(
+					"r", function(d) {
+						return Math.min(20, transactionValue(d.value));
+					}).style("fill", function(d) {
+						return nodeColor(d);
+					}).call(force.drag).on("click", function(node) {
+						showDetailsForNode(node);
+					});
 
 	force.on("tick", function() {
 		link.attr("d", function(d) {
 			var dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
 			return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + ","
 					+ d.target.y;
+		});
+		
+		linkLabel.attr("transform", function(d) {
+			var transX = parseFloat(d.source.x) + (parseFloat(d.target.x)-parseFloat(d.source.x))*0.33;
+			var transY = parseFloat(d.source.y) + (parseFloat(d.target.y) - parseFloat(d.source.y))*0.33;
+			return "translate(" + transX + "," + transY + ")";
 		});
 
 		node.attr("cx", function(d) {
@@ -101,8 +117,6 @@ function updateVisualization() {
 }
 
 function showDetailsForNode(node) {
-	console.log(node);
-
 	$('#inspectorNavTab :first-child').click(); // open the inspector tab
 
 	if (node.account) {
@@ -209,7 +223,6 @@ $(document).on('click', '#importReports', function() {
 
 		reader.onload = function(e) {
 			var parsedResults = jQuery.parseJSON(reader.result);
-			console.log(parsedResults);
 			$.each(parsedResults, function(id, report) {
 				appendReport(report);
 			});
@@ -217,7 +230,6 @@ $(document).on('click', '#importReports', function() {
 
 		reader.readAsText(file);
 	} else {
-		console.log(file.type)
 	}
 });
 
@@ -278,6 +290,8 @@ function loadAccountGraph(id) {
 	graph.links = [];
 
 	var accountsLookup = {}; // Index on accountId
+	var transactionsLookup = {}; // Index on accountId
+
 
 	reports[id].members
 			.forEach(function(transaction, index) {
@@ -320,13 +334,18 @@ function loadAccountGraph(id) {
 						+ transaction.value;
 				accountsLookup[transaction.target].account["in-count"]++;
 
-				var link = {
-					"source" : accountsLookup[transaction.src],
-					"target" : accountsLookup[transaction.target],
-					"value" : 1,
-					"xCountry" : transaction.xCountry
-				};
-				graph.links.push(link);
+				if(!transactionsLookup[(transaction.src, transaction.target)]) {
+					var link = {
+							"source" : accountsLookup[transaction.src],
+							"target" : accountsLookup[transaction.target],
+							"value" : 1,
+							"xCountry" : transaction.xCountry,
+							"cardinality": 0
+					};
+					transactionsLookup[(transaction.src, transaction.target)] = link;
+					graph.links.push(link);
+				}
+				transactionsLookup[(transaction.src, transaction.target)].cardinality++;
 			});
 
 	updateVisualization();
@@ -370,7 +389,6 @@ function processMessage(message) {
 		}
 
 	} else {
-		console.log("received: " + message)
 	}
 }
 
