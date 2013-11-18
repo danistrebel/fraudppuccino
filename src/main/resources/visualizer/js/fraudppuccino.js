@@ -3,6 +3,22 @@ var width = 960, height = 500;
 var color = d3.scale.linear().domain([ 0, 5, 10, 20 ]).range(
 		[ "green", "yellow", "orange", "red" ]);
 
+function linkColor(link) {
+	if(link.xCountry) {
+		return "red";		
+	} else {
+		return "gray";
+	}
+} 
+
+function nodeColor(node) {
+	if(node.xCountry) {
+		return "red";		
+	} else {
+		return color(node.group);
+	}
+}
+
 var transactionValue = d3.scale.log().domain([ 1, 1000 ]).range([ 0, 20 ]);
 
 var force = d3.layout.force().charge(-500).linkDistance(50).size(
@@ -54,14 +70,16 @@ function updateVisualization() {
 
 	var link = graphVisualization.append("svg:g").selectAll(".link").data(
 			graph.links).enter().append("svg:path").attr("class", "link").attr(
-			"marker-end", "url(#transaction)")
+			"marker-end", "url(#transaction)").style("stroke", function(link) {
+				return linkColor(link);
+			})
 
 	var node = graphVisualization.append("svg:g").selectAll(".node").data(
 			graph.nodes).enter().append("circle").attr("class", "node").attr(
 			"r", function(d) {
 				return Math.min(20, transactionValue(d.value));
 			}).style("fill", function(d) {
-		return color(d.group);
+		return nodeColor(d);
 	}).call(force.drag).on("click", function(node) {
 		showDetailsForNode(node);
 	});
@@ -235,6 +253,7 @@ function loadTransactionGraph(id) {
 			"group" : transaction.depth,
 			"transaction" : transaction,
 			"value" : 1 + (transaction.value / 100000000),
+			"xCountry": transaction.xCountry
 		};
 		transactionLookUp[transaction.id] = tx;
 		graph.nodes.push(tx);
@@ -304,7 +323,8 @@ function loadAccountGraph(id) {
 				var link = {
 					"source" : accountsLookup[transaction.src],
 					"target" : accountsLookup[transaction.target],
-					"value" : 1
+					"value" : 1,
+					"xCountry" : transaction.xCountry
 				};
 				graph.links.push(link);
 			});
