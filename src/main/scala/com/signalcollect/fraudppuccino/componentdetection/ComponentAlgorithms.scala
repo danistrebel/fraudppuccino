@@ -35,15 +35,16 @@ object ComponentAlgorithms {
   /*
    * Counts the number of sink accounts 
    */
-  val sinkMemberAlgorithm = ComponentMemberQuery(vertex => if (vertex.isPatternSink) ComponentMemberResponse(Some(1)) else ComponentMemberResponse(Some(0)))
-  val sinkCountAggregator: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
+  val sinkMemberAlgorithm = ComponentMemberQuery(vertex => 
+    if (vertex.isPatternSink) ComponentMemberResponse(Some(vertex.targetId)) else ComponentMemberResponse(None))
+  val countDistinctMemberAnswers: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
     (repliesFromMembers, master) =>
       {
         val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        replies.map(_.response.getOrElse(0).asInstanceOf[Int]).sum
+        replies.flatMap(_.response).toList.distinct.size
       }
   }
-  val SinkCounter = ComponentMemberQueryExecution(sinkMemberAlgorithm, sinkCountAggregator)
+  val SinkCounter = ComponentMemberQueryExecution(sinkMemberAlgorithm, countDistinctMemberAnswers)
   
   /**
    * Looks at the value at the sink transactions

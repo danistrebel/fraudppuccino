@@ -33,4 +33,13 @@ trait TransactionRelationshipExplorer extends VertexAlgorithm {
   
   def countSuccessors: Int = getHostVertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge)
   
+  /**
+   * @return the id of the source of this transaction
+   */
+  def sourceId = getHostVertex.getResult("src")
+  
+  /**
+   * @return the id of the target of this transaction
+   */
+  def targetId = getHostVertex.getResult("target")
 }

@@ -37,13 +37,13 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
   override def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case timeOut: Array[Long] => {
-        if (stepsUntilResultRequest==0) {
+        if (stepsUntilResultRequest == 0) {
           val requestState = ComponentMemberQuery(vertex => ComponentMemberResponse(Some(vertex.getState)))
           members.foreach(memberId => {
             graphEditor.sendSignal(requestState, memberId, Some(componentId))
           })
           stepsUntilResultRequest = -1
-        } else if(stepsUntilResultRequest > 0) {
+        } else if (stepsUntilResultRequest > 0) {
           stepsUntilResultRequest -= 1
         }
         true
@@ -61,7 +61,7 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
 
       case ComponentWorkflow(wf) => {
         componentWorkFlow = wf
-        initializeWorkflow(graphEditor)
+        executeWorkflowStep(graphEditor)
         true
       }
 
@@ -75,13 +75,6 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
       }
 
       case _ => super.deliverSignal(signal, sourceId, graphEditor)
-    }
-  }
-
-  def initializeWorkflow(graphEditor: GraphEditor[Any, Any]) {
-    if (componentWorkFlow == null) {}
-    else {
-      executeWorkflowStep(graphEditor)
     }
   }
 
