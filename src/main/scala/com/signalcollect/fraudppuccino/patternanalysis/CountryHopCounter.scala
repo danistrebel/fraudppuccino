@@ -6,14 +6,17 @@ import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionP
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 
 /**
- * This counts the number of cross country transactions within a pattern. 
+ * This counts the number of cross country transactions within a pattern.
+ * The number is determines by the smallest number of country hops from any
+ * connected source transaction to this vertex.
  * In back and forth hopping each spanning transaction is counted.
- */ 
+ */
 class CountryHopCounter(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
-  val isXcountry = vertex.getResult("xCountry").getOrElse(false).asInstanceOf[Boolean] //is this transaction cross country
-  
-  var countryHops = if(isXcountry) 1 else 0
+  var countryHops = ownXcountryCount
+  var smallestHopsReceived = Int.MaxValue
+
+  def ownXcountryCount = if (isXcountry) 1 else 0
 
   def getState = countryHops
 
@@ -26,12 +29,12 @@ class CountryHopCounter(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorit
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case signaledHops: Int => 
-        val newHops = if(isXcountry) signaledHops +1 else signaledHops
-        if (newHops > countryHops) {
-        countryHops = newHops
-        scoreSignal = 1.0
-      }
+      case signaledHops: Int =>
+        if (signaledHops < smallestHopsReceived) {
+          smallestHopsReceived = signaledHops
+          countryHops = smallestHopsReceived + ownXcountryCount
+          scoreSignal = 1.0
+        }
       case _ =>
     }
     true

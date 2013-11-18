@@ -59,8 +59,67 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
       graph.execute
       
       masterSinkCount === 2
+    }
+    
+    "work for x country counting" in {
+      val graph = GraphBuilder.build
+      //(ComponentMember ID, Component ID, successor (< 0 i.e. no successor for this vertex), src account, target account)
+      val componentMembers = List((1, 5, List(2), true), (2, 5, List(5), true), (3, 5, List(4), false), (4,5,List(5), true), (5,5,List(), true))
+
+      componentMembers.foreach(componentMember => {
+        val vertex = new RepeatedAnalysisVertex(componentMember._1)
+        vertex.storeAttribute("component", componentMember._2)
+        vertex.storeAttribute("time", 100l)
+        vertex.storeAttribute("value", 1000l)
+        vertex.storeAttribute("xCountry", componentMember._4)        
+
+
+        if (componentMember._1 == componentMember._2) {
+          vertex.setAlgorithmImplementation(v => new ComponentMaster(v))
+        } else {
+          vertex.setAlgorithmImplementation(v => new ComponentMember(v))
+        }
+
+        graph.addVertex(vertex)
+      })
+
+      componentMembers.foreach(componentMember => {
+        for(successorId <- componentMember._3) {
+        	graph.addEdge(componentMember._1, new DownstreamTransactionEdgeWrapper(successorId))
+        	graph.addEdge(successorId, new UpstreamTransactionEdgeWrapper(componentMember._1))
+        }
+      })
+      
+      //Members register themselves with the master
+      graph.recalculateScores
+      graph.execute
+      
+      var maxCountryHops: Int = 0
+      
+      val extndedCountryHopCondition: Any => Boolean = countryHops => {
+        val count = countryHops.asInstanceOf[Int]
+        maxCountryHops = count
+        count > 0 
+      } 
+      
+      graph.sendSignal(ComponentWorkflow(Array((ComponentAlgorithmParser.algorithms("countryhops"), extndedCountryHopCondition))), 5	, None)
+      
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+
+      graph.recalculateScores
+      graph.execute
+      
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+
+      graph.recalculateScores
+      graph.execute
       
       
+      maxCountryHops === 2
     }
   }
 }

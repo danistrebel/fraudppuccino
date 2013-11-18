@@ -42,4 +42,9 @@ trait TransactionRelationshipExplorer extends VertexAlgorithm {
    * @return the id of the target of this transaction
    */
   def targetId = getHostVertex.getResult("target")
+  
+  def isXcountry = getHostVertex.getResult("xCountry").getOrElse(false).asInstanceOf[Boolean] //is this transaction cross country
+  
+  def isCash = getHostVertex.getResult("cash").getOrElse(false).asInstanceOf[Boolean] //is this transaction cash based
+
 }
