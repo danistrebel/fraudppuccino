@@ -132,7 +132,7 @@ function showDetailsForNode(element) {
 
 	if (element.account) {
 		var account = element.account;
-		var details = '<h1>Account #' + account.id + '</h1>'
+		var details = '<h1>Account #' + element.name + '</h1>'
 				+ '<table class="table table-striped">'
 				+ '<tr><td># Transactions in</td><td>'
 				+ account["in-count"] + '</tr>'
