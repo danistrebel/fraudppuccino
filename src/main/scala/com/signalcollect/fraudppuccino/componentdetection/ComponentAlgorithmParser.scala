@@ -20,8 +20,11 @@ object ComponentAlgorithmParser {
   algorithms += (("size", SizeQuery))
   algorithms += (("depth", DepthAlgorithm))
   algorithms += (("sinks", SinkCounter))
+  algorithms += (("sources", SourceCounter))
   algorithms += (("countryhops", XCountryHops))
   algorithms += (("sinkvalue", SinkValue))
+  algorithms += (("cashsources", CashSourceCounter))
+  algorithms += (("circlemembers", CircleAlgorithm))
 
   
   /**

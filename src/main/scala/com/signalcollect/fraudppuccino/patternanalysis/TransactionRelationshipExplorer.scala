@@ -36,12 +36,12 @@ trait TransactionRelationshipExplorer extends VertexAlgorithm {
   /**
    * @return the id of the source of this transaction
    */
-  def sourceId = getHostVertex.getResult("src")
+  def sourceId = getHostVertex.getResult("src").get
   
   /**
    * @return the id of the target of this transaction
    */
-  def targetId = getHostVertex.getResult("target")
+  def targetId = getHostVertex.getResult("target").get
   
   def isXcountry = getHostVertex.getResult("xCountry").getOrElse(false).asInstanceOf[Boolean] //is this transaction cross country
   

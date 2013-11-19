@@ -121,5 +121,66 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
       
       maxCountryHops === 2
     }
+    
+    "work for cicle counting" in {
+      val graph = GraphBuilder.build
+      //(ComponentMember ID, Component ID, successor (< 0 i.e. no successor for this vertex), src account, target account)
+      val componentMembers = List((1, 5, List(2,3), 20, 21), (2, 5, List(5), 21, 22), (3, 5, List(4,5), 21, 23), (4,5,List(5), 23, 22), (5,5,List(), 22, 20))
+
+      componentMembers.foreach(componentMember => {
+        val vertex = new RepeatedAnalysisVertex(componentMember._1)
+        vertex.storeAttribute("component", componentMember._2)
+        vertex.storeAttribute("time", 100l)
+        vertex.storeAttribute("value", 1000l)
+        vertex.storeAttribute("src", componentMember._4)
+        vertex.storeAttribute("target", componentMember._5)
+
+
+        if (componentMember._1 == componentMember._2) {
+          vertex.setAlgorithmImplementation(v => new ComponentMaster(v))
+        } else {
+          vertex.setAlgorithmImplementation(v => new ComponentMember(v))
+        }
+
+        graph.addVertex(vertex)
+      })
+
+      componentMembers.foreach(componentMember => {
+        for(successorId <- componentMember._3) {
+        	graph.addEdge(componentMember._1, new DownstreamTransactionEdgeWrapper(successorId))
+        	graph.addEdge(successorId, new UpstreamTransactionEdgeWrapper(componentMember._1))
+        }
+      })
+      
+      //Members register themselves with the master
+      graph.recalculateScores
+      graph.execute
+      
+      var masterCircleCount: Int = 0
+      
+      val extendedCircleCondition: Any => Boolean = circleCount => {
+        val count = circleCount.asInstanceOf[Int]
+        masterCircleCount = count
+        count > 0 
+      } 
+      
+      graph.sendSignal(ComponentWorkflow(Array((ComponentAlgorithmParser.algorithms("circlemembers"), extendedCircleCondition))), 5	, None)
+      
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+
+      graph.recalculateScores
+      graph.execute
+      
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+
+      graph.recalculateScores
+      graph.execute
+      
+      masterCircleCount === 1
+    }
   }
 }
