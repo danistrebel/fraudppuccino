@@ -4,10 +4,18 @@ var color = d3.scale.linear().domain([ 0, 5, 10, 20 ]).range(
 		[ "green", "yellow", "orange", "red" ]);
 
 function linkColor(link) {
-	if(link.xCountry) {
-		return "red";		
+	
+	//red link if transaction is xCountry
+	if(link.transactions) {
+		var color = "gray"
+		$.each(link.transactions, function(i,t){
+			if(t.xCountry) {
+				color = "red";						
+			}
+		});
+		return color
 	} else {
-		return "gray";
+		return "gray";		
 	}
 } 
 
@@ -77,8 +85,8 @@ function updateVisualization() {
 			});
 	
 	var linkLabel = linkContainer.append("svg:text").text(function(d) {
-		if(d.cardinality > 1) {
-			return d.cardinality
+		if(d.transactions && d.transactions.length > 1) {
+			return d.transactions.length
 		}
 	}).style("fill", "#555").style("font-family", "Arial").style("font-size", 12);
 
@@ -290,7 +298,7 @@ function loadAccountGraph(id) {
 	graph.links = [];
 
 	var accountsLookup = {}; // Index on accountId
-	var transactionsLookup = {}; // Index on accountId
+	var transactionsLookup = {}; // Index on source and target accountId
 
 
 	reports[id].members
@@ -334,18 +342,21 @@ function loadAccountGraph(id) {
 						+ transaction.value;
 				accountsLookup[transaction.target].account["in-count"]++;
 
-				if(!transactionsLookup[(transaction.src, transaction.target)]) {
+				if(!transactionsLookup[transaction.src] || !transactionsLookup[transaction.src][transaction.target]) {
 					var link = {
 							"source" : accountsLookup[transaction.src],
 							"target" : accountsLookup[transaction.target],
 							"value" : 1,
 							"xCountry" : transaction.xCountry,
-							"cardinality": 0
+							"transactions" : []
 					};
-					transactionsLookup[(transaction.src, transaction.target)] = link;
+					if(!transactionsLookup[transaction.src]) {
+						transactionsLookup[transaction.src] = {}
+					}
+					transactionsLookup[transaction.src][transaction.target] = link;
 					graph.links.push(link);
 				}
-				transactionsLookup[(transaction.src, transaction.target)].cardinality++;
+				transactionsLookup[transaction.src][transaction.target].transactions.push(transaction);
 			});
 
 	updateVisualization();
