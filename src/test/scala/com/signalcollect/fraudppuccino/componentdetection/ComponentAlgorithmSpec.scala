@@ -53,7 +53,7 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
         count > 0 
       } 
       
-      graph.sendSignal(ComponentWorkflow(Array((ComponentAlgorithmParser.algorithms("sinks"), extendedSinkCondition))), 5	, None)
+      graph.sendSignal(ComponentWorkflow(Array(ConstantWorkflowStep(ComponentAlgorithmParser.algorithms("sinks"), extendedSinkCondition))), 5	, None)
       
       graph.recalculateScores
       graph.execute
@@ -102,7 +102,7 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
         count > 0 
       } 
       
-      graph.sendSignal(ComponentWorkflow(Array((ComponentAlgorithmParser.algorithms("countryhops"), extndedCountryHopCondition))), 5	, None)
+      graph.sendSignal(ComponentWorkflow(Array(ConstantWorkflowStep(ComponentAlgorithmParser.algorithms("countryhops"), extndedCountryHopCondition))), 5	, None)
       
       //Simulate next computation step
       graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
@@ -164,7 +164,7 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
         count > 0 
       } 
       
-      graph.sendSignal(ComponentWorkflow(Array((ComponentAlgorithmParser.algorithms("circlemembers"), extendedCircleCondition))), 5	, None)
+      graph.sendSignal(ComponentWorkflow(Array(ConstantWorkflowStep(ComponentAlgorithmParser.algorithms("circlemembers"), extendedCircleCondition))), 5	, None)
       
       //Simulate next computation step
       graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
@@ -223,7 +223,7 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
         count > 0 
       } 
       
-      graph.sendSignal(ComponentWorkflow(Array((ComponentAlgorithmParser.algorithms("fairsplits"), extendedEqualSplitCountCondition))), 5	, None)
+      graph.sendSignal(ComponentWorkflow(Array(ConstantWorkflowStep(ComponentAlgorithmParser.algorithms("fairsplits"), extendedEqualSplitCountCondition))), 5	, None)
       
       //Simulate next computation step
       graph.foreachVertexWithGraphEditor(graphEditor => vertex =>

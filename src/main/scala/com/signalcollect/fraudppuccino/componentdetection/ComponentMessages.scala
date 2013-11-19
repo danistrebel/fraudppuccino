@@ -9,7 +9,11 @@ case class WorkFlowStep(s: String)
 case class RegisterResultHandler(handler: ComponentResultHandler)
 
 // Component Handler --> Component Master
-case class ComponentWorkflow(workflow: IndexedSeq[(ConditionAlgorithm, Any => Boolean)])
+case class ComponentWorkflow(workflow: IndexedSeq[ComponentWorkflowStep])
+abstract class ComponentWorkflowStep
+case class ConstantWorkflowStep(algorithm: ConditionAlgorithm, acceptance: (Any => Boolean)) extends ComponentWorkflowStep
+case class AlgorithmWorkflowStep(algorithm: ConditionAlgorithm, referenceAlgorithm: ConditionAlgorithm, acceptance: ((Any, Any) => Boolean)) extends ComponentWorkflowStep
+
 abstract class ConditionAlgorithm //Handler requests some action at the master
 case class ComponentMasterQuery(query: ComponentMaster => Any) extends ConditionAlgorithm
 case class ComponentMemberQueryExecution(query: ComponentMemberQuery, allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster) => Any) extends ConditionAlgorithm

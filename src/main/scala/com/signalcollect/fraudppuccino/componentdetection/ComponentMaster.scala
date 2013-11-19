@@ -27,12 +27,13 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
   val system = ActorSystemRegistry.retrieve("SignalCollect").get
   val handler = system.actorFor("akka://SignalCollect/user/componentHandler")
 
-  var componentWorkFlow: IndexedSeq[(ConditionAlgorithm, Any => Boolean)] = null
+  var componentWorkFlow: IndexedSeq[ComponentWorkflowStep] = null
   var workflowIndex = 0
 
   val repliesFromMembers = ArrayBuffer[ComponentMemberMessage]()
   var allReceived: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = null
   var stepsUntilResultRequest = -1 //has this master sent algorithms to its members and not yet received their results
+  var comparisonResult: Any = null
 
   override def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
@@ -82,8 +83,16 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
     if (workflowIndex >= componentWorkFlow.size) {
       executeAndExpectMemberReplies(memberInfoExtraction, membersSerializer, graphEditor)
     } else {
-      val workflowRequest = componentWorkFlow(workflowIndex)._1
-      workflowRequest match {
+      val currentWorkflowStep = componentWorkFlow(workflowIndex)
+      currentWorkflowStep match {
+        case ConstantWorkflowStep(algorithm, _) => executeConditionAlgorithm(algorithm, graphEditor)
+        case AlgorithmWorkflowStep(algorithm, _, _) => executeConditionAlgorithm(algorithm, graphEditor)
+      }      
+    }
+  }
+  
+  def executeConditionAlgorithm(algorithm: ConditionAlgorithm, graphEditor: GraphEditor[Any, Any]) {
+    algorithm match {
         case ComponentMasterQuery(query) => testWorkflowCondition(query(this), graphEditor)
         case ComponentMemberQueryExecution(memberQuery, resultsProcessing) => {
           executeAndExpectMemberReplies(memberQuery, resultsProcessing, graphEditor)
@@ -93,7 +102,6 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
           stepsUntilResultRequest = 1
         }
       }
-    }
   }
 
   /**
@@ -105,12 +113,31 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
     if (workflowIndex >= componentWorkFlow.size) { //In case the entire work flow is passed the serialized component is returned
       graphEditor.sendToActor(handler, ComponentResult(result.asInstanceOf[String]))
       dropComponent(graphEditor)
-    } else if (componentWorkFlow(workflowIndex)._2(result)) { //proceed to the next step of the work flow
-      workflowIndex += 1
-      executeWorkflowStep(graphEditor)
-    } else { // drop this component
-      dropComponent(graphEditor)
-    }
+    } else{
+      val currentWorkflowStep = componentWorkFlow(workflowIndex)
+      currentWorkflowStep match {
+        case ConstantWorkflowStep(_, acceptance) =>  {
+          if(acceptance(result)) {
+            workflowIndex += 1
+            executeWorkflowStep(graphEditor)
+          }
+          else {
+        	  dropComponent(graphEditor)            
+          }
+        }
+        case AlgorithmWorkflowStep(_, comparisonAlgorithm, acceptance) => {
+          if(comparisonResult==null) {
+            comparisonResult = result
+            executeConditionAlgorithm(comparisonAlgorithm, graphEditor)
+          } else if (acceptance(comparisonResult, result)) {
+            workflowIndex += 1
+            executeWorkflowStep(graphEditor)
+          } else {
+        	  dropComponent(graphEditor)            
+          }
+        }
+      } 
+    } 
   }
 
   def dropComponent(graphEditor: GraphEditor[Any, Any]) = {

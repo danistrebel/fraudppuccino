@@ -23,7 +23,7 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
   /**
    * Ordered list of processing steps that have to be passed by each component in order to count as a result.
    */
-  val componentWorkFlow: ArrayBuffer[(ConditionAlgorithm, Any => Boolean)] = ArrayBuffer()
+  val componentWorkFlow: ArrayBuffer[ComponentWorkflowStep] = ArrayBuffer()
 
   def receive = {
     
