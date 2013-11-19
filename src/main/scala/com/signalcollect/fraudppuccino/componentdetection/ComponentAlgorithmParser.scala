@@ -25,6 +25,8 @@ object ComponentAlgorithmParser {
   algorithms += (("sinkvalue", SinkValue))
   algorithms += (("cashsources", CashSourceCounter))
   algorithms += (("circlemembers", CircleAlgorithm))
+  algorithms += (("fairsplits", FairSplitCounter))
+
 
   
   /**

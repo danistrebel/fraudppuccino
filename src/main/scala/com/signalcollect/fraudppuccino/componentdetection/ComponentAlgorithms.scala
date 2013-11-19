@@ -5,6 +5,7 @@ import com.signalcollect.GraphEditor
 import scala.collection.mutable.ArrayBuffer
 import com.signalcollect.fraudppuccino.patternanalysis.CountryHopCounter
 import com.signalcollect.fraudppuccino.patternanalysis.CircleDetection
+import com.signalcollect.fraudppuccino.patternanalysis.EqualSplits
 
 /**
  * Provides a number of predefined component algorithms that are used
@@ -106,5 +107,13 @@ object ComponentAlgorithms {
   }
 
   val CircleAlgorithm = ComponentAlgorithmExecution(circleMemberAlgorithm, countTrueResponses)
+  
+  /**
+   * counts splits where all splits have the same size
+   */
+   val equalSplits = ComponentMemberAlgorithm(vertex => new EqualSplits(vertex))
+
+  
+  val FairSplitCounter = ComponentAlgorithmExecution(equalSplits, countTrueResponses)
 
 }

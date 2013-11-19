@@ -5,6 +5,10 @@ import com.signalcollect._
 import scala.collection.mutable.ArrayBuffer
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 
+/**
+ * Detects if the target vertex of this transaction already occurred in the flow of
+ * transactions that lead to this transaction 
+ */
 class CircleDetection(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
   var foundCircle = false
