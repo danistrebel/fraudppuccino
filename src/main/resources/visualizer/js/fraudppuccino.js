@@ -82,6 +82,8 @@ function updateVisualization() {
 	var link = linkContainer.append("svg:path").attr("class", "link").attr(
 			"marker-end", "url(#transaction)").style("stroke", function(link) {
 				return linkColor(link);
+			}).on("click", function(link) {
+				showDetailsForNode(link);
 			});
 	
 	var linkLabel = linkContainer.append("svg:text").text(function(d) {
@@ -124,39 +126,49 @@ function updateVisualization() {
 
 }
 
-function showDetailsForNode(node) {
+function showDetailsForNode(element) {
 	$('#inspectorNavTab :first-child').click(); // open the inspector tab
+	$('#inspector-content').empty();
 
-	if (node.account) {
-		var details = '<h1>Account #' + node.name + '</h1>'
+	if (element.account) {
+		var account = element.account;
+		var details = '<h1>Account #' + account.id + '</h1>'
 				+ '<table class="table table-striped">'
 				+ '<tr><td># Transactions in</td><td>'
-				+ node.account["in-count"] + '</tr>'
+				+ account["in-count"] + '</tr>'
 				+ '<tr><td># Transactions out</td><td>'
-				+ node.account["out-count"] + '</td></tr>'
-				+ '<tr><td>BTC Transactions in</td><td>' + node.account["in"]
+				+ account["out-count"] + '</td></tr>'
+				+ '<tr><td>BTC Transactions in</td><td>' + account["in"]
 				/ 100000000 + ' BTC</td></tr>'
-				+ '<tr><td>BTC Transactions out</td><td>' + node.account["out"]
+				+ '<tr><td>BTC Transactions out</td><td>' + account["out"]
 				/ 100000000 + ' BTC</td></tr>' + '</table>'
-		$('#inspector-content').empty().append(details);
+		$('#inspector-content').append(details);
 	}
 
-	else if (node.transaction) {
-		var transactionDate = new Date(node.transaction.time * 1000);
-		var details = '<h1>Transaction #' + Math.abs(node.name) + '</h1>'
-				+ '<table class="table table-striped">'
-				+ '<tr><td>BTC Transaction Value</td><td>'
-				+ node.transaction.value / 100000000 + ' BTC</td></tr>'
-				+ '<tr><td>Time</td><td>'
-				+ transactionDate.toLocaleDateString() + ' '
-				+ transactionDate.toLocaleTimeString() + '</td></tr>'
-				+ '<tr><td>Source</td><td>' + node.transaction.src
-				+ '</td></tr>' + '<tr><td>Target</td><td>'
-				+ node.transaction.target + '</td></tr>'
-				+ '<tr><td>Cross Coutry</td><td>' + node.transaction.xCountry
-				+ '</td></tr>' + '</table>'
-		$('#inspector-content').empty().append(details);
+	else if (element.transaction) {
+		var transaction = element.transaction
+		appendTransactionDetails(transaction);
+	} 
+	else if(element.transactions) {
+		$.each(element.transactions, function(i,t) {appendTransactionDetails(t)});
 	}
+}
+
+function appendTransactionDetails(transaction) {
+	var transactionDate = new Date(transaction.time * 1000);
+	var details = '<h1>Transaction #' + Math.abs(transaction.id) + '</h1>'
+			+ '<table class="table table-striped">'
+			+ '<tr><td>BTC Transaction Value</td><td>'
+			+ transaction.value / 100000000 + ' BTC</td></tr>'
+			+ '<tr><td>Time</td><td>'
+			+ transactionDate.toLocaleDateString() + ' '
+			+ transactionDate.toLocaleTimeString() + '</td></tr>'
+			+ '<tr><td>Source</td><td>' + transaction.src
+			+ '</td></tr>' + '<tr><td>Target</td><td>'
+			+ transaction.target + '</td></tr>'
+			+ '<tr><td>Cross Coutry</td><td>' + transaction.xCountry
+			+ '</td></tr>' + '</table>'
+	$('#inspector-content').append(details);
 }
 
 function appendReport(report) {
