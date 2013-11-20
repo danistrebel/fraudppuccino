@@ -1,11 +1,8 @@
 package com.signalcollect.fraudppuccino.componentdetection
 
-import com.signalcollect.fraudppuccino.patternanalysis.PatternDepthAnalyzer
 import com.signalcollect.GraphEditor
-import scala.collection.mutable.ArrayBuffer
-import com.signalcollect.fraudppuccino.patternanalysis.CountryHopCounter
-import com.signalcollect.fraudppuccino.patternanalysis.CircleDetection
-import com.signalcollect.fraudppuccino.patternanalysis.EqualSplits
+import ComponentMemberResultAggregators._
+import ComponentMemberAlgorithms._
 
 /**
  * Provides a number of predefined component algorithms that are used
@@ -18,102 +15,66 @@ object ComponentAlgorithms {
    */
   val SizeQuery = ComponentMasterQuery(master => master.members.size)
 
-  /*
-   * Queries the component for the max depth i.e. the longest path from any source to a sink transaction
+  /**
+   * Returns the max depth of any component in the graph.
    */
-  val depthMemberAlgorithm = ComponentMemberAlgorithm(vertex => new PatternDepthAnalyzer(vertex))
-
-  //just gets the max returned integer from all component members
-  val maxReplyAggregator: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
-    (repliesFromMembers, master) =>
-      {
-        val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        replies.map(_.response.getOrElse(0).asInstanceOf[Int]).max
-      }
-  }
-
-  val DepthAlgorithm = ComponentAlgorithmExecution(depthMemberAlgorithm, maxReplyAggregator)
-
-  /*
-   * Counts the number of sink accounts 
-   */
-  val sinkMemberAlgorithm = ComponentMemberQuery(vertex =>
-    if (vertex.isPatternSink) ComponentMemberResponse(Some(vertex.targetId)) else ComponentMemberResponse(None))
-  val countDistinctMemberAnswers: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
-    (repliesFromMembers, master) =>
-      {
-        val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        replies.flatMap(_.response).toList.distinct.size
-      }
-  }
-  val SinkCounter = ComponentMemberQueryExecution(sinkMemberAlgorithm, countDistinctMemberAnswers)
-
-  /*
-   * Counts the number of source accounts 
-   */
-  val sourceMemberAlgorithm = ComponentMemberQuery(vertex =>
-    if (vertex.isPatternSource) ComponentMemberResponse(Some(vertex.targetId)) else ComponentMemberResponse(None))
-  val SourceCounter = ComponentMemberQueryExecution(sourceMemberAlgorithm, countDistinctMemberAnswers)
-
-  /*
-   * Counts the number source transactions in cash
-   */
-  val cashSourceMemberAlgorithm = ComponentMemberQuery(vertex =>
-    if (vertex.isPatternSource && vertex.isCash) ComponentMemberResponse(Some(vertex.targetId)) else ComponentMemberResponse(None))
-  val countMemberAnswers: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
-    (repliesFromMembers, master) =>
-      {
-        val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        replies.flatMap(_.response).size
-      }
-  }
-  val CashSourceCounter = ComponentMemberQueryExecution(sourceMemberAlgorithm, countDistinctMemberAnswers)
+  val DepthAlgorithm = ComponentAlgorithmExecution(depthMemberAlgorithm, maxInt)
 
   /**
-   * Looks at the value at the sink transactions
+   * Counts the number of sink accounts in the graph. I.e. accounts where sink transactions are credited.
    */
-  val sinkValueQuery = ComponentMemberQuery(vertex => if (vertex.isPatternSink) ComponentMemberResponse(vertex.getResult("value")) else ComponentMemberResponse(Some(0l)))
+  val SinkAccountCounter = ComponentMemberQueryExecution(sinkAccountAlgorithm, countDistinctMemberAnswers)
 
-  //sums up all the longs returned by the component members
-  val longSumAggregator: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
-    (repliesFromMembers, master) =>
-      {
-        val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        replies.map(_.response.getOrElse(0l).asInstanceOf[Long]).sum
-      }
-  }
+  /**
+   * Counts the number of sink transactions in the graph.
+   */
+  val SinkTransactionCounter = ComponentMemberQueryExecution(sinkTransactionAlgorithm, countMemberAnswers)
+  
+  /**
+   * Counts the number of source accounts in the graph. I.e. accounts where source transactions are originating.
+   */
+  val SourceAccountCounter = ComponentMemberQueryExecution(sourceAccountAlgorithm, countDistinctMemberAnswers)
+
+  /**
+   * Counts the number of source transactions in the graph.
+   */
+  val SourceTransactionCounter = ComponentMemberQueryExecution(sourceTransactionAlgorithm, countMemberAnswers)
+
+  /**
+   * Counts the number of source transactions that were executed in cash
+   */
+  val CashSourceCounter = ComponentMemberQueryExecution(cashSourceMemberAlgorithm, countMemberAnswers)
+
+  /**
+   * Sums up the value of all sink transactions
+   */
   val SinkValue = ComponentMemberQueryExecution(sinkValueQuery, longSumAggregator)
-
-  /*
-   * Queries the component for the max country hop count i.e. the max number of cross country transactions from any source to a sink transaction
+  
+  /**
+   * Sums up the value of all source transactions
    */
-  val xCountryMemberAlgorithm = ComponentMemberAlgorithm(vertex => new CountryHopCounter(vertex))
-  val XCountryHops = ComponentAlgorithmExecution(xCountryMemberAlgorithm, maxReplyAggregator)
+  val SourceValue = ComponentMemberQueryExecution(sourceValueQuery, longSumAggregator)
+  
+  /**
+   * Returns the max value of all transactions
+   */
+  val MaxValue = ComponentMemberQueryExecution(valueQuery, maxLong)
 
   /**
-   * Checks if accounts occur repeatedly in a transaction flow
+   * Returns  the max country hop count i.e. the max number of cross country
+   * transactions from any source to a sink transaction
    */
-  val circleMemberAlgorithm = ComponentMemberAlgorithm(vertex => new CircleDetection(vertex))
+  val XCountryHops = ComponentAlgorithmExecution(xCountryMemberAlgorithm, maxInt)
 
   /**
-   * Counts how many of the members returned true
+   * Returns the number of accounts that occur repeatedly in a transaction flow
    */
-  val countTrueResponses: (Iterable[ComponentMemberMessage], ComponentMaster) => Any = {
-    (repliesFromMembers, master) =>
-      {
-        val replies = repliesFromMembers.asInstanceOf[ArrayBuffer[ComponentMemberResponse]]
-        replies.count(_.response.get.asInstanceOf[Boolean]==true)
-      }
-  }
-
   val CircleAlgorithm = ComponentAlgorithmExecution(circleMemberAlgorithm, countTrueResponses)
-  
-  /**
-   * counts splits where all splits have the same size
-   */
-   val equalSplits = ComponentMemberAlgorithm(vertex => new EqualSplits(vertex))
 
-  
+  /**
+   * Returns the number of splits where all splits have approximately the same size.
+   */
   val FairSplitCounter = ComponentAlgorithmExecution(equalSplits, countTrueResponses)
+
 
 }

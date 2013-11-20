@@ -19,10 +19,14 @@ object ComponentAlgorithmParser {
   // Register predefined algorithms
   algorithms += (("size", SizeQuery))
   algorithms += (("depth", DepthAlgorithm))
-  algorithms += (("sinks", SinkCounter))
-  algorithms += (("sources", SourceCounter))
+  algorithms += (("sinkaccounts", SinkAccountCounter))
+  algorithms += (("sourceaccounts", SourceAccountCounter))
+  algorithms += (("sinktransactions", SinkTransactionCounter))
+  algorithms += (("sourcetransactions", SourceTransactionCounter))
   algorithms += (("countryhops", XCountryHops))
   algorithms += (("sinkvalue", SinkValue))
+  algorithms += (("sourcevalue", SourceValue))
+  algorithms += (("maxtransactionvalue", MaxValue))
   algorithms += (("cashsources", CashSourceCounter))
   algorithms += (("circlemembers", CircleAlgorithm))
   algorithms += (("fairsplits", FairSplitCounter))
@@ -43,10 +47,9 @@ object ComponentAlgorithmParser {
       val componentAlgorithm = algorithms.get(algorithm.toLowerCase)
       val referenceAlgorithm = algorithms.get(referenceValue.toLowerCase)
 
-      if(componentAlgorithm.isDefined && referenceAlgorithm.isDefined) {
+      if (componentAlgorithm.isDefined && referenceAlgorithm.isDefined) {
         AlgorithmWorkflowStep(componentAlgorithm.get, referenceAlgorithm.get, parseAlgorithmValueComparisonFunction(operator))
-      }
-      else if (componentAlgorithm.isDefined) {
+      } else if (componentAlgorithm.isDefined) {
         ConstantWorkflowStep(componentAlgorithm.get, parseStaticValueComparisonFunction(operator, referenceValue))
       } else {
         throw new Exception("no algorithm namded \"" + algorithm + "\" is registered. Check spellling or register this algorithm with the ComponentAlgorithmParser object.")
@@ -104,7 +107,7 @@ object ComponentAlgorithmParser {
       } case "_" => _: Any => false
     }
   }
-  
+
   def parseAlgorithmValueComparisonFunction(operator: String): (Any, Any) => Boolean = {
     operator match {
       case "=" => (resultA, resultB) => resultA.toString == resultB.toString
@@ -122,7 +125,7 @@ object ComponentAlgorithmParser {
           case res: Long => res.asInstanceOf[Long] < resultB.asInstanceOf[Long]
           case res: Int => res.asInstanceOf[Int] < resultB.asInstanceOf[Int]
           case res: Double => res.asInstanceOf[Double] < resultB.asInstanceOf[Double]
-          case res: Float => res.asInstanceOf[Float] <  resultB.asInstanceOf[Float]
+          case res: Float => res.asInstanceOf[Float] < resultB.asInstanceOf[Float]
           case _ => false
         }
       }
