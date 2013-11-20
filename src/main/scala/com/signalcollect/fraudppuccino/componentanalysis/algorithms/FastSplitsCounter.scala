@@ -6,33 +6,32 @@ import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionP
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * Tests if this transaction is split in equal shares
- * @param precision percentage that a split is allowed to vary from the fair share
+ * Tests if this transaction is split amongst other transactions within a predefined amount of time
+ * @param duration maxDuration between this transaction and the latest split
  * @param minSplits that a transaction is split into
  */
-class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, minSplits: Int = 3) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
+class FastSplits(vertex: RepeatedAnalysisVertex[_], duration: Long = 86400, minSplits: Int = 3) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
-  var isEqualSplit = false
+  var isFastSplit = false
 
-  def getState = isEqualSplit
+  def getState = isFastSplit
 
   val repliesFromSplits = ArrayBuffer[Long]()
 
   def setState(state: Any) = {
     state match {
-      case split: Boolean => isEqualSplit = split
+      case split: Boolean => isFastSplit = split
       case _ =>
     }
   }
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case RequestTransactionValue => graphEditor.sendSignal(value, sourceId.get, Some(vertex.id))
-      case splittedValue: Long => {
-        repliesFromSplits += splittedValue
+      case RequestTransactionTime => graphEditor.sendSignal(time, sourceId.get, Some(vertex.id))
+      case splitTimeStamp: Long => {
+        repliesFromSplits += splitTimeStamp
         if (vertex.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) == repliesFromSplits.size) {
-          val equalSplitSize = value.toDouble / repliesFromSplits.size
-          isEqualSplit = repliesFromSplits.forall(split => Math.abs(split - equalSplitSize) < precision * equalSplitSize)
+          isFastSplit = repliesFromSplits.forall(splitTime => splitTime-time < duration)
         }
       }
       case _ =>
@@ -42,7 +41,7 @@ class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, mi
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     if (isSplitter) {
-      outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(RequestTransactionValue, edge._1, Some(vertex.id)))
+      outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(RequestTransactionTime, edge._1, Some(vertex.id)))
     }
     scoreSignal = 0
   }
@@ -58,4 +57,4 @@ class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, mi
   }
 }
 
-case object RequestTransactionValue
+case object RequestTransactionTime

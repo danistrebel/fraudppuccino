@@ -75,6 +75,11 @@ object ComponentAlgorithms {
    * Returns the number of splits where all splits have approximately the same size.
    */
   val FairSplitCounter = ComponentAlgorithmExecution(equalSplits, countTrueResponses)
+  
+  /**
+   * Returns the number of splits where all splits happened within 24h after the transaction.
+   */
+  val SameDaySplitCounter = ComponentAlgorithmExecution(sameDaySplits, countTrueResponses)
 
 
 }

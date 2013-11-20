@@ -27,6 +27,7 @@ object ComponentAlgorithmParser {
   algorithms += (("cashsources", CashSourceCounter))
   algorithms += (("circlemembers", CircleAlgorithm))
   algorithms += (("fairsplits", FairSplitCounter))
+  algorithms += (("samedaysplits", SameDaySplitCounter))
 
   /**
    * Registers an algorithm so that it can be used in a filter step

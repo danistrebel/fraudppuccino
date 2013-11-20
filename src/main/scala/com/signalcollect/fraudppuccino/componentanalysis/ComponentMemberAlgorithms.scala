@@ -4,6 +4,7 @@ import com.signalcollect.fraudppuccino.componentanalysis.algorithms.CountryHopCo
 import com.signalcollect.fraudppuccino.componentanalysis.algorithms.PatternDepthAnalyzer
 import com.signalcollect.fraudppuccino.componentanalysis.algorithms.EqualSplits
 import com.signalcollect.fraudppuccino.componentanalysis.algorithms.CircleDetection
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.FastSplits
 
 object ComponentMemberAlgorithms {
 
@@ -71,4 +72,9 @@ object ComponentMemberAlgorithms {
    * Counts splits where all splits have the same size
    */
   val equalSplits = ComponentMemberAlgorithm(vertex => new EqualSplits(vertex))
+  
+  /**
+   * Counts splits where all splits happened at the same day as the transaction
+   */
+  val sameDaySplits = ComponentMemberAlgorithm(vertex => new FastSplits(vertex))
 }

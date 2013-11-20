@@ -242,5 +242,64 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
       
       masterSplitCount === 1
     }
+    
+    "work for fast splits counting" in {
+      val graph = GraphBuilder.build
+      //(ComponentMember ID, Component ID, successor (< 0 i.e. no successor for this vertex), tx time)
+      val componentMembers = List((1, 5, List(2,3,4,5), 1362229800l), (2, 5, List(), 1362244200l), (3, 5, List(), 1362257700l), (4,5,List(), 1362257700l), (5,5,List(), 1362258900l))
+
+      componentMembers.foreach(componentMember => {
+        val vertex = new RepeatedAnalysisVertex(componentMember._1)
+        vertex.storeAttribute("component", componentMember._2)
+        vertex.storeAttribute("time", componentMember._4)
+        vertex.storeAttribute("value", 100l)
+
+
+        if (componentMember._1 == componentMember._2) {
+          vertex.setAlgorithmImplementation(v => new ComponentMaster(v))
+        } else {
+          vertex.setAlgorithmImplementation(v => new ComponentMember(v))
+        }
+
+        graph.addVertex(vertex)
+      })
+
+      componentMembers.foreach(componentMember => {
+        for(successorId <- componentMember._3) {
+        	graph.addEdge(componentMember._1, new DownstreamTransactionEdgeWrapper(successorId))
+        	graph.addEdge(successorId, new UpstreamTransactionEdgeWrapper(componentMember._1))
+        }
+      })
+      
+      //Members register themselves with the master
+      graph.recalculateScores
+      graph.execute
+      
+      var masterSplitCount: Int = 0
+      
+      val extendedFastSplitCountCondition: Any => Boolean = splitCount => {
+        val count = splitCount.asInstanceOf[Int]
+        masterSplitCount = count
+        count > 0 
+      } 
+      
+      graph.sendSignal(ComponentWorkflow(Array(ConstantWorkflowStep(ComponentAlgorithmParser.algorithms("samedaysplits"), extendedFastSplitCountCondition))), 5	, None)
+      
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+
+      graph.recalculateScores
+      graph.execute
+      
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+
+      graph.recalculateScores
+      graph.execute
+      
+      masterSplitCount === 1
+    }
   }
 }

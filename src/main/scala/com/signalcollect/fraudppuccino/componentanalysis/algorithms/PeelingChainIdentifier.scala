@@ -6,7 +6,6 @@ import com.signalcollect.fraudppuccino.structuredetection._
 
 
 class PeelingChainIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
-  val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]
 
   def getState = None
 
