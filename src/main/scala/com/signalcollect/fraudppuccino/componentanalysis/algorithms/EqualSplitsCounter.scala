@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
  * @param precision percentage that a split is allowed to vary from the fair share
  * @param minSplits that a transaction is split into
  */
-class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, minSplits: Int = 3) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
+class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, minSplits: Int = 2) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
 
   var isEqualSplit = false
 
@@ -30,7 +30,7 @@ class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, mi
       case RequestTransactionValue => graphEditor.sendSignal(value, sourceId.get, Some(vertex.id))
       case splittedValue: Long => {
         repliesFromSplits += splittedValue
-        if (vertex.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) == repliesFromSplits.size) {
+        if (countSuccessors == repliesFromSplits.size) {
           val equalSplitSize = value.toDouble / repliesFromSplits.size
           isEqualSplit = repliesFromSplits.forall(split => Math.abs(split - equalSplitSize) < precision * equalSplitSize)
         }

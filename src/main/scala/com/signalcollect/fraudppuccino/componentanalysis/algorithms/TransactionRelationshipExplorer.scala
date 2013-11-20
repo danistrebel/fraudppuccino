@@ -30,7 +30,7 @@ trait TransactionRelationshipExplorer extends VertexAlgorithm {
 
   def countPredecessors: Int = getHostVertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge)
 
-  def countSuccessors: Int = getHostVertex.outgoingEdges.count(_._2 == UpstreamTransactionPatternEdge)
+  def countSuccessors: Int = getHostVertex.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge)
 
   /**
    * @return the id of the source of this transaction

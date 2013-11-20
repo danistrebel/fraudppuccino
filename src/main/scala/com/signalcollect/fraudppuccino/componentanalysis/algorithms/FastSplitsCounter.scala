@@ -30,8 +30,8 @@ class FastSplits(vertex: RepeatedAnalysisVertex[_], duration: Long = 86400, minS
       case RequestTransactionTime => graphEditor.sendSignal(time, sourceId.get, Some(vertex.id))
       case splitTimeStamp: Long => {
         repliesFromSplits += splitTimeStamp
-        if (vertex.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) == repliesFromSplits.size) {
-          isFastSplit = repliesFromSplits.forall(splitTime => splitTime-time < duration)
+        if (countSuccessors == repliesFromSplits.size) {
+          isFastSplit = repliesFromSplits.forall(splitTime => splitTime-time < duration)       
         }
       }
       case _ =>
@@ -49,7 +49,7 @@ class FastSplits(vertex: RepeatedAnalysisVertex[_], duration: Long = 86400, minS
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
   }
 
-  var scoreSignal = if (isSplitter && vertex.outgoingEdges.count(edge => edge._2 == DownstreamTransactionPatternEdge) > minSplits) 1.0 else 0.0
+  var scoreSignal = if (isSplitter && countSuccessors > minSplits) 1.0 else 0.0
 
   var scoreCollect = 0.0
 

@@ -139,6 +139,8 @@ case class StreamingExecution(
     }
 
     transaction.storeAttribute("xCountry", srcId % 10 == targetId % 10) //true of the transaction spans 2 countries.
+    transaction.storeAttribute("cash", srcId % 10 == (targetId+1) % 10) //true of the transaction spans 2 countries.
+
     transaction.setAlgorithmImplementation(transactionAlgorithm)
 
     val sender = new RepeatedAnalysisVertex(srcId)
