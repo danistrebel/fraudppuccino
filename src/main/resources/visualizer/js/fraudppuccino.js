@@ -4,24 +4,28 @@ var color = d3.scale.linear().domain([ 0, 5, 10, 20 ]).range(
 		[ "green", "yellow", "orange", "red" ]);
 
 function linkColor(link) {
-	
+
 	//red link if transaction is xCountry
-	if(link.transactions) {
+	if (link.transactions) {
 		var color = "gray"
-		$.each(link.transactions, function(i,t){
-			if(t.xCountry) {
-				color = "red";						
+		$.each(link.transactions, function(i, t) {
+			if (t.xCountry) {
+				color = "red";
+			} else if (t.cash) {
+				color = "blue";
 			}
 		});
 		return color
 	} else {
-		return "gray";		
+		return "gray";
 	}
-} 
+}
 
 function nodeColor(node) {
-	if(node.xCountry) {
-		return "red";		
+	if (node.transaction && node.transaction.xCountry) {
+		return "red";
+	} else if (node.transaction && node.transaction.cash) {
+		return "blue"
 	} else {
 		return color(node.group);
 	}
@@ -72,48 +76,63 @@ function updateVisualization() {
 	force.nodes(graph.nodes).links(graph.links).start();
 
 	graphVisualization.append("svg:defs").append("svg:marker").attr("id",
-			"transaction").attr("viewBox", "0 -5 10 10").attr("refX", 13).attr(
+			"transaction").attr("viewBox", "0 -5 10 10").attr("refX", 10).attr(
 			"refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr(
-			"orient", "auto").append("svg:path").attr("d", "M0,-5L10,0L0,5");
+			"orient", "auto").append("svg:path").attr("d", "M0,-5L10,0L0,5Z");
 
-	var linkContainer = graphVisualization.selectAll(".link").data(
-			graph.links).enter().append("svg:g").attr("class", "linkContainer");
-	
+	var linkContainer = graphVisualization.selectAll(".link").data(graph.links)
+			.enter().append("svg:g").attr("class", "linkContainer");
+
 	var link = linkContainer.append("svg:path").attr("class", "link").attr(
 			"marker-end", "url(#transaction)").style("stroke", function(link) {
-				return linkColor(link);
-			}).on("click", function(link) {
-				showDetailsForNode(link);
-			});
-	
+		return linkColor(link);
+	}).on("click", function(link) {
+		showDetailsForNode(link);
+	});
+
 	var linkLabel = linkContainer.append("svg:text").text(function(d) {
-		if(d.transactions && d.transactions.length > 1) {
+		if (d.transactions && d.transactions.length > 1) {
 			return d.transactions.length
 		}
-	}).style("fill", "#555").style("font-family", "Arial").style("font-size", 12);
+	}).style("fill", "#555").style("font-family", "Arial").style("font-size",
+			12);
 
-	var nodeContainer = graphVisualization.selectAll(".node").data(
-			graph.nodes).enter().append("svg:g").attr("class", "nodeContainer");
-	
-	var node = nodeContainer.append("circle").attr("class", "node").attr(
-					"r", function(d) {
-						return Math.min(20, transactionValue(d.value));
-					}).style("fill", function(d) {
-						return nodeColor(d);
-					}).call(force.drag).on("click", function(node) {
-						showDetailsForNode(node);
-					});
+	var nodeContainer = graphVisualization.selectAll(".node").data(graph.nodes)
+			.enter().append("svg:g").attr("class", "nodeContainer");
+
+	var node = nodeContainer.append("circle").attr("class", "node").attr("r",
+			function(d) {
+				r = Math.max(Math.min(25, transactionValue(d.value)),3);
+				d.radius = r;
+				return r;
+			}).style("fill", function(d) {
+		return nodeColor(d);
+	}).call(force.drag).on("click", function(node) {
+		showDetailsForNode(node);
+	});
 
 	force.on("tick", function() {
 		link.attr("d", function(d) {
-			var dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
-			return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + ","
-					+ d.target.y;
+			// Total difference in x and y from source to target
+			var diffX = d.target.x - d.source.x;
+			var diffY = d.target.y - d.source.y;
+
+			// Length of path from center of source node to center of target node
+			var pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
+
+			// x and y distances from center to outside edge of target node
+			var offsetX = (diffX * d.target.radius) / pathLength;
+			var offsetY = (diffY * d.target.radius) / pathLength;
+
+			return "M" + d.source.x + "," + d.source.y + "L"
+					+ (d.target.x - offsetX) + "," + (d.target.y - offsetY);
 		});
-		
+
 		linkLabel.attr("transform", function(d) {
-			var transX = parseFloat(d.source.x) + (parseFloat(d.target.x)-parseFloat(d.source.x))*0.33;
-			var transY = parseFloat(d.source.y) + (parseFloat(d.target.y) - parseFloat(d.source.y))*0.33;
+			var transX = parseFloat(d.source.x)
+					+ (parseFloat(d.target.x) - parseFloat(d.source.x)) * 0.33;
+			var transY = parseFloat(d.source.y)
+					+ (parseFloat(d.target.y) - parseFloat(d.source.y)) * 0.33;
 			return "translate(" + transX + "," + transY + ")";
 		});
 
@@ -134,9 +153,8 @@ function showDetailsForNode(element) {
 		var account = element.account;
 		var details = '<h1>Account #' + element.name + '</h1>'
 				+ '<table class="table table-striped">'
-				+ '<tr><td># Transactions in</td><td>'
-				+ account["in-count"] + '</tr>'
-				+ '<tr><td># Transactions out</td><td>'
+				+ '<tr><td># Transactions in</td><td>' + account["in-count"]
+				+ '</tr>' + '<tr><td># Transactions out</td><td>'
 				+ account["out-count"] + '</td></tr>'
 				+ '<tr><td>BTC Transactions in</td><td>' + account["in"]
 				/ 100000000 + ' BTC</td></tr>'
@@ -148,9 +166,10 @@ function showDetailsForNode(element) {
 	else if (element.transaction) {
 		var transaction = element.transaction
 		appendTransactionDetails(transaction);
-	} 
-	else if(element.transactions) {
-		$.each(element.transactions, function(i,t) {appendTransactionDetails(t)});
+	} else if (element.transactions) {
+		$.each(element.transactions, function(i, t) {
+			appendTransactionDetails(t)
+		});
 	}
 }
 
@@ -158,14 +177,12 @@ function appendTransactionDetails(transaction) {
 	var transactionDate = new Date(transaction.time * 1000);
 	var details = '<h1>Transaction #' + Math.abs(transaction.id) + '</h1>'
 			+ '<table class="table table-striped">'
-			+ '<tr><td>BTC Transaction Value</td><td>'
-			+ transaction.value / 100000000 + ' BTC</td></tr>'
-			+ '<tr><td>Time</td><td>'
+			+ '<tr><td>BTC Transaction Value</td><td>' + transaction.value
+			/ 100000000 + ' BTC</td></tr>' + '<tr><td>Time</td><td>'
 			+ transactionDate.toLocaleDateString() + ' '
 			+ transactionDate.toLocaleTimeString() + '</td></tr>'
-			+ '<tr><td>Source</td><td>' + transaction.src
-			+ '</td></tr>' + '<tr><td>Target</td><td>'
-			+ transaction.target + '</td></tr>'
+			+ '<tr><td>Source</td><td>' + transaction.src + '</td></tr>'
+			+ '<tr><td>Target</td><td>' + transaction.target + '</td></tr>'
 			+ '<tr><td>Cross Coutry</td><td>' + transaction.xCountry
 			+ '</td></tr>' + '</table>'
 	$('#inspector-content').append(details);
@@ -284,8 +301,7 @@ function loadTransactionGraph(id) {
 			"name" : transaction.id,
 			"group" : transaction.depth,
 			"transaction" : transaction,
-			"value" : 1 + (transaction.value / 100000000),
-			"xCountry": transaction.xCountry
+			"value" : 1 + (transaction.value / 100000000)
 		};
 		transactionLookUp[transaction.id] = tx;
 		graph.nodes.push(tx);
@@ -311,7 +327,6 @@ function loadAccountGraph(id) {
 
 	var accountsLookup = {}; // Index on accountId
 	var transactionsLookup = {}; // Index on source and target accountId
-
 
 	reports[id].members
 			.forEach(function(transaction, index) {
@@ -354,21 +369,23 @@ function loadAccountGraph(id) {
 						+ transaction.value;
 				accountsLookup[transaction.target].account["in-count"]++;
 
-				if(!transactionsLookup[transaction.src] || !transactionsLookup[transaction.src][transaction.target]) {
+				if (!transactionsLookup[transaction.src]
+						|| !transactionsLookup[transaction.src][transaction.target]) {
 					var link = {
-							"source" : accountsLookup[transaction.src],
-							"target" : accountsLookup[transaction.target],
-							"value" : 1,
-							"xCountry" : transaction.xCountry,
-							"transactions" : []
+						"source" : accountsLookup[transaction.src],
+						"target" : accountsLookup[transaction.target],
+						"value" : 1,
+						"xCountry" : transaction.xCountry,
+						"transactions" : []
 					};
-					if(!transactionsLookup[transaction.src]) {
+					if (!transactionsLookup[transaction.src]) {
 						transactionsLookup[transaction.src] = {}
 					}
 					transactionsLookup[transaction.src][transaction.target] = link;
 					graph.links.push(link);
 				}
-				transactionsLookup[transaction.src][transaction.target].transactions.push(transaction);
+				transactionsLookup[transaction.src][transaction.target].transactions
+						.push(transaction);
 			});
 
 	updateVisualization();
