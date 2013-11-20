@@ -1,10 +1,7 @@
-package com.signalcollect.fraudppuccino.componentdetection
+package com.signalcollect.fraudppuccino.componentanalysis
 
 import akka.actor.Actor
-import com.signalcollect.configuration.ActorSystemRegistry
-import akka.actor.Props
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.Map
 import com.signalcollect.GraphEditor
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection._

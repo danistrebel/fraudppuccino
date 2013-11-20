@@ -13,6 +13,7 @@ import akka.actor.Actor
 import scala.util.parsing.json.JSON
 import com.signalcollect.fraudppuccino.resulthandling._
 import com.signalcollect.fraudppuccino.structuredetection._
+import com.signalcollect.fraudppuccino.componentanalysis._
 
 @RunWith(classOf[JUnitRunner])
 class ComponentSpecs extends SpecificationWithJUnit {

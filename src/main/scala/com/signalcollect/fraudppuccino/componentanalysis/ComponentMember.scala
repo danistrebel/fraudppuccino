@@ -1,8 +1,8 @@
-package com.signalcollect.fraudppuccino.componentdetection
+package com.signalcollect.fraudppuccino.componentanalysis
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
-import com.signalcollect.fraudppuccino.patternanalysis.TransactionRelationshipExplorer
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.TransactionRelationshipExplorer
 
 /**
  * Member of a connected component.

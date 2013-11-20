@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.componentdetection
+package com.signalcollect.fraudppuccino.componentanalysis
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.GraphEditor

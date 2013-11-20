@@ -1,10 +1,7 @@
-package com.signalcollect.fraudppuccino.componentdetection
+package com.signalcollect.fraudppuccino.componentanalysis
 
 import scala.collection.mutable.Map
-import com.signalcollect.fraudppuccino.patternanalysis._
-import com.signalcollect.GraphEditor
-import scala.collection.mutable.ArrayBuffer
-import com.signalcollect.fraudppuccino.componentdetection.ComponentAlgorithms._
+import ComponentAlgorithms._
 
 /**
  * Utility to facilitate the parsing of filter executions on reported transactions

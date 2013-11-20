@@ -6,12 +6,13 @@ import org.specs2.mutable.SpecificationWithJUnit
 import com.signalcollect.GraphBuilder
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection._
+import com.signalcollect.fraudppuccino.componentanalysis._
 
 @RunWith(classOf[JUnitRunner])
 class ComponentAlgorithmSpec extends SpecificationWithJUnit {
 
   "component algorithms" should {
-    "work for sink counting" in {
+    "work for sink account counting" in {
       val graph = GraphBuilder.build
       //(ComponentMember ID, Component ID, successor (< 0 i.e. no successor for this vertex), src account, target account)
       val componentMembers = List((1, 5, List(2,3), 20, 21), (2, 5, List(), 21, 22), (3, 5, List(4,5), 21, 23), (4,5,List(), 23, 22), (5,5,List(), 23, 24))
@@ -53,7 +54,7 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
         count > 0 
       } 
       
-      graph.sendSignal(ComponentWorkflow(Array(ConstantWorkflowStep(ComponentAlgorithmParser.algorithms("sinks"), extendedSinkCondition))), 5	, None)
+      graph.sendSignal(ComponentWorkflow(Array(ConstantWorkflowStep(ComponentAlgorithmParser.algorithms("sinkaccounts"), extendedSinkCondition))), 5	, None)
       
       graph.recalculateScores
       graph.execute

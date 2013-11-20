@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.componentdetection
+package com.signalcollect.fraudppuccino.componentanalysis
 
 import scala.collection.mutable.ArrayBuffer
 

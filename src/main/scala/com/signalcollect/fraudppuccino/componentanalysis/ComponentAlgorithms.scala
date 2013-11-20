@@ -1,8 +1,8 @@
-package com.signalcollect.fraudppuccino.componentdetection
+package com.signalcollect.fraudppuccino.componentanalysis
 
-import com.signalcollect.GraphEditor
 import ComponentMemberResultAggregators._
 import ComponentMemberAlgorithms._
+
 
 /**
  * Provides a number of predefined component algorithms that are used

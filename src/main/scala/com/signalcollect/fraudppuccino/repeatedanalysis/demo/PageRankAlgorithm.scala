@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.repeatedanalysis.algorithms
+package com.signalcollect.fraudppuccino.repeatedanalysis.demo
 
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._

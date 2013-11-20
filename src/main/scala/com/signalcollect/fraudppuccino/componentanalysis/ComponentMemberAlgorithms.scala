@@ -1,6 +1,9 @@
-package com.signalcollect.fraudppuccino.componentdetection
+package com.signalcollect.fraudppuccino.componentanalysis
 
-import com.signalcollect.fraudppuccino.patternanalysis._
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.CountryHopCounter
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.PatternDepthAnalyzer
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.EqualSplits
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.CircleDetection
 
 object ComponentMemberAlgorithms {
 

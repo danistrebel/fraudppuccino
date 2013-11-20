@@ -1,10 +1,10 @@
 
-package com.signalcollect.fraudppuccino.patternanalysis
+package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
-import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
+
 
 /**
  * Explores the depth of this vertex. I.e. their longest distance from a

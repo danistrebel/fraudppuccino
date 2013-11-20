@@ -1,7 +1,6 @@
-package com.signalcollect.fraudppuccino.patternanalysis
+package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis.VertexAlgorithm
-import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection._
 
 /**

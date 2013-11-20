@@ -1,12 +1,10 @@
-package com.signalcollect.fraudppuccino.componentdetection
+package com.signalcollect.fraudppuccino.componentanalysis
 
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import scala.collection.mutable.ArrayBuffer
 import com.signalcollect._
 import com.signalcollect.configuration.ActorSystemRegistry
-import akka.actor.ActorRef
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
-import ch.epfl.lamp.compiler.msil.MemberInfo
 import scala.collection.mutable.HashSet
 
 /**

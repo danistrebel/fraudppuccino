@@ -6,6 +6,8 @@ import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.interfaces.EdgeId
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.componentanalysis.ComponentMaster
+import com.signalcollect.fraudppuccino.componentanalysis.ComponentMember
 
 /**
  * Runs a specialized for of label propagation

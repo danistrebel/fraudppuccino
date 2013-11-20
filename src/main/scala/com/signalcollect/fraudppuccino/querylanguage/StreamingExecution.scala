@@ -12,6 +12,7 @@ import com.signalcollect.fraudppuccino.componentdetection._
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.Vertex
 import akka.actor.ActorRef
+import com.signalcollect.fraudppuccino.componentanalysis._
 
 /**
  * A streamed execution that reads transactions from an input source and matches them

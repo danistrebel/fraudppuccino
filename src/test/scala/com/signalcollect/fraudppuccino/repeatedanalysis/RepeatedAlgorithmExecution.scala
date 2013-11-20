@@ -4,9 +4,9 @@ import org.specs2.mutable._
 import com.signalcollect.GraphBuilder
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-import com.signalcollect.fraudppuccino.repeatedanalysis.algorithms.SSSPAlgorithm
+import com.signalcollect.fraudppuccino.repeatedanalysis.demo.SSSPAlgorithm
 import com.signalcollect.StateForwarderEdge
-import com.signalcollect.fraudppuccino.repeatedanalysis.algorithms.PageRankAlgorithm
+import com.signalcollect.fraudppuccino.repeatedanalysis.demo.PageRankAlgorithm
 
 @RunWith(classOf[JUnitRunner])
 class RepeatedAlgorithmExecution extends SpecificationWithJUnit {

@@ -9,8 +9,8 @@ import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionP
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionEdgeWrapper
 import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionEdgeWrapper
 import scala.collection.mutable.Map
-import com.signalcollect.fraudppuccino.patternanalysis.PeelingChainIdentifier
-import com.signalcollect.fraudppuccino.patternanalysis.PeelingChain
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.PeelingChainIdentifier
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.PeelingChain
 
 @RunWith(classOf[JUnitRunner])
 class PeelingChainIdentifierSpec extends SpecificationWithJUnit {

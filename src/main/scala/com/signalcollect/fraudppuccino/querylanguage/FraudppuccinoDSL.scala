@@ -1,12 +1,5 @@
 package com.signalcollect.fraudppuccino.querylanguage
 
-import com.signalcollect.fraudppuccino.evaluation.btc._
-import com.signalcollect.fraudppuccino.repeatedanalysis._
-import com.signalcollect.fraudppuccino.structuredetection._
-import com.signalcollect.fraudppuccino.patternanalysis._
-import scala.collection.mutable.HashMap
-import language.dynamics
-import scala.collection.Iterator
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.Constructor
 

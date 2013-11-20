@@ -1,9 +1,9 @@
-package com.signalcollect.fraudppuccino.patternanalysis
+package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection._
-import com.signalcollect.fraudppuccino.structuredetection.TransactionOutput
+
 
 class PeelingChainIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
   val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]

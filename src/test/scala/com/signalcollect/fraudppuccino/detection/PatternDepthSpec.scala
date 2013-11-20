@@ -7,7 +7,7 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import scala.collection.mutable.Map
 import com.signalcollect.fraudppuccino.structuredetection._
-import com.signalcollect.fraudppuccino.patternanalysis.PatternDepthAnalyzer
+import com.signalcollect.fraudppuccino.componentanalysis.algorithms.PatternDepthAnalyzer
 
 @RunWith(classOf[JUnitRunner])
 class PatternDepthSpec extends SpecificationWithJUnit {

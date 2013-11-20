@@ -1,9 +1,8 @@
-package com.signalcollect.fraudppuccino.patternanalysis
+package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
-import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 
 /**
  * This counts the number of cross country transactions within a pattern.

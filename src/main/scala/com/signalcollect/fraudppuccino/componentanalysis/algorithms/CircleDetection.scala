@@ -1,9 +1,9 @@
-package com.signalcollect.fraudppuccino.patternanalysis
+package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import scala.collection.mutable.ArrayBuffer
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.structuredetection._
 
 /**
  * Detects if the target vertex of this transaction already occurred in the flow of

@@ -7,7 +7,6 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import scala.collection.mutable.Map
 import com.signalcollect.fraudppuccino.structuredetection._
-import com.signalcollect.fraudppuccino.patternanalysis._
 import com.signalcollect.fraudppuccino.querylanguage.StreamingExecutionDemo
 import com.signalcollect.fraudppuccino.querylanguage.StreamingExecution
 
