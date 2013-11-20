@@ -17,7 +17,7 @@ class PeelingChainIdentifier(vertex: RepeatedAnalysisVertex[_]) extends VertexAl
       case output: TransactionOutput => {
         if (output.value < 0.5 * this.value) {
           val successors = vertex.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge)
-          if (successors.length == 2) {
+          if (successors.size == 2) {
             successors.foreach(successor => graphEditor.addEdge(vertex.id, new PeeelingChainEdge(successor._1), true))
           }
         }

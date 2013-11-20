@@ -24,6 +24,7 @@ import com.signalcollect.Edge
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.AbstractBuffer
+import scala.collection.mutable.HashSet
 
 /**
  * This Vertex aims to facilitate the repeated execution of possibly different computations on the
@@ -81,7 +82,7 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
    */
   def dropState(key: String) { results.remove(key) }
 
-  var outgoingEdges = ArrayBuffer[(Any, EdgeMarker)]()
+  var outgoingEdges = HashSet[(Any, EdgeMarker)]()
 
   /**
    * Adds edges without checking for duplicates
