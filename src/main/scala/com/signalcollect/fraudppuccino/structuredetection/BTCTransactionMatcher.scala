@@ -44,6 +44,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     for ((ins, outs) <- matchesFound) {
+
       for (in <- ins) {
         for (out <- outs) {
           graphEditor.sendSignal((out, DownstreamTransactionPatternEdge), in, None)
@@ -110,9 +111,10 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
   def tryPartialOutputResult(inputs: Iterable[PartialInput], partialOutputs: PartialOutput): Iterable[PartialInput] = {
     //inputs that happened before the outputs and are smaller or equal in their value
-    val candidateInputs = inputs.filter(input => ((input.sum - partialOutputs.sum).toDouble / partialOutputs.sum) < 0.1 && partialOutputs.earliestTime > input.latestTime)
+    val candidateInputs = inputs.filter(input => ((input.sum - partialOutputs.sum).toDouble / input.sum) > -0.1 && partialOutputs.earliestTime > input.latestTime)
+
     for (input <- candidateInputs) {
-      if ((input.sum - partialOutputs.sum).toDouble/partialOutputs.sum > -0.1) {
+      if ((input.sum - partialOutputs.sum).toDouble / input.sum < 0.1) {
         matchesFound += ((input.members, partialOutputs.members))
         scoreSignal = 1.0
       }
