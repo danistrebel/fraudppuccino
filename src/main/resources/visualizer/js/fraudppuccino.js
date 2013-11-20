@@ -10,9 +10,9 @@ function linkColor(link) {
 		var color = "gray"
 		$.each(link.transactions, function(i, t) {
 			if (t.xCountry) {
-				color = "red";
-			} else if (t.cash) {
 				color = "blue";
+			} else if (t.cash) {
+				color = "goldenrod";
 			}
 		});
 		return color
@@ -23,17 +23,33 @@ function linkColor(link) {
 
 function nodeColor(node) {
 	if (node.transaction && node.transaction.xCountry) {
-		return "red";
+		return "blue";
 	} else if (node.transaction && node.transaction.cash) {
-		return "blue"
-	} else {
+		return "goldenrod"
+	} else if(node.account) {
+		if(node.account.in > node.account.out) {
+			return "red"
+		} else if(node.account.out > node.account.in) {
+			return "green"
+		} else {
+			return "gray"
+		}
+	}
+	else {
 		return color(node.group);
 	}
 }
 
-var transactionValue = d3.scale.log().domain([ 1, 1000 ]).range([ 0, 20 ]);
+function mapValue(d) {
+	var translation = d3.scale.linear().domain([1,750]).range([ 0, 20 ]);
+	if(d.account) {
+		return translation(Math.abs(d.account.in-d.account.out));
+	} else {
+		return translation(d.value);
+	}
+}
 
-var force = d3.layout.force().charge(-500).linkDistance(50).size(
+var force = d3.layout.force().charge(-1000).linkDistance(100).size(
 		[ width, height ]);
 
 var svg = d3.select("svg#patternVisualizer");
@@ -102,7 +118,7 @@ function updateVisualization() {
 
 	var node = nodeContainer.append("circle").attr("class", "node").attr("r",
 			function(d) {
-				r = Math.max(Math.min(25, transactionValue(d.value)),3);
+				r = Math.max(Math.min(25, mapValue(d)),3);
 				d.radius = r;
 				return r;
 			}).style("fill", function(d) {
@@ -157,9 +173,9 @@ function showDetailsForNode(element) {
 				+ '</tr>' + '<tr><td># Transactions out</td><td>'
 				+ account["out-count"] + '</td></tr>'
 				+ '<tr><td>BTC Transactions in</td><td>' + account["in"]
-				/ 100000000 + ' BTC</td></tr>'
+			    + ' BTC</td></tr>'
 				+ '<tr><td>BTC Transactions out</td><td>' + account["out"]
-				/ 100000000 + ' BTC</td></tr>' + '</table>'
+				+ ' BTC</td></tr>' + '</table>'
 		$('#inspector-content').append(details);
 	}
 
@@ -347,7 +363,7 @@ function loadAccountGraph(id) {
 					graph.nodes.push(source);
 				}
 				accountsLookup[transaction.src].account["out"] = accountsLookup[transaction.src].account["out"]
-						+ transaction.value;
+						+ (transaction.value /  100000000);
 				accountsLookup[transaction.src].account["out-count"]++;
 
 				if (!accountsLookup[transaction.target]) {
@@ -366,7 +382,7 @@ function loadAccountGraph(id) {
 					graph.nodes.push(target);
 				}
 				accountsLookup[transaction.target].account["in"] = accountsLookup[transaction.target].account["in"]
-						+ transaction.value;
+						+ (transaction.value /100000000);
 				accountsLookup[transaction.target].account["in-count"]++;
 
 				if (!transactionsLookup[transaction.src]
