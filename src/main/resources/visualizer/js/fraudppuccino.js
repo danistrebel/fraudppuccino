@@ -199,7 +199,7 @@ function appendTransactionDetails(transaction) {
 			+ transactionDate.toLocaleTimeString() + '</td></tr>'
 			+ '<tr><td>Source</td><td>' + transaction.src + '</td></tr>'
 			+ '<tr><td>Target</td><td>' + transaction.target + '</td></tr>'
-			+ '<tr><td>Cross Coutry</td><td>' + transaction.xCountry
+			+ '<tr><td>Cross Country</td><td>' + transaction.xCountry
 			+ '</td></tr>' + '</table>'
 	$('#inspector-content').append(details);
 }
