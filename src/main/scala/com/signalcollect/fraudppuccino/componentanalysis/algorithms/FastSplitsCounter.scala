@@ -49,7 +49,7 @@ class FastSplits(vertex: RepeatedAnalysisVertex[_], duration: Long = 86400, minS
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
   }
 
-  var scoreSignal = if (isSplitter && countSuccessors > minSplits) 1.0 else 0.0
+  var scoreSignal = if (isSplitter && countSuccessors >= minSplits) 1.0 else 0.0
 
   var scoreCollect = 0.0
 

@@ -50,7 +50,7 @@ class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, mi
   def executeCollectOperation(graphEditor: GraphEditor[Any, Any]) = {
   }
 
-  var scoreSignal = if (isSplitter && countSuccessors > minSplits) 1.0 else 0.0
+  var scoreSignal = if (isSplitter && countSuccessors >= minSplits) 1.0 else 0.0
 
   var scoreCollect = 0.0
 

@@ -145,28 +145,28 @@ object ComponentAlgorithmParser {
       }
       case "<" => (resultA, resultB) => {
         resultA match {
-          case res: Long => res.asInstanceOf[Long] < resultB.asInstanceOf[Long]
-          case res: Int => res.asInstanceOf[Int] < resultB.asInstanceOf[Int]
-          case res: Double => res.asInstanceOf[Double] < resultB.asInstanceOf[Double]
-          case res: Float => res.asInstanceOf[Float] < resultB.asInstanceOf[Float]
+          case res: Long => res < resultB.asInstanceOf[Long]
+          case res: Int => res < resultB.asInstanceOf[Int]
+          case res: Double => res < resultB.asInstanceOf[Double]
+          case res: Float => res < resultB.asInstanceOf[Float]
           case _ => false
         }
       }
       case "<=" => (resultA, resultB) => {
         resultA match {
-          case res: Long => res.asInstanceOf[Long] <= resultB.asInstanceOf[Long]
-          case res: Int => res.asInstanceOf[Int] <= resultB.asInstanceOf[Int]
-          case res: Double => res.asInstanceOf[Double] <= resultB.asInstanceOf[Double]
-          case res: Float => res.asInstanceOf[Float] <= resultB.asInstanceOf[Float]
+          case res: Long => res <= resultB.asInstanceOf[Long]
+          case res: Int => res <= resultB.asInstanceOf[Int]
+          case res: Double => res <= resultB.asInstanceOf[Double]
+          case res: Float => res <= resultB.asInstanceOf[Float]
           case _ => false
         }
       }
       case ">=" => (resultA, resultB) => {
         resultA match {
-          case res: Long => res.asInstanceOf[Long] >= resultB.asInstanceOf[Long]
-          case res: Int => res.asInstanceOf[Int] >= resultB.asInstanceOf[Int]
-          case res: Double => res.asInstanceOf[Double] >= resultB.asInstanceOf[Double]
-          case res: Float => res.asInstanceOf[Float] >= resultB.asInstanceOf[Double]
+          case res: Long => res >= resultB.asInstanceOf[Long]
+          case res: Int => res >= resultB.asInstanceOf[Int]
+          case res: Double => res >= resultB.asInstanceOf[Double]
+          case res: Float => res >= resultB.asInstanceOf[Double]
           case _ => false
         }
       } case "_" => (resultA, resultB) => false
