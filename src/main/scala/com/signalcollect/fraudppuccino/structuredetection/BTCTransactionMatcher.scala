@@ -20,15 +20,19 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   def setState(state: Any) = {}
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
+    
     signal match {
       case input: TransactionInput =>
         processInputTransaction(input); true
       case output: TransactionOutput => {
         uncollectedOutputs += output
-        scoreCollect = 1.0
-        false
+        true //because they can only be collected in the next step
       }
       case timeoutPill: Array[Long] => {
+        if(uncollectedOutputs.size > 0) {
+          scoreCollect = 1.0
+
+        }
         matchableInputs = matchableInputs.dropWhile(_.latestTime < timeoutPill(0))
         matchableOutputs = matchableOutputs.dropWhile(_.earliestTime < timeoutPill(0))
 
@@ -44,7 +48,6 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
     for ((ins, outs) <- matchesFound) {
-
       for (in <- ins) {
         for (out <- outs) {
           graphEditor.sendSignal((out, DownstreamTransactionPatternEdge), in, None)

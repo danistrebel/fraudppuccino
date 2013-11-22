@@ -26,6 +26,11 @@ class WorkFlowParserSpec extends SpecificationWithJUnit {
       greaterThan100(99) === false
       greaterThan100(101) === true
       
+      val greaterEqualThan100 = ComponentAlgorithmParser.parseStaticValueComparisonFunction(">=", "100")
+      greaterEqualThan100(100l) === true
+      greaterEqualThan100(99) === false
+      greaterEqualThan100(101) === true
+      
       val approxEquals100 = ComponentAlgorithmParser.parseStaticValueComparisonFunction("~=10%", "100")
       approxEquals100(100) === true
       approxEquals100(110l) === true
