@@ -4,6 +4,7 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import scala.collection.mutable.ArrayBuffer
 import com.signalcollect.fraudppuccino.structuredetection._
+import scala.collection.mutable.HashSet
 
 /**
  * Detects if the target vertex of this transaction already occurred in the flow of
@@ -13,7 +14,7 @@ class CircleDetection(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm
 
   var foundCircle = false
 
-  val accountTrail = ArrayBuffer[Any]()
+  val accountTrail = HashSet[Any]()
   
   def getState = foundCircle
 
@@ -25,9 +26,12 @@ class CircleDetection(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm
   }
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
+    if(vertex.id.asInstanceOf[Int] /10000 == 1000) {
+        println(vertex.id + " " + signal)
+      }
     signal match {
-      case signaledTrail: Iterable[Any] => {
-    	  if(accountTrail.exists(_==targetId)) {
+      case signaledTrail: List[Any] => {
+    	  if(!signaledTrail.isEmpty && signaledTrail.tail.contains(targetId)) {
     	    foundCircle = true
     	  }
     	  accountTrail++=signaledTrail
@@ -39,7 +43,7 @@ class CircleDetection(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(sourceId+:accountTrail, edge._1, Some(vertex.id)))
+    outgoingEdges.filter(edge => edge._2 == DownstreamTransactionPatternEdge).foreach(edge => graphEditor.sendSignal(sourceId+:accountTrail.toList, edge._1, Some(vertex.id)))
     scoreSignal = 0
   }
 
