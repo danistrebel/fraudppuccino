@@ -13,6 +13,8 @@ import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.Vertex
 import akka.actor.ActorRef
 import com.signalcollect.fraudppuccino.componentanalysis._
+import java.lang.management.ManagementFactory
+import scala.collection.JavaConversions._ 
 
 /**
  * A streamed execution that reads transactions from an input source and matches them
@@ -62,6 +64,9 @@ case class StreamingExecution(
     sendStatusUpdate("update", "computation has started")
 
     for (lowerWindowBound <- startTime to endTime by windowSize) {
+      
+      val stepStartTime = System.currentTimeMillis
+      
       if (maxComponentDuration > 0) { //signal maxComponentDuration if it is set
         retire(Array(lowerWindowBound - maxTxInterval, lowerWindowBound - 2 * maxTxInterval, lowerWindowBound - maxComponentDuration))
       } else {
@@ -73,16 +78,27 @@ case class StreamingExecution(
       load(sourceFile, lowerWindowBound, lowerWindowBound + windowSize)
       val loadingTime = System.currentTimeMillis - loadingStartTime
       
+      sendStatusUpdate("progress", ((lowerWindowBound - startTime) * 100 / (endTime - startTime)).toString)
+      
       val executionStartTime = System.currentTimeMillis
       graph.recalculateScores
       graph.execute
       val executionTime = System.currentTimeMillis - executionStartTime
+      val stepTime =  System.currentTimeMillis - stepStartTime
+      
       if (debug) {
-        sendStatusUpdate("progress", ((lowerWindowBound - startTime) * 100 / (endTime - startTime)).toString)
-        println(loadingTime + "," + executionTime + "," + lowerWindowBound)
+        val memoryBean = ManagementFactory.getMemoryMXBean
+        val heapUsage = memoryBean.getHeapMemoryUsage.getUsed/1048576
+        val nonHeapUsage = memoryBean.getNonHeapMemoryUsage.getUsed/1048576
+        val totalMemoryUsage = heapUsage+nonHeapUsage
+        
+        println(loadingTime + "," + executionTime + "," + stepTime + "," + lowerWindowBound + "," + heapUsage + "," + nonHeapUsage + "," + totalMemoryUsage +","+ timeInGC)
       }
     }
-
+  }
+    
+  def timeInGC = {
+    ManagementFactory.getGarbageCollectorMXBeans.map(_.getCollectionTime).sum
   }
 
   /**

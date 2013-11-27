@@ -11,6 +11,7 @@ object ComponentResultHandler {
       case "CONSOLE" => CommandLineResultHandler
       case "WEBSERVER" => FraudppuccinoServer
       case "MONGODB"=> MongoDBResultHandler
+      case "COUNTING" => CountingResultHandler
     }
   }
 }
