@@ -1,3 +1,12 @@
+//Register different use cases that specify application domain specific behavior
+var availableUseCases = {};
+availableUseCases["Bitcoin"] = Bitcoin;
+availableUseCases["banktransactions"] = BankTransactions;
+
+
+var currentUseCaseName = "Bitcoin"
+function useCase() { return availableUseCases[currentUseCaseName];}
+
 var width = 960, height = 500;
 
 var color = d3.scale.linear().domain([ 0, 5, 10, 20 ]).range(
@@ -164,44 +173,7 @@ function updateVisualization() {
 function showDetailsForNode(element) {
 	$('#inspectorNavTab :first-child').click(); // open the inspector tab
 	$('#inspector-content').empty();
-
-	if (element.account) {
-		var account = element.account;
-		var details = '<h1>Account #' + element.name + '</h1>'
-				+ '<table class="table table-striped">'
-				+ '<tr><td># Transactions in</td><td>' + account["in-count"]
-				+ '</tr>' + '<tr><td># Transactions out</td><td>'
-				+ account["out-count"] + '</td></tr>'
-				+ '<tr><td>BTC Transactions in</td><td>' + account["in"]
-			    + ' BTC</td></tr>'
-				+ '<tr><td>BTC Transactions out</td><td>' + account["out"]
-				+ ' BTC</td></tr>' + '</table>'
-		$('#inspector-content').append(details);
-	}
-
-	else if (element.transaction) {
-		var transaction = element.transaction
-		appendTransactionDetails(transaction);
-	} else if (element.transactions) {
-		$.each(element.transactions, function(i, t) {
-			appendTransactionDetails(t)
-		});
-	}
-}
-
-function appendTransactionDetails(transaction) {
-	var transactionDate = new Date(transaction.time * 1000);
-	var details = '<h1>Transaction #' + Math.abs(transaction.id) + '</h1>'
-			+ '<table class="table table-striped">'
-			+ '<tr><td>BTC Transaction Value</td><td>' + transaction.value
-			/ 100000000 + ' BTC</td></tr>' + '<tr><td>Time</td><td>'
-			+ transactionDate.toLocaleDateString() + ' '
-			+ transactionDate.toLocaleTimeString() + '</td></tr>'
-			+ '<tr><td>Source</td><td>' + transaction.src + '</td></tr>'
-			+ '<tr><td>Target</td><td>' + transaction.target + '</td></tr>'
-			+ '<tr><td>Cross Country</td><td>' + transaction.xCountry
-			+ '</td></tr>' + '</table>'
-	$('#inspector-content').append(details);
+	$('#inspector-content').append(useCase().getDetailsFor(element));
 }
 
 function appendReport(report) {
@@ -215,12 +187,8 @@ function appendReport(report) {
 			+ '-'
 			+ endDate.toLocaleDateString()
 			+ '<br/>'
-			+ 'BTC '
-			+ Math.round(report.flow / 100000000 * 10000)
-			/ 10000
-			+ ', '
-			+ report.members.length
-			+ ' transactions<br/>'
+			+ useCase().getReportSignature(report)
+			+ '<br/>'
 			+ '<button type="button" class="btn btn-default btn-xs showAccountGraph">Account Graph</button> <button type="button" class="btn btn-default btn-xs showTransactionGraph">Transaction Graph</button></li>';
 	reportsCounter++;
 	$("div #reportsList").append(reportListEntry);
@@ -264,6 +232,7 @@ $(document).on(
 
 $(document).on('click', '#updateSettings', function() {
 	var newWebSocketURI = $('#wsURI').val();
+	currentUseCaseName = $('#useCase').val();
 	initializeWebSocket(newWebSocketURI);
 });
 
@@ -363,7 +332,7 @@ function loadAccountGraph(id) {
 					graph.nodes.push(source);
 				}
 				accountsLookup[transaction.src].account["out"] = accountsLookup[transaction.src].account["out"]
-						+ (transaction.value /  100000000);
+						+ transaction.value;
 				accountsLookup[transaction.src].account["out-count"]++;
 
 				if (!accountsLookup[transaction.target]) {
@@ -382,7 +351,7 @@ function loadAccountGraph(id) {
 					graph.nodes.push(target);
 				}
 				accountsLookup[transaction.target].account["in"] = accountsLookup[transaction.target].account["in"]
-						+ (transaction.value /100000000);
+						+ transaction.value;
 				accountsLookup[transaction.target].account["in-count"]++;
 
 				if (!transactionsLookup[transaction.src]
