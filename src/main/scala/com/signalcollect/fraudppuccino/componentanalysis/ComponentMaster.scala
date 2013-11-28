@@ -247,7 +247,7 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
           "\"id\" : " + componentId.toString + "," +
           "\"start\":" + memberInfos.map(_.results("time").asInstanceOf[Long]).min * 1000l + "," +
           "\"end\":" + memberInfos.map(_.results("time").asInstanceOf[Long]).max * 1000l + "," +
-          "\"flow\":" + memberInfos.map(_.results("value").asInstanceOf[Long]).max + "," +
+          "\"flow\":" + memberInfos.filter(_.successors.isEmpty).map(_.results("value").asInstanceOf[Long]).sum + "," +
           "\"members\":[" + memberInfos.map(member => {
             "{\"id\":" + member.id + "," + member.results.map(result => "\"" + result._1 + "\":" + result._2.toString).mkString(",") +
               ",\"successor\":[" + member.successors.mkString(",") + "]}"
