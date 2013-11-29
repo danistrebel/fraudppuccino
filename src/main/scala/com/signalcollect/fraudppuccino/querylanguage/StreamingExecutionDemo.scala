@@ -21,6 +21,8 @@ parse:
   target: [3, Int]
   value: [4, Long]
   time: [5, Long]
+  xCountry: [6, Boolean]
+  cash: [7, Boolean]
 
 #The sections of the input data that should be processed
 start: 01/09/2009 02:50:00

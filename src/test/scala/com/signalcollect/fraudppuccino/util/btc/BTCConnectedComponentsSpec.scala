@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.evaluation.btc
+package com.signalcollect.fraudppuccino.util.btc
 
 import org.junit.runner.RunWith
 import org.specs2.mutable.SpecificationWithJUnit

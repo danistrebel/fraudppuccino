@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.evaluation.btc.datasetpreparation
+package com.signalcollect.fraudppuccino.util.btc.datasetpreparation
 
 import com.signalcollect.GraphBuilder
 import java.io.BufferedReader

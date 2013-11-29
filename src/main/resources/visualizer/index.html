@@ -73,7 +73,7 @@
 						<div id="tabs-1">
 							<textarea id="query" rows="15" placeholder="Start here..">
 #path of the input data
-source: /Volumes/Data/BTC_August2013/user-user-tx.csv
+source: /Volumes/Data/BTC_August2013/bitcoinExtended.csv
 
 #tells the parser about the semantics of the entries in the
 #input data
@@ -83,6 +83,9 @@ parse:
   target: [3, Int]
   value: [4, Long]
   time: [5, Long]
+  xCountry: [6, Boolean]
+  cash: [7, Boolean]
+  
 
 #The sections of the input data that should be processed
 start: 01/09/2009 02:50:00

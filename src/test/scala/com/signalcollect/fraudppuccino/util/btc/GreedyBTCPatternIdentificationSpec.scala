@@ -1,4 +1,4 @@
-package com.signalcollect.fraudppuccino.evaluation.btc
+package com.signalcollect.fraudppuccino.util.btc
 
 import org.specs2.mutable._
 import com.signalcollect.GraphBuilder
@@ -10,11 +10,12 @@ import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPat
 import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
+import com.signalcollect.fraudppuccino.structuredetection.GreedyBitcoinMatcher
 
 @RunWith(classOf[JUnitRunner])
-class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
+class GreedyBTCPatternIdentificationSpec extends SpecificationWithJUnit {
 
-  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new BTCTransactionMatcher(vertex)
+  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new GreedyBitcoinMatcher(vertex)
   val transactionAnnouncing: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionAnnouncer(vertex)
 
   "The pattern identifier" should {

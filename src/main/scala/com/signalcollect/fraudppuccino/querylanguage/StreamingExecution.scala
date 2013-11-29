@@ -153,10 +153,7 @@ case class StreamingExecution(
       val attributeValue = attribute._2._2(transactionAttributes(attribute._2._1))
       transaction.storeAttribute(attribute._1, attributeValue)
     }
-
-    transaction.storeAttribute("xCountry", srcId % 10 == targetId % 10) //true if the transaction spans 2 countries.
-    transaction.storeAttribute("cash", srcId % 10 == (targetId+1) % 10) //true if the transaction was cash.
-
+    
     transaction.setAlgorithmImplementation(transactionAlgorithm)
 
     val sender = new RepeatedAnalysisVertex(srcId)

@@ -52,6 +52,7 @@ class ExecutionModel {
     val doubleParser: String => Any = doubleValue => doubleValue.toDouble
     val floatParser: String => Any = floatValue => floatValue.toFloat
     val stringParser: String => Any = stringValue => stringValue
+    val booleanParser: String => Any = booleanValue => if(booleanValue.length==1) booleanValue.toInt!=0 else booleanValue.toBoolean
     val ignoredParser: String => Any = ignoredValue => null
 
     def getTypeParserForType(typeName: String): String => Any = {
@@ -61,6 +62,7 @@ class ExecutionModel {
         case "long" => longParser
         case "float" => floatParser
         case "double" => doubleParser
+        case "boolean" => booleanParser
         case _ => throw new Exception("can't recognize type " + typeName + " please use a primitive type or the keyword \"ignore\".")
       }
     }
