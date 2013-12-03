@@ -125,20 +125,6 @@ object Equal extends ResultEvaluation {
         case _ => throw new Exception("unsupported result type: " + v1.getClass)
       }
   }
-
-}
-
-object Compare extends ResultEvaluation {
-  def evaluate: (Any, Any) => Boolean = {
-    (v1, v2) =>
-      v1 match {
-        case res: Long => res == LongResult(v2)
-        case res: Int => res == IntResult(v2)
-        case res: Double => res == DoubleResult(v2)
-        case res: Float => res == FloatResult(v2)
-        case _ => throw new Exception("unsupported result type: " + v1.getClass)
-      }
-  }
 }
 
 object GreaterThan extends ResultEvaluation {
