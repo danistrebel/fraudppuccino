@@ -1,11 +1,15 @@
 package com.signalcollect.fraudppuccino.repeatedanalysis
 
 import com.signalcollect._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
+
 
 /**
  * Defines the structure of an interchangeable algorithm implementation
  */
-abstract class VertexAlgorithm(vertex: RepeatedAnalysisVertex[_]) {
+trait VertexAlgorithm {
+  
+  val vertex: RepeatedAnalysisVertex[_]
 
   def getState: Any
 

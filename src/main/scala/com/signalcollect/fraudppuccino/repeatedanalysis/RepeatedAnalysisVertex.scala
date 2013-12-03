@@ -25,6 +25,8 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.AbstractBuffer
 import scala.collection.mutable.HashSet
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
+
 
 /**
  * This Vertex aims to facilitate the repeated execution of possibly different computations on the
@@ -92,7 +94,7 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
 
     edge match {
       case markerEdge: EdgeMarkerWrapper => outgoingEdges += ((markerEdge.edgeTarget, markerEdge.marker))
-      case otherEdge: Edge[_] => outgoingEdges += ((edge.targetId, UnknownEdge))
+      case otherEdge: Edge[_] => outgoingEdges += ((edge.targetId, EdgeMarkers.UnknownEdge))
     }
     true
   }
@@ -119,9 +121,17 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
   def setState(state: Any): Unit = algorithm.setState(state)
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]): Boolean = {
-    val hasCollected = algorithm.deliverSignal(signal, sourceId, graphEditor)
-    loadNextAlgorithm
-    hasCollected
+    signal match {
+      case EdgeMarkerSignature(linkTarget,edgeType) => {
+       outgoingEdges += ((linkTarget, edgeType))
+       true
+      }
+      case _ => {
+        val hasCollected = algorithm.deliverSignal(signal, sourceId, graphEditor)
+        loadNextAlgorithm
+        hasCollected
+      }
+    }
   }
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any]): Unit = algorithm.executeSignalOperation(graphEditor, outgoingEdges)
 

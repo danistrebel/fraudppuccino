@@ -2,7 +2,7 @@ package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
  * @param precision percentage that a split is allowed to vary from the fair share
  * @param minSplits that a transaction is split into
  */
-class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, minSplits: Int = 3) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
+case class EqualSplits(vertex: RepeatedAnalysisVertex[_], precision: Double = 0.1, minSplits: Int = 3) extends VertexAlgorithm with TransactionRelationshipExplorer {
 
   var isEqualSplit = false
 

@@ -2,10 +2,9 @@ package com.signalcollect.fraudppuccino.componentdetection
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
-import com.signalcollect.fraudppuccino.structuredetection.TransactionPatternEdge
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
+
 import com.signalcollect.interfaces.EdgeId
-import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.componentanalysis.ComponentMaster
 import com.signalcollect.fraudppuccino.componentanalysis.ComponentMember
 
@@ -18,26 +17,26 @@ import com.signalcollect.fraudppuccino.componentanalysis.ComponentMember
  * determine if two components are linked to each
  * other or not.
  */
-class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends AbstractLabelMerger[(Int, Long)](vertex) {
+case class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends AbstractLabelMerger[ComponentLabel](vertex) {
 
   val ownTimeStamp = vertex.getResult("time").get.asInstanceOf[Long]
 
   var unconnectedChildren = vertex.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1)
   var isTerminated = false
 
-  def initialLabel: (Int, Long) = (vertex.id.asInstanceOf[Int], vertex.getResult("time").get.asInstanceOf[Long])
+  def initialLabel: ComponentLabel = ComponentLabel(vertex.id.asInstanceOf[Int], vertex.getResult("time").get.asInstanceOf[Long])
 
-  def shouldSwitchToLabel(newLabel: (Int, Long)): Boolean = this.label._2 < newLabel._2 || (this.label._2 == newLabel._2 && this.label._1 < newLabel._1) //switch to the id of the newer time stamp
+  def shouldSwitchToLabel(newLabel: ComponentLabel): Boolean = this.label.time < newLabel.time || (this.label.time == newLabel.time && this.label.masterId < newLabel.masterId) //switch to the id of the newer time stamp
 
-  def shouldSignalForEdgeType(edgeType: EdgeMarker): Boolean = edgeType.isInstanceOf[TransactionPatternEdge]
+  def shouldSignalForEdgeType(edgeType: EdgeMarker): Boolean = edgeType == DownstreamTransactionPatternEdge || edgeType == UpstreamTransactionPatternEdge
 
   def handleTimeout(timeout: Array[Long], graphEditor: GraphEditor[Any, Any]) = { //Fix the component when the 2nd timeout is met by the most recent member of the component
 
-    if (timeout(1) > this.label._2) { //an entire component times out if the most recent element timed out.
-      vertex.storeAttribute("component", label._1)
+    if (timeout(1) > this.label.time) { //an entire component times out if the most recent element timed out.
+      vertex.storeAttribute("component", label.masterId)
 
       //Test if this is the component head or a member
-      if (this.label._1 == vertex.id.asInstanceOf[Int]) {
+      if (this.label.masterId == vertex.id.asInstanceOf[Int]) {
         vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMaster(v)
       } else {
         vertex.nextAlgorithm = (v: RepeatedAnalysisVertex[_]) => new ComponentMember(v)
@@ -45,14 +44,14 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
     } 
     // to prevent infinitely large components the component can be cut at a specific point in time.
     else if (!isTerminated && timeout.length == 3 && timeout(2) > ownTimeStamp) {
-      graphEditor.sendSignal(CutComponent, this.label._1, Some(vertex.id))
+      graphEditor.sendSignal(CutComponent, this.label.masterId, Some(vertex.id))
     }
   }
 
   override def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
       case timeout: Array[Long] => handleTimeout(timeout, graphEditor)
-      case newLabel: (Int, Long) => {
+      case newLabel: ComponentLabel => {
         if (!isTerminated) {
           unconnectedChildren -= sourceId.get
           if (shouldSwitchToLabel(newLabel)) {
@@ -93,3 +92,4 @@ class ConnectedComponentsIdentifier(vertex: RepeatedAnalysisVertex[_]) extends A
 
 case object CutComponent
 case object ComponentTerminated
+case class ComponentLabel(masterId: Int, time: Long)

@@ -6,7 +6,7 @@ import com.signalcollect.fraudppuccino.componentanalysis.algorithms.EqualSplits
 import com.signalcollect.fraudppuccino.componentanalysis.algorithms.CircleDetection
 import com.signalcollect.fraudppuccino.componentanalysis.algorithms.FastSplits
 
-object ComponentMemberAlgorithms {
+case object ComponentMemberAlgorithms {
 
   /*
    * Queries the component for the max depth i.e. the longest path from any source to a sink transaction

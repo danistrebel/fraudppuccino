@@ -1,6 +1,6 @@
 package com.signalcollect.fraudppuccino.resulthandling
 
-object CountingResultHandler extends ComponentResultHandler {
+case object CountingResultHandler extends ComponentResultHandler {
   var count = 0
 
   def processResult(jsonData: String): Unit = {

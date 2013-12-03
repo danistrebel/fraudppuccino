@@ -4,9 +4,11 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.SpecificationWithJUnit
 import com.signalcollect.GraphBuilder
-import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.componentanalysis._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._ 
+import com.signalcollect.fraudppuccino.repeatedanalysis._
+
 
 @RunWith(classOf[JUnitRunner])
 class ComponentAlgorithmSpec extends SpecificationWithJUnit {
@@ -36,8 +38,8 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
 
       componentMembers.foreach(componentMember => {
         for (successorId <- componentMember._3) {
-          graph.addEdge(componentMember._1, new DownstreamTransactionEdgeWrapper(successorId))
-          graph.addEdge(successorId, new UpstreamTransactionEdgeWrapper(componentMember._1))
+          graph.addEdge(componentMember._1, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, successorId))
+          graph.addEdge(successorId, EdgeMarkerWrapper(UpstreamTransactionPatternEdge, componentMember._1))
         }
       })
 
@@ -84,8 +86,8 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
 
       componentMembers.foreach(componentMember => {
         for (successorId <- componentMember._3) {
-          graph.addEdge(componentMember._1, new DownstreamTransactionEdgeWrapper(successorId))
-          graph.addEdge(successorId, new UpstreamTransactionEdgeWrapper(componentMember._1))
+          graph.addEdge(componentMember._1, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, successorId))
+          graph.addEdge(successorId, EdgeMarkerWrapper(UpstreamTransactionPatternEdge, componentMember._1))
         }
       })
 
@@ -144,8 +146,8 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
 
       componentMembers.foreach(componentMember => {
         for (successorId <- componentMember._3) {
-          graph.addEdge(componentMember._1, new DownstreamTransactionEdgeWrapper(successorId))
-          graph.addEdge(successorId, new UpstreamTransactionEdgeWrapper(componentMember._1))
+          graph.addEdge(componentMember._1, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, successorId))
+          graph.addEdge(successorId, EdgeMarkerWrapper(UpstreamTransactionPatternEdge, componentMember._1))
         }
       })
 
@@ -211,8 +213,8 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
 
       componentMembers.foreach(componentMember => {
         for (successorId <- componentMember._3) {
-          graph.addEdge(componentMember._1, new DownstreamTransactionEdgeWrapper(successorId))
-          graph.addEdge(successorId, new UpstreamTransactionEdgeWrapper(componentMember._1))
+          graph.addEdge(componentMember._1, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, successorId))
+          graph.addEdge(successorId, EdgeMarkerWrapper(UpstreamTransactionPatternEdge, componentMember._1))
         }
       })
 
@@ -270,8 +272,8 @@ class ComponentAlgorithmSpec extends SpecificationWithJUnit {
 
       componentMembers.foreach(componentMember => {
         for (successorId <- componentMember._3) {
-          graph.addEdge(componentMember._1, new DownstreamTransactionEdgeWrapper(successorId))
-          graph.addEdge(successorId, new UpstreamTransactionEdgeWrapper(componentMember._1))
+          graph.addEdge(componentMember._1, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, successorId))
+          graph.addEdge(successorId, EdgeMarkerWrapper(UpstreamTransactionPatternEdge, componentMember._1))
         }
       })
 

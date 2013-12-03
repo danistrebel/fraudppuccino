@@ -9,6 +9,7 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.componentdetection.ConnectedComponentsIdentifier
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
+import com.signalcollect.fraudppuccino.componentdetection.ComponentLabel
 
 @RunWith(classOf[JUnitRunner])
 class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
@@ -62,6 +63,12 @@ class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
         graph.execute
       }
 
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+      graph.recalculateScores
+      graph.execute
+
       val timeout = Array(2l, 3l)
       graph.sendSignal(timeout, 100, None)
       graph.sendSignal(timeout, 101, None)
@@ -70,8 +77,8 @@ class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
       graph.recalculateScores
       graph.execute
 
-      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](100, v => v.state.asInstanceOf[(Int, Long)]._1) === 101
-      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](101, v => v.state.asInstanceOf[(Int, Long)]._1) === 101
+      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](100, v => v.state.asInstanceOf[ComponentLabel].masterId) === 101
+      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](101, v => v.state.asInstanceOf[ComponentLabel].masterId) === 101
     }
 
     " have the same component label for splits" in {
@@ -112,9 +119,17 @@ class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
         transaction._1.storeAttribute("target", transaction._5)
         transaction._1.setAlgorithmImplementation(transactionAnnouncing)
         graph.addVertex(transaction._1)
-        graph.recalculateScores
-        graph.execute
+
       }
+
+      graph.recalculateScores
+      graph.execute
+
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+      graph.recalculateScores
+      graph.execute
 
       val timeout = Array(2l, 3l)
       graph.sendSignal(timeout, 100, None)
@@ -123,11 +138,10 @@ class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
 
       graph.recalculateScores
       graph.execute
-     
 
-      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](100, v => v.state.asInstanceOf[(Int, Long)]._1) === 102
-      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](101, v => v.state.asInstanceOf[(Int, Long)]._1) === 102
-      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](102, v => v.state.asInstanceOf[(Int, Long)]._1) === 102
+      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](100, v => v.state.asInstanceOf[ComponentLabel].masterId) === 102
+      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](101, v => v.state.asInstanceOf[ComponentLabel].masterId) === 102
+      graph.forVertexWithId[RepeatedAnalysisVertex[_], Int](102, v => v.state.asInstanceOf[ComponentLabel].masterId) === 102
 
     }
   }

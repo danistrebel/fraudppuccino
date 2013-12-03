@@ -5,6 +5,7 @@ import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.SpecificationWithJUnit
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 import scala.collection.mutable.Map
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.componentanalysis.algorithms.PatternDepthAnalyzer
@@ -37,20 +38,20 @@ class PatternDepthSpec extends SpecificationWithJUnit {
       transactionsMap += ((tx.id, tx))
     }
 
-    graph.addEdge(100, new DownstreamTransactionEdgeWrapper(101))
-    graph.addEdge(100, new DownstreamTransactionEdgeWrapper(102))
-    graph.addEdge(101, new UpstreamTransactionEdgeWrapper(100))
-    graph.addEdge(102, new UpstreamTransactionEdgeWrapper(100))
+    graph.addEdge(100, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, 101))
+    graph.addEdge(100, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, 102))
+    graph.addEdge(101, EdgeMarkerWrapper(UpstreamTransactionPatternEdge,100))
+    graph.addEdge(102, EdgeMarkerWrapper(UpstreamTransactionPatternEdge,100))
 
-    graph.addEdge(101, new DownstreamTransactionEdgeWrapper(103))
-    graph.addEdge(101, new DownstreamTransactionEdgeWrapper(104))
-    graph.addEdge(103, new UpstreamTransactionEdgeWrapper(101))
-    graph.addEdge(104, new UpstreamTransactionEdgeWrapper(101))
+    graph.addEdge(101, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, 103))
+    graph.addEdge(101, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, 104))
+    graph.addEdge(103, EdgeMarkerWrapper(UpstreamTransactionPatternEdge,101))
+    graph.addEdge(104, EdgeMarkerWrapper(UpstreamTransactionPatternEdge,101))
 
-    graph.addEdge(103, new DownstreamTransactionEdgeWrapper(105))
-    graph.addEdge(103, new DownstreamTransactionEdgeWrapper(106))
-    graph.addEdge(105, new UpstreamTransactionEdgeWrapper(103))
-    graph.addEdge(106, new UpstreamTransactionEdgeWrapper(103))
+    graph.addEdge(103, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, 105))
+    graph.addEdge(103, EdgeMarkerWrapper(DownstreamTransactionPatternEdge, 106))
+    graph.addEdge(105, EdgeMarkerWrapper(UpstreamTransactionPatternEdge,103))
+    graph.addEdge(106, EdgeMarkerWrapper(UpstreamTransactionPatternEdge,103))
 
     " be found" in {
 

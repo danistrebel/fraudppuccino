@@ -1,8 +1,9 @@
 package com.signalcollect.fraudppuccino.repeatedanalysis
 
 import com.signalcollect._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 
-class DummyVertexAlgorithm() extends VertexAlgorithm(null) {
+case class DummyVertexAlgorithm(vertex: RepeatedAnalysisVertex[_]= null) extends VertexAlgorithm {
  def getState = None
 
   def setState(state: Any) = {

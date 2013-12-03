@@ -14,12 +14,12 @@ import com.signalcollect.Vertex
 import akka.actor.ActorRef
 import com.signalcollect.fraudppuccino.componentanalysis._
 import java.lang.management.ManagementFactory
-import scala.collection.JavaConversions._ 
+import scala.collection.JavaConversions._
 
 /**
  * A streamed execution that reads transactions from an input source and matches them
  * according to the conditions specified by the user.
- */ 
+ */
 case class StreamingExecution(
   sourceFile: String = "", //Path to the input source file
   startTime: Long = 0l, //Unix time stamp
@@ -35,7 +35,7 @@ case class StreamingExecution(
   debug: Boolean = false, // prints additional information about the execution if true
   transactionAttributes: Map[String, (Int, String => Any)] = Map[String, (Int, String => Any)]()) //Attributes that should be parsed from the input file. Format (Name, (Index, Parser))
   {
-  val graph = GraphBuilder.withStorageFactory(JavaMapStorage).build
+  val graph = GraphBuilder.withStorageFactory(JavaMapStorage).build//.withMessageSerialization(true).withKryoRegistrations(kryoRegistrations).build //
   var iter: Iterator[String] = null //Specify the work flow
   val mandatoryTransactionAttributes = Array[String]("id", "src", "target", "time")
   val indexOfId = transactionAttributes("id")._1
@@ -52,9 +52,11 @@ case class StreamingExecution(
   def execute = {
 
     val system = ActorSystemRegistry.retrieve("SignalCollect").get
+   
     handlerRef = system.actorOf(Props(new ComponentHandler(graph)), "componentHandler")
+
     for (handler <- resultHandlers) {
-      handlerRef ! RegisterResultHandler(ComponentResultHandler(handler))
+      handlerRef ! RegisterResultHandler(ComponentResultHandlerFactory(handler))
     }
 
     for (filter <- filters) {
@@ -64,9 +66,9 @@ case class StreamingExecution(
     sendStatusUpdate("update", "computation has started")
 
     for (lowerWindowBound <- startTime to endTime by windowSize) {
-      
+
       val stepStartTime = System.currentTimeMillis
-      
+
       if (maxComponentDuration > 0) { //signal maxComponentDuration if it is set
         retire(Array(lowerWindowBound - maxTxInterval, lowerWindowBound - 2 * maxTxInterval, lowerWindowBound - maxComponentDuration))
       } else {
@@ -77,26 +79,26 @@ case class StreamingExecution(
       val loadingStartTime = System.currentTimeMillis
       load(sourceFile, lowerWindowBound, lowerWindowBound + windowSize)
       val loadingTime = System.currentTimeMillis - loadingStartTime
-      
+
       sendStatusUpdate("progress", ((lowerWindowBound - startTime) * 100 / (endTime - startTime)).toString)
-      
+
       val executionStartTime = System.currentTimeMillis
       graph.recalculateScores
       graph.execute
       val executionTime = System.currentTimeMillis - executionStartTime
-      val stepTime =  System.currentTimeMillis - stepStartTime
-      
+      val stepTime = System.currentTimeMillis - stepStartTime
+
       if (debug) {
         val memoryBean = ManagementFactory.getMemoryMXBean
-        val heapUsage = memoryBean.getHeapMemoryUsage.getUsed/1048576
-        val nonHeapUsage = memoryBean.getNonHeapMemoryUsage.getUsed/1048576
-        val totalMemoryUsage = heapUsage+nonHeapUsage
-        
-        println(loadingTime + "," + executionTime + "," + stepTime + "," + lowerWindowBound + "," + heapUsage + "," + nonHeapUsage + "," + totalMemoryUsage +","+ timeInGC)
+        val heapUsage = memoryBean.getHeapMemoryUsage.getUsed / 1048576
+        val nonHeapUsage = memoryBean.getNonHeapMemoryUsage.getUsed / 1048576
+        val totalMemoryUsage = heapUsage + nonHeapUsage
+
+        println(loadingTime + "," + executionTime + "," + stepTime + "," + lowerWindowBound + "," + heapUsage + "," + nonHeapUsage + "," + totalMemoryUsage + "," + timeInGC)
       }
     }
   }
-    
+
   def timeInGC = {
     ManagementFactory.getGarbageCollectorMXBeans.map(_.getCollectionTime).sum
   }
@@ -153,7 +155,7 @@ case class StreamingExecution(
       val attributeValue = attribute._2._2(transactionAttributes(attribute._2._1))
       transaction.storeAttribute(attribute._1, attributeValue)
     }
-    
+
     transaction.setAlgorithmImplementation(transactionAlgorithm)
 
     val sender = new RepeatedAnalysisVertex(srcId)
@@ -181,6 +183,34 @@ case class StreamingExecution(
   def sendStatusUpdate(status: String, msg: String) {
     handlerRef ! ComputationStatus("{\"status\":\"" + status + "\", \"msg\":\"" + msg + "\"}")
   }
+  
+  lazy val kryoRegistrations = List("com.signalcollect.fraudppuccino.structuredetection.TransactionInput",
+    "com.signalcollect.fraudppuccino.structuredetection.TransactionOutput",
+    "com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkerSignature",
+    "com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers$",
+    "com.signalcollect.fraudppuccino.componentdetection.ComponentLabel",
+    "com.signalcollect.fraudppuccino.componentdetection.CutComponent",
+    "com.signalcollect.fraudppuccino.componentdetection.ComponentTerminated",
+    "com.signalcollect.fraudppuccino.componentanalysis.WorkFlowStep",
+    "com.signalcollect.fraudppuccino.componentanalysis.RegisterResultHandler",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentWorkflow",
+    "com.signalcollect.fraudppuccino.componentanalysis.ConstantWorkflowStep",
+    "com.signalcollect.fraudppuccino.componentanalysis.AlgorithmWorkflowStep",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentMasterQuery",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberQueryExecution",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentAlgorithmExecution",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentAnnouncement",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentResult",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComputationStatus",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberRegistration",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberResponse",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberInfo",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberQuery",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberAlgorithm",
+    "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberElimination$",
+    "com.signalcollect.fraudppuccino.resulthandling.ComponentResultHandlerFactory",
+    "scala.collection.mutable.ArrayBuffer",
+    "com.signalcollect.fraudppuccino.componentanalysis.StaticEvaluation")
 }
 
 abstract class MatchingMode

@@ -22,20 +22,38 @@ package com.signalcollect.fraudppuccino.repeatedanalysis
 import com.signalcollect._
 import com.signalcollect.interfaces._
 
+
+
+
 /**
  * Used to identify different edge types 
  */ 
-abstract class EdgeMarker
+object EdgeMarkers extends Enumeration with Serializable {
+  
+  type EdgeMarker = Byte
+  
+  /**
+   * Marker for edges where its type is unknown
+   */ 
+  val UnknownEdge: Byte = 0
+  
+  /**
+   * Connects pattern transactions in the direction of the transaction flow i.e. inputs to outputs
+   */ 
+  val DownstreamTransactionPatternEdge: Byte = 1
+  
+  /**
+   * Connects pattern transactions in the opposite direction of the transaction flow i.e. transactions to inputs
+   */ 
+  val UpstreamTransactionPatternEdge: Byte = 2
+}
 
-/**
- * Marker for edges where its type is unknown
- */ 
-case object UnknownEdge extends EdgeMarker
+import EdgeMarkers._
 
 /**
  * Wrapper to transport EdgeMarker information via the default Edge interface
  */ 
-case class EdgeMarkerWrapper(edgeTarget: Any, marker: EdgeMarker) extends Edge[Any] {
+case class EdgeMarkerWrapper(marker: EdgeMarker, edgeTarget: Any) extends Edge[Any] {
   type Source = Vertex[_,_]
   
   def id: EdgeId[_] = null
@@ -52,3 +70,5 @@ case class EdgeMarkerWrapper(edgeTarget: Any, marker: EdgeMarker) extends Edge[A
   
   def executeSignalOperation(sourceVertex: Vertex[_, _], graphEditor: GraphEditor[Any, Any]) = {}
 }
+
+case class EdgeMarkerSignature(edgeTarget: Any, marker: EdgeMarker)

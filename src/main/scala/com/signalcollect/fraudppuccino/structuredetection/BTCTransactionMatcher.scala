@@ -7,8 +7,10 @@ import java.util.HashMap
 import scala.collection.JavaConversions._
 import java.util.ArrayList
 import com.signalcollect.fraudppuccino.querylanguage._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._ 
 
-case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL, matchingComplexity: Int = 10) extends VertexAlgorithm(vertex) {
+
+case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL, matchingComplexity: Int = 10) extends VertexAlgorithm {
 
   var matchableInputs = new ArrayBuffer[PartialInput] // Transactions that are received by this entity
   var matchableOutputs = new ArrayBuffer[PartialOutput] // Transactions that are sent by this entity
@@ -20,8 +22,7 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
   def setState(state: Any) = {}
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
-    
-    signal match {
+    signal match {    
       case input: TransactionInput =>
         processInputTransaction(input); true
       case output: TransactionOutput => {
@@ -50,8 +51,8 @@ case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode
     for ((ins, outs) <- matchesFound) {
       for (in <- ins) {
         for (out <- outs) {
-          graphEditor.sendSignal((out, DownstreamTransactionPatternEdge), in, None)
-          graphEditor.sendSignal((in, UpstreamTransactionPatternEdge), out, None)
+          graphEditor.sendSignal(EdgeMarkerSignature(out, DownstreamTransactionPatternEdge), in, None)
+          graphEditor.sendSignal(EdgeMarkerSignature(in, UpstreamTransactionPatternEdge), out, None)
         }
       }
     }

@@ -1,8 +1,8 @@
 package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 import com.signalcollect._
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 
 /**
  * This counts the number of cross country transactions within a pattern.
@@ -10,7 +10,7 @@ import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionP
  * connected source transaction to this vertex.
  * In back and forth hopping each spanning transaction is counted.
  */
-class CountryHopCounter(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
+case class CountryHopCounter(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm with TransactionRelationshipExplorer {
 
   var countryHops = ownXcountryCount
   var smallestHopsReceived = Int.MaxValue

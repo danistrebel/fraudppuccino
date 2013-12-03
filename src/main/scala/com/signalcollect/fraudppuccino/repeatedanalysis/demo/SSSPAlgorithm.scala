@@ -2,8 +2,10 @@ package com.signalcollect.fraudppuccino.repeatedanalysis.demo
 
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._ 
 
-class SSSPAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
+
+case class SSSPAlgorithm(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
   var minDistance = Int.MaxValue
   var minSignal = Int.MaxValue

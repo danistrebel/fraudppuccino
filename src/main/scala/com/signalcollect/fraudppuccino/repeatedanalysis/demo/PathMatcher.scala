@@ -2,8 +2,10 @@ package com.signalcollect.fraudppuccino.repeatedanalysis.demo
 
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._ 
 
-class PathMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
+
+case class PathMatcher(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
   var unmatchedPatterns: List[RegexPattern] = List()
   var matches: List[RegexPattern] = List()

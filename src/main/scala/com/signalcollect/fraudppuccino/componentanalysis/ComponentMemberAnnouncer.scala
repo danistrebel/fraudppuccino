@@ -3,13 +3,14 @@ package com.signalcollect.fraudppuccino.componentanalysis
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.structuredetection._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 
 /**
  * Lets the component members report themselves at the component master.
  * Requires that the vertex already learned about the id of its component
  * master and stored it in a "component" field.
  */ 
-class ComponentMemberAnnoncer(vertex : RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
+case class ComponentMemberAnnoncer(vertex : RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 def getState = None
 
   def setState(state: Any) = {
@@ -20,8 +21,8 @@ def getState = None
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    graphEditor.sendSignal(ComponentMemberRegistration(vertex.outgoingEdges.filter(edge => edge._2.isInstanceOf[TransactionPatternEdge]).map(_._1)), 
-        vertex.getResult("component").get.asInstanceOf[Int], Some(vertex.id))
+    val neighbors = vertex.outgoingEdges.filter(edge => edge._2==EdgeMarkers.DownstreamTransactionPatternEdge || edge._2==EdgeMarkers.UpstreamTransactionPatternEdge).map(_._1.asInstanceOf[Int])
+    graphEditor.sendSignal(ComponentMemberRegistration(neighbors.toArray), vertex.getResult("component").get.asInstanceOf[Int], Some(vertex.id))
     scoreSignal = 0.0
   }
 

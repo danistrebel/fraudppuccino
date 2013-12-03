@@ -6,8 +6,7 @@ import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import com.signalcollect.fraudppuccino.repeatedanalysis._
-import com.signalcollect.fraudppuccino.structuredetection.UpstreamTransactionPatternEdge
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
 import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
 
@@ -64,6 +63,12 @@ class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
         graph.execute
 
       }
+      
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+      graph.recalculateScores
+      graph.execute
 
       graph.recalculateScores
       graph.execute
@@ -111,6 +116,7 @@ class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
         account.setAlgorithmImplementation(transactionMatching)
         graph.addVertex(account)
       }
+      
 
       for (transaction <- transactionInfos) {
         transaction._1.storeAttribute("value", transaction._2)
@@ -122,6 +128,12 @@ class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
         graph.recalculateScores
         graph.execute
       }
+      graph.recalculateScores
+      graph.execute
+
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+      vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
       graph.recalculateScores
       graph.execute
 
@@ -181,6 +193,12 @@ class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
         graph.recalculateScores
         graph.execute
       }
+      
+      //Simulate next computation step
+      graph.foreachVertexWithGraphEditor(graphEditor => vertex =>
+        vertex.deliverSignal(Array[Long](0l, 0l), None, graphEditor))
+      graph.recalculateScores
+      graph.execute
 
       graph.recalculateScores
       graph.execute
