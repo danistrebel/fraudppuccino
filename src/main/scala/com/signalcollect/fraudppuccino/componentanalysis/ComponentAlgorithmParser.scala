@@ -3,7 +3,6 @@ package com.signalcollect.fraudppuccino.componentanalysis
 import scala.collection.mutable.Map
 import ComponentAlgorithms._
 
-
 /**
  * Utility to facilitate the parsing of filter executions on reported transactions
  */
@@ -78,7 +77,7 @@ object ComponentAlgorithmParser {
       case "<" => SmallerThan.staticCompare(value)
       case "<=" => SmallerThanEqual.staticCompare(value)
       case ">=" => GreaterThanEqual.staticCompare(value)
-      case "_" => _ => false
+      case "_" => _ => throw new Exception("unsupported operator: " + operator)
     }
   }
 
@@ -90,7 +89,7 @@ object ComponentAlgorithmParser {
       case "<" => SmallerThan.evaluate
       case "<=" => SmallerThanEqual.evaluate
       case ">=" => GreaterThanEqual.evaluate
-      case "_" => (_, _) => false
+      case "_" => throw new Exception("unsupported operator: " + operator)
     }
   }
 
@@ -101,18 +100,18 @@ trait ResultEvaluation extends Serializable {
 }
 
 case class ApproxEqual(percentString: String) extends ResultEvaluation {
-    def evaluate: (Any, Any) => Boolean = {
-          (v1, v2) =>
+  def evaluate: (Any, Any) => Boolean = {
+    (v1, v2) =>
       val percent = percentString.toInt.toDouble / 100
       v1 match {
         case res: Long => Math.abs(res - LongResult(v2)).toDouble / LongResult(v2) <= percent
-          case res: Int => Math.abs(res - IntResult(v2)).toDouble / IntResult(v2) <= percent
-          case res: Double => Math.abs(res - DoubleResult(v2)) / DoubleResult(v2) <= percent
-          case res: Float => Math.abs(res - FloatResult(v2)) / FloatResult(v2) <= percent
-        case _ => false
+        case res: Int => Math.abs(res - IntResult(v2)).toDouble / IntResult(v2) <= percent
+        case res: Double => Math.abs(res - DoubleResult(v2)) / DoubleResult(v2) <= percent
+        case res: Float => Math.abs(res - FloatResult(v2)) / FloatResult(v2) <= percent
+        case _ => throw new Exception("unsupported result type: " + v1.getClass)
       }
 
-    }
+  }
 }
 
 object Equal extends ResultEvaluation {
@@ -123,7 +122,21 @@ object Equal extends ResultEvaluation {
         case res: Int => res == IntResult(v2)
         case res: Double => res == DoubleResult(v2)
         case res: Float => res == FloatResult(v2)
-        case _ => v1.toString == v2.toString
+        case _ => throw new Exception("unsupported result type: " + v1.getClass)
+      }
+  }
+
+}
+
+object Compare extends ResultEvaluation {
+  def evaluate: (Any, Any) => Boolean = {
+    (v1, v2) =>
+      v1 match {
+        case res: Long => res == LongResult(v2)
+        case res: Int => res == IntResult(v2)
+        case res: Double => res == DoubleResult(v2)
+        case res: Float => res == FloatResult(v2)
+        case _ => throw new Exception("unsupported result type: " + v1.getClass)
       }
   }
 }
@@ -136,7 +149,7 @@ object GreaterThan extends ResultEvaluation {
         case res: Int => res > IntResult(v2)
         case res: Double => res > DoubleResult(v2)
         case res: Float => res > FloatResult(v2)
-        case _ => false
+        case _ => throw new Exception("unsupported result type: " + v1.getClass)
       }
   }
 }
@@ -149,7 +162,7 @@ object SmallerThan extends ResultEvaluation {
         case res: Int => res < IntResult(v2)
         case res: Double => res < DoubleResult(v2)
         case res: Float => res < FloatResult(v2)
-        case _ => false
+        case _ => throw new Exception("unsupported result type: " + v1.getClass)
       }
   }
 }
@@ -162,7 +175,7 @@ object SmallerThanEqual extends ResultEvaluation {
         case res: Int => res <= IntResult(v2)
         case res: Double => res <= DoubleResult(v2)
         case res: Float => res <= FloatResult(v2)
-        case _ => false
+        case _ => throw new Exception("unsupported result type: " + v1.getClass)
       }
   }
 }
@@ -175,7 +188,7 @@ object GreaterThanEqual extends ResultEvaluation {
         case res: Int => res >= IntResult(v2)
         case res: Double => res >= DoubleResult(v2)
         case res: Float => res >= FloatResult(v2)
-        case _ => false
+        case _ => throw new Exception("unsupported result type: " + v1.getClass)
       }
   }
 }
