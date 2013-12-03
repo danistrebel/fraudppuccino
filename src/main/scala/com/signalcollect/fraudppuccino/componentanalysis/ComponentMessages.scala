@@ -2,19 +2,19 @@ package com.signalcollect.fraudppuccino.componentanalysis
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.GraphEditor
-import com.signalcollect.fraudppuccino.resulthandling.ComponentResultHandler
+import com.signalcollect.fraudppuccino.resulthandling._
 
 // Some Instance -> Component Handler
 case class WorkFlowStep(s: String)
-case class RegisterResultHandler(handler: ComponentResultHandler)
+case class RegisterResultHandler(handler:  ComponentResultHandlerFactory)
 
 // Component Handler --> Component Master
 case class ComponentWorkflow(workflow: IndexedSeq[ComponentWorkflowStep])
-abstract class ComponentWorkflowStep
+trait ComponentWorkflowStep
 case class ConstantWorkflowStep(algorithm: ConditionAlgorithm, acceptance: (Any => Boolean)) extends ComponentWorkflowStep
 case class AlgorithmWorkflowStep(algorithm: ConditionAlgorithm, referenceAlgorithm: ConditionAlgorithm, acceptance: ((Any, Any) => Boolean)) extends ComponentWorkflowStep
 
-abstract class ConditionAlgorithm //Handler requests some action at the master
+trait ConditionAlgorithm //Handler requests some action at the master
 case class ComponentMasterQuery(query: ComponentMaster => Any) extends ConditionAlgorithm
 case class ComponentMemberQueryExecution(query: ComponentMemberQuery, allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster) => Any) extends ConditionAlgorithm
 case class ComponentAlgorithmExecution(memberAlgorithm: ComponentMemberAlgorithm, allRepliesReceived: (Iterable[ComponentMemberMessage], ComponentMaster) => Any) extends ConditionAlgorithm
@@ -25,13 +25,13 @@ case class ComponentResult(serializedComponent: String)
 case class ComputationStatus(serializedStatus: String)
 
 // Component Member --> Component Master
-abstract class ComponentMemberMessage //Message sent from the component member to the master
+trait ComponentMemberMessage //Message sent from the component member to the master
 case class ComponentMemberRegistration(neighbors: Iterable[Any]) extends ComponentMemberMessage
 case class ComponentMemberResponse(response: Option[Any]) extends ComponentMemberMessage
 case class ComponentMemberInfo(id: Any, results: collection.Map[String, Any], successors: Iterable[Int]) extends ComponentMemberMessage
 
 // Component Master --> Component Member
-abstract class MasterRequest //Master requests some action from its members
+trait MasterRequest //Master requests some action from its members
 case class ComponentMemberQuery(queryFunction: ComponentMember => ComponentMemberMessage) extends MasterRequest
 case class ComponentMemberAlgorithm(algorithmFactory: RepeatedAnalysisVertex[_] => VertexAlgorithm) extends MasterRequest
 case object ComponentMemberElimination extends MasterRequest

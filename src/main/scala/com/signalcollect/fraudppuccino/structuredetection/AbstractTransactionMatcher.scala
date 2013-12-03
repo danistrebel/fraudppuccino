@@ -5,8 +5,9 @@ import com.signalcollect.fraudppuccino.repeatedanalysis._
 import scala.collection.mutable.ArrayBuffer
 import java.util.HashMap
 import scala.collection.JavaConversions._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._ 
 
-abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingComplexity: Int) extends VertexAlgorithm(vertex) {
+abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingComplexity: Int) extends VertexAlgorithm {
 
   val unmatchedInputs = new HashMap[Int, TransactionInput]() // Transactions that could serve as inputs for this transaction
   val unmatchedOutputs = new HashMap[Int, TransactionOutput]() // Transactions that could serve as outputs for this transactions
@@ -41,8 +42,8 @@ abstract class AbstractTransactionMatcher(vertex: RepeatedAnalysisVertex[_], mat
     for ((ins, outs) <- matchesFound) {
       for (in <- ins) {
         for (out <- outs) {
-          graphEditor.sendSignal((out.transactionID, DownstreamTransactionPatternEdge), in.transactionID, None)
-          graphEditor.sendSignal((in.transactionID, UpstreamTransactionPatternEdge), out.transactionID, None)
+          graphEditor.sendSignal(EdgeMarkerSignature(out.transactionID, DownstreamTransactionPatternEdge), in.transactionID, None)
+          graphEditor.sendSignal(EdgeMarkerSignature(in.transactionID, UpstreamTransactionPatternEdge), out.transactionID, None)
         }
       }
     }

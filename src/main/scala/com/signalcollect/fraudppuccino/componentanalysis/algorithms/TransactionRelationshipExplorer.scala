@@ -2,6 +2,8 @@ package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis.VertexAlgorithm
 import com.signalcollect.fraudppuccino.structuredetection._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
+
 
 /**
  * Utility to explore node properties about nodes and their direct environment
@@ -18,7 +20,7 @@ trait TransactionRelationshipExplorer extends VertexAlgorithm {
    */
   def isPatternSink: Boolean = hasPredecessors && !hasSuccessors
 
-  def isIsolated: Boolean = !getHostVertex.outgoingEdges.exists(_._2.isInstanceOf[TransactionPatternEdge])
+  def isIsolated: Boolean = !getHostVertex.outgoingEdges.exists(edge => edge._2 == DownstreamTransactionPatternEdge || edge._2 == UpstreamTransactionPatternEdge)
 
   def isSplitter = getHostVertex.outgoingEdges.count(_._2 == DownstreamTransactionPatternEdge) > 1
 

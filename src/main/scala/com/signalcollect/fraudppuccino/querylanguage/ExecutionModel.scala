@@ -66,7 +66,7 @@ class ExecutionModel {
         case _ => throw new Exception("can't recognize type " + typeName + " please use a primitive type or the keyword \"ignore\".")
       }
     }
-    parsed.toMap.map(parsingEntry => ((parsingEntry._1.toLowerCase, (parsingEntry._2(0).asInstanceOf[Int], getTypeParserForType(parsingEntry._2(1).asInstanceOf[String])))))
+    parsed.toMap.map(parsingEntry => ((parsingEntry._1, (parsingEntry._2(0).asInstanceOf[Int], getTypeParserForType(parsingEntry._2(1).asInstanceOf[String])))))
   }
 
   //helpers

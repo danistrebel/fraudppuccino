@@ -12,7 +12,6 @@ import akka.routing.FromConfig
 import java.io.File
 import org.mashupbots.socko.events.WebSocketHandshakeEvent
 import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import com.signalcollect.fraudppuccino.componentanalysis.ComponentHandler
 import sys.process._
 import scala.collection.mutable.ArrayBuffer

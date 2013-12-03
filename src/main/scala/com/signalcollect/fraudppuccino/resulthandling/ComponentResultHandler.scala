@@ -1,17 +1,20 @@
 package com.signalcollect.fraudppuccino.resulthandling
 
-abstract class ComponentResultHandler {
+import com.signalcollect.fraudppuccino.componentdetection.DummyResultsHandler
+
+trait ComponentResultHandler {
   def processResult(jsonData: String): Unit
   def processStatusMessage(jsonStatus: String) = {}
 }
 
-object ComponentResultHandler {
-  def apply(s: String): ComponentResultHandler = {
-    s match {
+case class ComponentResultHandlerFactory(s: String) {
+  def apply(): ComponentResultHandler = {
+    s.toUpperCase match {
       case "CONSOLE" => CommandLineResultHandler
       case "WEBSERVER" => FraudppuccinoServer
       case "MONGODB"=> MongoDBResultHandler
       case "COUNTING" => CountingResultHandler
+      case "DUMMY" => DummyResultsHandler
     }
   }
 }

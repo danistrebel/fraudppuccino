@@ -2,12 +2,13 @@ package com.signalcollect.fraudppuccino.componentdetection
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 
 /**
  * Generic vertex algorithm that can be used to propagate labels amongst members of
  * connected vertices.
  */
-abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
+abstract class AbstractLabelMerger[LabelType](vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
   var label = initialLabel
   def getState = label

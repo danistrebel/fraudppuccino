@@ -14,6 +14,7 @@ import scala.util.parsing.json.JSON
 import com.signalcollect.fraudppuccino.resulthandling._
 import com.signalcollect.fraudppuccino.structuredetection._
 import com.signalcollect.fraudppuccino.componentanalysis._
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 
 @RunWith(classOf[JUnitRunner])
 class ComponentSpecs extends SpecificationWithJUnit {
@@ -31,7 +32,7 @@ class ComponentSpecs extends SpecificationWithJUnit {
       val handlerRef = system.actorFor("akka://SignalCollect/user/componentHandler")
       handlerRef ! WorkFlowStep("SIZE > 6")
       handlerRef ! WorkFlowStep("DEPTH > 5")
-      handlerRef ! RegisterResultHandler(DummyResultsHandler)
+      handlerRef ! RegisterResultHandler(ComponentResultHandlerFactory("DUMMY"))
       Thread.sleep(500l)
 
       //(ComponentMember ID, Component ID, successor (< 0 i.e. no successor for this vertex))

@@ -24,7 +24,7 @@ class ComponentHandler(graphEditor: GraphEditor[Any, Any]) extends Actor {
 
   def receive = {
     
-    case RegisterResultHandler(handler) => resultHandler += handler
+    case RegisterResultHandler(handler) => resultHandler += handler()
 
     //Adds a new work flow step by parsing the work flow specification
     case WorkFlowStep(workFlow) => componentWorkFlow += ComponentAlgorithmParser.parseWorkFlowStep(workFlow)

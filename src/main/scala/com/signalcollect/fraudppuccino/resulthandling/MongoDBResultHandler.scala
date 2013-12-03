@@ -12,7 +12,7 @@ import com.mongodb.DBObject
  * The reported components can later be found in the 'fraudppuccino'
  * database in in the collection 'reports<DATETIME OF EXECUTION>'
  */ 
-object MongoDBResultHandler extends ComponentResultHandler {
+case object MongoDBResultHandler extends ComponentResultHandler {
 
   val mongoClient = MongoClient()
   val collection = mongoClient("fraudppuccino")("results" + getTimeStamp)

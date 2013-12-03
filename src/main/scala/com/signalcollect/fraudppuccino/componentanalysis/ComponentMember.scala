@@ -3,12 +3,13 @@ package com.signalcollect.fraudppuccino.componentanalysis
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.componentanalysis.algorithms.TransactionRelationshipExplorer
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 
 /**
  * Member of a connected component.
  * Serves as a wrapper for yet another VertexAlgorithm and reports it's results back to the master of the connected component.
  */
-class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
+case class ComponentMember(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm with TransactionRelationshipExplorer {
 
   def id = vertex.id
   def getResult(key: String) = vertex.getResult(key)

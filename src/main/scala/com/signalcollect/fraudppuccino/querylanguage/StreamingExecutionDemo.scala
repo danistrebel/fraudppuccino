@@ -45,7 +45,7 @@ filters: [SIZE > 5,SIZE < 1000, SINKVALUE > 10000000000, DEPTH > 3, COUNTRYHOPS 
 
 #handlers that receive the reported components
 #e.g. WEBSERVER, CONSOLE, MONGODB
-handlers: [WEBSERVER, COUNTING]
+handlers: [WEBSERVER, CONSOLE]
 
 debug: true
   

@@ -4,8 +4,8 @@ import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import scala.collection.mutable.ArrayBuffer
 import com.signalcollect._
 import com.signalcollect.configuration.ActorSystemRegistry
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
 import scala.collection.mutable.HashSet
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers
 
 /**
  *  Serves as the main point of access to a connected component.
@@ -233,7 +233,7 @@ class ComponentMaster(vertex: RepeatedAnalysisVertex[_]) extends ComponentMember
   /**
    * Requests a serialized version of a component member
    */
-  val memberInfoExtraction: ComponentMemberQuery = ComponentMemberQuery(vertex => ComponentMemberInfo(vertex.id, vertex.results, vertex.outgoingEdges.filter(_._2 == DownstreamTransactionPatternEdge).map(_._1.asInstanceOf[Int])))
+  val memberInfoExtraction: ComponentMemberQuery = ComponentMemberQuery(vertex => ComponentMemberInfo(vertex.id, vertex.results, vertex.outgoingEdges.filter(_._2 == EdgeMarkers.DownstreamTransactionPatternEdge).map(_._1.asInstanceOf[Int])))
 
   /**
    * Combines the serialized information about the component member

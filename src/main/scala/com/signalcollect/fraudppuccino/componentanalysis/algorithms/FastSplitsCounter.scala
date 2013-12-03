@@ -2,7 +2,7 @@ package com.signalcollect.fraudppuccino.componentanalysis.algorithms
 
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
-import com.signalcollect.fraudppuccino.structuredetection.DownstreamTransactionPatternEdge
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
  * @param duration maxDuration between this transaction and the latest split
  * @param minSplits that a transaction is split into
  */
-class FastSplits(vertex: RepeatedAnalysisVertex[_], duration: Long = 86400, minSplits: Int = 3) extends VertexAlgorithm(vertex) with TransactionRelationshipExplorer {
+case class FastSplits(vertex: RepeatedAnalysisVertex[_], duration: Long = 86400, minSplits: Int = 3) extends VertexAlgorithm with TransactionRelationshipExplorer {
 
   var isFastSplit = false
 

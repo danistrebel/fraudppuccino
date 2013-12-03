@@ -3,8 +3,9 @@ package com.signalcollect.fraudppuccino.structuredetection
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect._
 import com.signalcollect.fraudppuccino.componentdetection.ConnectedComponentsIdentifier
+import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._ 
 
-case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm(vertex) {
+case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
   val value = vertex.getResult("value").getOrElse(0l).asInstanceOf[Long]
   val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]
@@ -21,7 +22,6 @@ case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends Verte
 
   def deliverSignal(signal: Any, sourceId: Option[Any], graphEditor: GraphEditor[Any, Any]) = {
     signal match {
-      case (linkTarget: Int, edgeType: EdgeMarker) => vertex.outgoingEdges += ((linkTarget, edgeType))
       case timeoutPill: Array[Long] => //Timeout pill represents the maximum age that a transaction is allowed to have in order to stay in the graph.
         if (!timedout && (time < timeoutPill(0))) {
           handleTimeout(graphEditor)
