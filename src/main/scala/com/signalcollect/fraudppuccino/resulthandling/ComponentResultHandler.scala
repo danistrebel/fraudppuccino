@@ -1,7 +1,5 @@
 package com.signalcollect.fraudppuccino.resulthandling
 
-import com.signalcollect.fraudppuccino.componentdetection.DummyResultsHandler
-
 trait ComponentResultHandler {
   def processResult(jsonData: String): Unit
   def processStatusMessage(jsonStatus: String) = {}

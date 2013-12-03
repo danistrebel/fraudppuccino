@@ -21,8 +21,8 @@ def getState = None
   }
 
   def executeSignalOperation(graphEditor: GraphEditor[Any, Any], outgoingEdges: Iterable[(Any, EdgeMarker)]) {
-    val neighbors = vertex.outgoingEdges.filter(edge => edge._2==EdgeMarkers.DownstreamTransactionPatternEdge || edge._2==EdgeMarkers.UpstreamTransactionPatternEdge).map(_._1)
-    graphEditor.sendSignal(ComponentMemberRegistration(neighbors), vertex.getResult("component").get.asInstanceOf[Int], Some(vertex.id))
+    val neighbors = vertex.outgoingEdges.filter(edge => edge._2==EdgeMarkers.DownstreamTransactionPatternEdge || edge._2==EdgeMarkers.UpstreamTransactionPatternEdge).map(_._1.asInstanceOf[Int])
+    graphEditor.sendSignal(ComponentMemberRegistration(neighbors.toArray), vertex.getResult("component").get.asInstanceOf[Int], Some(vertex.id))
     scoreSignal = 0.0
   }
 

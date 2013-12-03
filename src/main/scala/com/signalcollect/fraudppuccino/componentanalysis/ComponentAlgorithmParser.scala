@@ -3,6 +3,7 @@ package com.signalcollect.fraudppuccino.componentanalysis
 import scala.collection.mutable.Map
 import ComponentAlgorithms._
 
+
 /**
  * Utility to facilitate the parsing of filter executions on reported transactions
  */
@@ -64,113 +65,153 @@ object ComponentAlgorithmParser {
   /**
    * Regex for approximately equal checks
    */
-  val ApproxEqual = "~=(\\d+)%".r
+  val ApproxEqualRegex = "~=(\\d+)%".r
 
   /**
    * Generates the evaluation function that determines whether a returned result is accepted.
    */
   def parseStaticValueComparisonFunction(operator: String, value: String): Any => Boolean = {
     operator match {
-      case "=" => result: Any => result.toString == value
-      case ApproxEqual(percentString) => result: Any => {
-        val percent = percentString.toInt.toDouble / 100
-        result match {
-          case res: Long => Math.abs(res - value.toLong).toDouble / value.toLong <= percent
-          case res: Int => Math.abs(res - value.toInt).toDouble / value.toInt <= percent
-          case res: Double => Math.abs(res - value.toDouble) / value.toDouble <= percent
-          case res: Float => Math.abs(res - value.toFloat) / value.toFloat <= percent
-          case _ => false
-        }
-      }
-      case ">" => result: Any => {
-        result match {
-          case res: Long => res > value.toLong
-          case res: Int => res > value.toInt
-          case res: Double => res > value.toDouble
-          case res: Float => res > value.toFloat
-          case _ => false
-        }
-      }
-      case "<" => result: Any => {
-        result match {
-          case res: Long => res < value.toLong
-          case res: Int => res < value.toInt
-          case res: Double => res < value.toDouble
-          case res: Float => res < value.toFloat
-          case _ => false
-        }
-      }
-      case "<=" => result: Any => {
-        result match {
-          case res: Long => res <= value.toLong
-          case res: Int => res <= value.toInt
-          case res: Double => res <= value.toDouble
-          case res: Float => res <= value.toFloat
-          case _ => false
-        }
-      }
-      case ">=" => result: Any => {
-        result match {
-          case res: Long => res >= value.toLong
-          case res: Int => res >= value.toInt
-          case res: Double => res >= value.toDouble
-          case res: Float => res >= value.toFloat
-          case _ => false
-        }
-      } case "_" => _: Any => false
+      case "=" => Equal.staticCompare(value)
+      case ApproxEqualRegex(percentString) => ApproxEqual(percentString).staticCompare(value)
+      case ">" => GreaterThan.staticCompare(value)
+      case "<" => SmallerThan.staticCompare(value)
+      case "<=" => SmallerThanEqual.staticCompare(value)
+      case ">=" => GreaterThanEqual.staticCompare(value)
+      case "_" => _ => false
     }
   }
 
   def parseAlgorithmValueComparisonFunction(operator: String): (Any, Any) => Boolean = {
     operator match {
-      case "=" => (resultA, resultB) => resultA.toString == resultB.toString
-      case ApproxEqual(percentString) => (resultA, resultB) => {
-    	  val percent = percentString.toInt.toDouble / 100
-        resultA match {
-          case res: Long => Math.abs(res - resultB.asInstanceOf[Long]).toDouble / resultB.asInstanceOf[Long] <= percent
-          case res: Int => Math.abs(res - resultB.asInstanceOf[Int]).toDouble / resultB.asInstanceOf[Int] <= percent
-          case res: Double => Math.abs(res - resultB.asInstanceOf[Double]) / resultB.asInstanceOf[Double] <= percent
-          case res: Float => Math.abs(res - resultB.asInstanceOf[Float]) / resultB.asInstanceOf[Float] <= percent
-          case _ => false
-        }
-      }
-      case ">" => (resultA, resultB) => {
-        resultA match {
-          case res: Long => res > resultB.asInstanceOf[Long]
-          case res: Int => res > resultB.asInstanceOf[Int]
-          case res: Double => res > resultB.asInstanceOf[Double]
-          case res: Float => res > resultB.asInstanceOf[Float]
-          case _ => false
-        }
-      }
-      case "<" => (resultA, resultB) => {
-        resultA match {
-          case res: Long => res < resultB.asInstanceOf[Long]
-          case res: Int => res < resultB.asInstanceOf[Int]
-          case res: Double => res < resultB.asInstanceOf[Double]
-          case res: Float => res < resultB.asInstanceOf[Float]
-          case _ => false
-        }
-      }
-      case "<=" => (resultA, resultB) => {
-        resultA match {
-          case res: Long => res <= resultB.asInstanceOf[Long]
-          case res: Int => res <= resultB.asInstanceOf[Int]
-          case res: Double => res <= resultB.asInstanceOf[Double]
-          case res: Float => res <= resultB.asInstanceOf[Float]
-          case _ => false
-        }
-      }
-      case ">=" => (resultA, resultB) => {
-        resultA match {
-          case res: Long => res >= resultB.asInstanceOf[Long]
-          case res: Int => res >= resultB.asInstanceOf[Int]
-          case res: Double => res >= resultB.asInstanceOf[Double]
-          case res: Float => res >= resultB.asInstanceOf[Double]
-          case _ => false
-        }
-      } case "_" => (resultA, resultB) => false
+      case "=" => Equal.evaluate
+      case ApproxEqualRegex(percentString) => ApproxEqual(percentString).evaluate
+      case ">" => GreaterThan.evaluate
+      case "<" => SmallerThan.evaluate
+      case "<=" => SmallerThanEqual.evaluate
+      case ">=" => GreaterThanEqual.evaluate
+      case "_" => (_, _) => false
     }
   }
 
+}
+trait ResultEvaluation extends Serializable {
+  def staticCompare(staticValue: Any): (Any) => Boolean = evaluate(_, staticValue)
+  def evaluate: (Any, Any) => Boolean
+}
+
+case class ApproxEqual(percentString: String) extends ResultEvaluation {
+    def evaluate: (Any, Any) => Boolean = {
+          (v1, v2) =>
+      val percent = percentString.toInt.toDouble / 100
+      v1 match {
+        case res: Long => Math.abs(res - LongResult(v2)).toDouble / LongResult(v2) <= percent
+          case res: Int => Math.abs(res - IntResult(v2)).toDouble / IntResult(v2) <= percent
+          case res: Double => Math.abs(res - DoubleResult(v2)) / DoubleResult(v2) <= percent
+          case res: Float => Math.abs(res - FloatResult(v2)) / FloatResult(v2) <= percent
+        case _ => false
+      }
+
+    }
+}
+
+object Equal extends ResultEvaluation {
+  def evaluate: (Any, Any) => Boolean = {
+    (v1, v2) =>
+      v1 match {
+        case res: Long => res == LongResult(v2)
+        case res: Int => res == IntResult(v2)
+        case res: Double => res == DoubleResult(v2)
+        case res: Float => res == FloatResult(v2)
+        case _ => v1.toString == v2.toString
+      }
+  }
+}
+
+object GreaterThan extends ResultEvaluation {
+  def evaluate: (Any, Any) => Boolean = {
+    (v1, v2) =>
+      v1 match {
+        case res: Long => res > LongResult(v2)
+        case res: Int => res > IntResult(v2)
+        case res: Double => res > DoubleResult(v2)
+        case res: Float => res > FloatResult(v2)
+        case _ => false
+      }
+  }
+}
+
+object SmallerThan extends ResultEvaluation {
+  def evaluate: (Any, Any) => Boolean = {
+    (v1, v2) =>
+      v1 match {
+        case res: Long => res < LongResult(v2)
+        case res: Int => res < IntResult(v2)
+        case res: Double => res < DoubleResult(v2)
+        case res: Float => res < FloatResult(v2)
+        case _ => false
+      }
+  }
+}
+
+object SmallerThanEqual extends ResultEvaluation {
+  def evaluate: (Any, Any) => Boolean = {
+    (v1, v2) =>
+      v1 match {
+        case res: Long => res <= LongResult(v2)
+        case res: Int => res <= IntResult(v2)
+        case res: Double => res <= DoubleResult(v2)
+        case res: Float => res <= FloatResult(v2)
+        case _ => false
+      }
+  }
+}
+
+object GreaterThanEqual extends ResultEvaluation {
+  def evaluate: (Any, Any) => Boolean = {
+    (v1, v2) =>
+      v1 match {
+        case res: Long => res >= LongResult(v2)
+        case res: Int => res >= IntResult(v2)
+        case res: Double => res >= DoubleResult(v2)
+        case res: Float => res >= FloatResult(v2)
+        case _ => false
+      }
+  }
+}
+
+object IntResult {
+  def apply(value: Any): Int = {
+    value match {
+      case s: String => s.toInt
+      case _ => value.asInstanceOf[Int]
+    }
+  }
+}
+
+object LongResult {
+  def apply(value: Any): Long = {
+    value match {
+      case s: String => s.toLong
+      case _ => value.asInstanceOf[Long]
+    }
+  }
+}
+
+object DoubleResult {
+  def apply(value: Any): Double = {
+    value match {
+      case s: String => s.toDouble
+      case _ => value.asInstanceOf[Double]
+    }
+  }
+}
+
+object FloatResult {
+  def apply(value: Any): Float = {
+    value match {
+      case s: String => s.toFloat
+      case _ => value.asInstanceOf[Float]
+    }
+  }
 }

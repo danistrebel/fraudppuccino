@@ -35,7 +35,7 @@ case class StreamingExecution(
   debug: Boolean = false, // prints additional information about the execution if true
   transactionAttributes: Map[String, (Int, String => Any)] = Map[String, (Int, String => Any)]()) //Attributes that should be parsed from the input file. Format (Name, (Index, Parser))
   {
-  val graph = GraphBuilder.withStorageFactory(JavaMapStorage).build //.withMessageSerialization(true).withKryoRegistrations(kryoRegistrations).build //
+  val graph = GraphBuilder.withStorageFactory(JavaMapStorage).build//.withMessageSerialization(true).withKryoRegistrations(kryoRegistrations).build //
   var iter: Iterator[String] = null //Specify the work flow
   val mandatoryTransactionAttributes = Array[String]("id", "src", "target", "time")
   val indexOfId = transactionAttributes("id")._1
@@ -209,7 +209,8 @@ case class StreamingExecution(
     "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberAlgorithm",
     "com.signalcollect.fraudppuccino.componentanalysis.ComponentMemberElimination$",
     "com.signalcollect.fraudppuccino.resulthandling.ComponentResultHandlerFactory",
-    "scala.collection.immutable.$colon$colon")
+    "scala.collection.mutable.ArrayBuffer",
+    "com.signalcollect.fraudppuccino.componentanalysis.StaticEvaluation")
 }
 
 abstract class MatchingMode
