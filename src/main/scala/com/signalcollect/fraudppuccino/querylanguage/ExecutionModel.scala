@@ -5,6 +5,8 @@ import scala.collection.JavaConversions._
 import java.util.HashMap
 import java.util.Calendar
 import java.util.TimeZone
+import com.signalcollect.fraudppuccino.repeatedanalysis._
+import com.signalcollect.fraudppuccino.structuredetection._
 
 /**
  * Captures all relevant information for issuing matcher executions.
@@ -19,6 +21,7 @@ class ExecutionModel {
   @BeanProperty var transactionInterval: String = null
   @BeanProperty var exhaustiveMatching = true
   @BeanProperty var matchingComplexity = 10
+  @BeanProperty var matcher: String = ""
   @BeanProperty var maxComponentDuration: String = "0"
   @BeanProperty var filters = new java.util.ArrayList[String]()
   @BeanProperty var handlers = new java.util.ArrayList[String]()
@@ -33,8 +36,8 @@ class ExecutionModel {
         parseUnixDate(end), parseSec(window), 
         parseSec(transactionInterval), 
         exhaustiveMatching, 
-        matchingComplexity,
-        MATCH_ALL,
+        transactionAlgorithmParser(matcher),
+        matcherParser(matcher),
         parseSec(maxComponentDuration),
         filters, 
         handlers, 
@@ -67,6 +70,20 @@ class ExecutionModel {
       }
     }
     parsed.toMap.map(parsingEntry => ((parsingEntry._1, (parsingEntry._2(0).asInstanceOf[Int], getTypeParserForType(parsingEntry._2(1).asInstanceOf[String])))))
+  }
+  
+  def matcherParser(matcherName: String): RepeatedAnalysisVertex[_] => VertexAlgorithm = {
+    matcherName.toUpperCase match {
+      case "BTC" => if (exhaustiveMatching) v => BTCTransactionMatcher(v, MATCH_ALL, matchingComplexity) else v => GreedyBitcoinMatcher(v, MATCH_ALL, matchingComplexity)
+      case _ => throw new Exception("No matcher registered with name " + matcherName)
+    }
+  }
+  
+  def transactionAlgorithmParser(matcherName: String): RepeatedAnalysisVertex[_] => VertexAlgorithm = {
+    matcherName.toUpperCase match {
+      case "BTC" => if (exhaustiveMatching) v => TransactionAnnouncer(v) else v => new UnsubscribingTransactionAnnouncer(v)
+      case _ => throw new Exception("No matcher registered with name " + matcherName)
+    }
   }
 
   //helpers

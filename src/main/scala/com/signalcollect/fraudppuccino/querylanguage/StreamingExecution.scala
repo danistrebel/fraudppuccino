@@ -27,8 +27,8 @@ case class StreamingExecution(
   windowSize: Long = 0l, //in s
   maxTxInterval: Long = 0l, // in s
   exhaustiveMatching: Boolean = true, // should the matcher consider more than one possible matching combination
-  matchingComplexity: Integer = 10, //number Of inputs and outputs that are considered in the matching
-  matchingMode: MatchingMode = MATCH_ALL, //what kinds of transaction associations should be captured
+  transactionAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = null, //Initial algorithm to be run on the transactions depending on the use case
+  transactionMatcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = null, //Matcher implementation to match the transactions depending on the use case
   maxComponentDuration: Long = 0l, //maximum length of a component
   filters: Iterable[String] = List(), //List of filters that components have to comply with in order to be reported
   resultHandlers: Iterable[String] = List(), // handlers that receive the reported components
@@ -45,9 +45,6 @@ case class StreamingExecution(
   var handlerRef: ActorRef = null
 
   val optionalAttributes = transactionAttributes.filter(attribute => !mandatoryTransactionAttributes.contains(attribute._1))
-
-  val transactionAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if (exhaustiveMatching) v => TransactionAnnouncer(v) else v => new UnsubscribingTransactionAnnouncer(v)
-  val matcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = if (exhaustiveMatching) v => BTCTransactionMatcher(v, matchingMode, matchingComplexity) else v => GreedyBitcoinMatcher(v, matchingMode, matchingComplexity)
 
   def execute = {
 
@@ -159,9 +156,9 @@ case class StreamingExecution(
     transaction.setAlgorithmImplementation(transactionAlgorithm)
 
     val sender = new RepeatedAnalysisVertex(srcId)
-    sender.setAlgorithmImplementation(matcherAlgorithm)
+    sender.setAlgorithmImplementation(transactionMatcherAlgorithm)
     val receiver = new RepeatedAnalysisVertex(targetId)
-    receiver.setAlgorithmImplementation(matcherAlgorithm)
+    receiver.setAlgorithmImplementation(transactionMatcherAlgorithm)
 
     graph.addVertex(transaction)
     graph.addVertex(sender)
