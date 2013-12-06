@@ -27,8 +27,8 @@ case class StreamingExecution(
   windowSize: Long = 0l, //in s
   maxTxInterval: Long = 0l, // in s
   exhaustiveMatching: Boolean = true, // should the matcher consider more than one possible matching combination
-  transactionAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = null, //Initial algorithm to be run on the transactions depending on the use case
-  transactionMatcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = null, //Matcher implementation to match the transactions depending on the use case
+  transactionAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm, //Initial algorithm to be run on the transactions depending on the use case
+  transactionMatcherAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm, //Matcher implementation to match the transactions depending on the use case
   maxComponentDuration: Long = 0l, //maximum length of a component
   filters: Iterable[String] = List(), //List of filters that components have to comply with in order to be reported
   resultHandlers: Iterable[String] = List(), // handlers that receive the reported components

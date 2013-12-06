@@ -29,7 +29,9 @@ class StreamedStructureDetectionSpec extends SpecificationWithJUnit {
 
     sequential
 
-    val execution = new StreamingExecution(transactionAttributes = txAttributes.toMap)
+    val execution = new StreamingExecution(transactionAttributes = txAttributes.toMap, 
+        transactionAlgorithm = v => TransactionAnnouncer(v), 
+        transactionMatcherAlgorithm = v => BTCTransactionMatcher(v))
 
     "add Transactions to the transaction matcher " in {
 

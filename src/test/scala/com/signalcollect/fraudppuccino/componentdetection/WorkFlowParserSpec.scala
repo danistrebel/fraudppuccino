@@ -18,7 +18,7 @@ class WorkFlowParserSpec extends SpecificationWithJUnit {
       val lessThan100 = ComponentAlgorithmParser.parseStaticValueComparisonFunction("<", "100")
       lessThan100(100l) === false
       lessThan100(99) === true
-      lessThan100("some string") === false
+      lessThan100("some string") must throwA[Exception] //Because only numeric values are allowed here.
       lessThan100(1.0) === true
 
       val greaterThan100 = ComponentAlgorithmParser.parseStaticValueComparisonFunction(">", "100")

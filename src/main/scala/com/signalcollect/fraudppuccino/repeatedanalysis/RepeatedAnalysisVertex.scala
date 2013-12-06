@@ -41,7 +41,7 @@ class RepeatedAnalysisVertex[Id](val id: Id) extends Vertex[Id, Any] {
   var nextAlgorithm: RepeatedAnalysisVertex[_] => VertexAlgorithm = null
 
   def setAlgorithmImplementation(algorithmFactory: (RepeatedAnalysisVertex[Id]) => VertexAlgorithm) {
-    algorithm = algorithmFactory.apply(this)
+    algorithm = algorithmFactory(this)
   }
 
   def removeAlgorithmImplementation = algorithm = new DummyVertexAlgorithm

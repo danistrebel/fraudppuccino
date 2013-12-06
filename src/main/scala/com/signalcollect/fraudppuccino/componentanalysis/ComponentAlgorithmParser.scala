@@ -67,7 +67,10 @@ object ComponentAlgorithmParser {
   val ApproxEqualRegex = "~=(\\d+)%".r
 
   /**
-   * Generates the evaluation function that determines whether a returned result is accepted.
+   * Generates the evaluation function that determines whether a returned 
+   * result is accepted by comparing it to a static value type.
+   * 
+   * @throws Exception if the operator is not supported or the types can not be compared. 
    */
   def parseStaticValueComparisonFunction(operator: String, value: String): Any => Boolean = {
     operator match {
@@ -81,6 +84,12 @@ object ComponentAlgorithmParser {
     }
   }
 
+  /**
+   * Generates the evaluation function that determines whether a returned 
+   * result is accepted by comparing it to the result of another algorithm.
+   * 
+   * @throws Exception if the operator is not supported or the results can not be compared. 
+   */
   def parseAlgorithmValueComparisonFunction(operator: String): (Any, Any) => Boolean = {
     operator match {
       case "=" => Equal.evaluate
@@ -92,13 +101,30 @@ object ComponentAlgorithmParser {
       case "_" => throw new Exception("unsupported operator: " + operator)
     }
   }
-
 }
+
+/**
+ * Defines the functionality by for comparison implementations and matches
+ * the static comparison to the more generic algorithm-algorithm comparison
+ */
 trait ResultEvaluation extends Serializable {
+  /**
+   * creates a comparison function that compares a value with the static value
+   */
   def staticCompare(staticValue: Any): (Any) => Boolean = evaluate(_, staticValue)
+  
+  /**
+   * creates a comparison function to compare a pair of values
+   */
   def evaluate: (Any, Any) => Boolean
 }
 
+/**
+ * Comparison that determines if two values are approximately equal.
+ * I.e. the values lie within the specified tolerance
+ * 
+ * @param percentString Tolerance with which the two values are allowed to differ from each other.
+ */
 case class ApproxEqual(percentString: String) extends ResultEvaluation {
   def evaluate: (Any, Any) => Boolean = {
     (v1, v2) =>
@@ -114,6 +140,9 @@ case class ApproxEqual(percentString: String) extends ResultEvaluation {
   }
 }
 
+/**
+ * Comparison that determines if two values are approximately equal.
+ */
 object Equal extends ResultEvaluation {
   def evaluate: (Any, Any) => Boolean = {
     (v1, v2) =>
@@ -122,11 +151,14 @@ object Equal extends ResultEvaluation {
         case res: Int => res == IntResult(v2)
         case res: Double => res == DoubleResult(v2)
         case res: Float => res == FloatResult(v2)
-        case _ => throw new Exception("unsupported result type: " + v1.getClass)
+        case _ => v1 == v2
       }
   }
 }
 
+/**
+ * Comparison that determines if the first value is greater than the second value.
+ */
 object GreaterThan extends ResultEvaluation {
   def evaluate: (Any, Any) => Boolean = {
     (v1, v2) =>
@@ -140,6 +172,9 @@ object GreaterThan extends ResultEvaluation {
   }
 }
 
+/**
+ * Comparison that determines if the first value is smaller than the second value.
+ */
 object SmallerThan extends ResultEvaluation {
   def evaluate: (Any, Any) => Boolean = {
     (v1, v2) =>
@@ -153,6 +188,9 @@ object SmallerThan extends ResultEvaluation {
   }
 }
 
+/**
+ * Comparison that determines if the first value is smaller than or equal to the second value.
+ */
 object SmallerThanEqual extends ResultEvaluation {
   def evaluate: (Any, Any) => Boolean = {
     (v1, v2) =>
@@ -166,6 +204,9 @@ object SmallerThanEqual extends ResultEvaluation {
   }
 }
 
+/**
+ * Comparison that determines if the first value is greater than or equal to the second value.
+ */
 object GreaterThanEqual extends ResultEvaluation {
   def evaluate: (Any, Any) => Boolean = {
     (v1, v2) =>
@@ -179,6 +220,9 @@ object GreaterThanEqual extends ResultEvaluation {
   }
 }
 
+/*
+ * Combined parsing and type casting for Integers
+ */
 object IntResult {
   def apply(value: Any): Int = {
     value match {
@@ -188,6 +232,9 @@ object IntResult {
   }
 }
 
+/*
+ * Combined parsing and type casting for Longs
+ */
 object LongResult {
   def apply(value: Any): Long = {
     value match {
@@ -197,6 +244,9 @@ object LongResult {
   }
 }
 
+/*
+ * Combined parsing and type casting for Doubles
+ */
 object DoubleResult {
   def apply(value: Any): Double = {
     value match {
@@ -206,6 +256,9 @@ object DoubleResult {
   }
 }
 
+/*
+ * Combined parsing and type casting for Floats
+ */
 object FloatResult {
   def apply(value: Any): Float = {
     value match {

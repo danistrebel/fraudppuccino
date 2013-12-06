@@ -5,12 +5,16 @@ import com.signalcollect._
 import com.signalcollect.fraudppuccino.componentdetection.ConnectedComponentsIdentifier
 import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._ 
 
+/**
+ * Vertex algorithm to be used on financial transactions financial transactions
+ * Requires the fields 'src', 'target', 'time' and 'value' to be set on the vertex. 
+ */
 case class TransactionAnnouncer(vertex: RepeatedAnalysisVertex[_]) extends VertexAlgorithm {
 
-  val value = vertex.getResult("value").getOrElse(0l).asInstanceOf[Long]
-  val time = vertex.getResult("time").getOrElse(0l).asInstanceOf[Long]
-  val source = vertex.getResult("src").getOrElse(0).asInstanceOf[Int]
-  val target = vertex.getResult("target").getOrElse(0).asInstanceOf[Int]
+  val value = vertex.getResult("value").getOrElse(throw new Exception("Value is not set on transaction with id " + vertex.id)).asInstanceOf[Long]
+  val time = vertex.getResult("time").getOrElse(throw new Exception("Time is not set on transaction with id " + vertex.id)).asInstanceOf[Long]
+  val source = vertex.getResult("src").getOrElse(throw new Exception("Src is not set on transaction with id " + vertex.id)).asInstanceOf[Int]
+  val target = vertex.getResult("target").getOrElse(throw new Exception("Target is not set on transaction with id " + vertex.id)).asInstanceOf[Int]
   def id = vertex.id.asInstanceOf[Int]
 
   var timedout = false

@@ -33,4 +33,4 @@ libraryDependencies ++= Seq(
 
 jarName in assembly := "fraudppucchino.jar"
 
-test in assembly := {}// skips the tests
+//test in assembly := {}// skips the tests
