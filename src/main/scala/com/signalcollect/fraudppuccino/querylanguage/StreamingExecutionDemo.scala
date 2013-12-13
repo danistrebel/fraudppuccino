@@ -25,7 +25,7 @@ parse:
   cash: [7, Boolean]
 
 #defines the use case
-matcher: BTC
+matcher: FINANCIAL
 
 #the sections of the input data that should be processed
 start: 01/09/2009 02:50:00

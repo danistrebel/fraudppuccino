@@ -74,14 +74,14 @@ class ExecutionModel {
   
   def matcherParser(matcherName: String): RepeatedAnalysisVertex[_] => VertexAlgorithm = {
     matcherName.toUpperCase match {
-      case "BTC" => if (exhaustiveMatching) v => BTCTransactionMatcher(v, MATCH_ALL, matchingComplexity) else v => GreedyBitcoinMatcher(v, MATCH_ALL, matchingComplexity)
+      case "FINANCIAL" => if (exhaustiveMatching) v => FinancialTransactionsMatcher(v, MATCH_ALL, matchingComplexity) else v => GreedyBitcoinMatcher(v, MATCH_ALL, matchingComplexity)
       case _ => throw new Exception("No matcher registered with name " + matcherName)
     }
   }
   
   def transactionAlgorithmParser(matcherName: String): RepeatedAnalysisVertex[_] => VertexAlgorithm = {
     matcherName.toUpperCase match {
-      case "BTC" => if (exhaustiveMatching) v => TransactionAnnouncer(v) else v => new UnsubscribingTransactionAnnouncer(v)
+      case "FINANCIAL" => if (exhaustiveMatching) v => TransactionAnnouncer(v) else v => new UnsubscribingTransactionAnnouncer(v)
       case _ => throw new Exception("No matcher registered with name " + matcherName)
     }
   }

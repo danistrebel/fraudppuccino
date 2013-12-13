@@ -8,13 +8,13 @@ import com.signalcollect.fraudppuccino.repeatedanalysis.RepeatedAnalysisVertex
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.componentdetection.ConnectedComponentsIdentifier
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
-import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
+import com.signalcollect.fraudppuccino.structuredetection.FinancialTransactionsMatcher
 import com.signalcollect.fraudppuccino.componentdetection.ComponentLabel
 
 @RunWith(classOf[JUnitRunner])
 class BTCConnectedComponentsSpec extends SpecificationWithJUnit {
 
-  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new BTCTransactionMatcher(vertex)
+  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new FinancialTransactionsMatcher(vertex)
   val transactionAnnouncing: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionAnnouncer(vertex)
 
   sequential

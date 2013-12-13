@@ -10,7 +10,7 @@ import com.signalcollect.fraudppuccino.querylanguage._
 import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._ 
 
 
-case class BTCTransactionMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL, matchingComplexity: Int = 10) extends VertexAlgorithm {
+case class FinancialTransactionsMatcher(vertex: RepeatedAnalysisVertex[_], matchingMode: MatchingMode = MATCH_ALL, matchingComplexity: Int = 10) extends VertexAlgorithm {
 
   var matchableInputs = new ArrayBuffer[PartialInput] // Transactions that are received by this entity
   var matchableOutputs = new ArrayBuffer[PartialOutput] // Transactions that are sent by this entity

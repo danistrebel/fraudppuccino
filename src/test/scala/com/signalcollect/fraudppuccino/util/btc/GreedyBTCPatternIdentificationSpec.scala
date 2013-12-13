@@ -8,7 +8,7 @@ import org.specs2.runner.JUnitRunner
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
-import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
+import com.signalcollect.fraudppuccino.structuredetection.FinancialTransactionsMatcher
 import com.signalcollect.fraudppuccino.structuredetection.GreedyBitcoinMatcher
 
 @RunWith(classOf[JUnitRunner])

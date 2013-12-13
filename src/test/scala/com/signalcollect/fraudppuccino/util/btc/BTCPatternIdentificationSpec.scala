@@ -8,12 +8,12 @@ import org.specs2.runner.JUnitRunner
 import com.signalcollect.fraudppuccino.repeatedanalysis._
 import com.signalcollect.fraudppuccino.repeatedanalysis.EdgeMarkers._
 import com.signalcollect.fraudppuccino.structuredetection.TransactionAnnouncer
-import com.signalcollect.fraudppuccino.structuredetection.BTCTransactionMatcher
+import com.signalcollect.fraudppuccino.structuredetection.FinancialTransactionsMatcher
 
 @RunWith(classOf[JUnitRunner])
 class BTCPatternIdentificationSpec extends SpecificationWithJUnit {
 
-  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new BTCTransactionMatcher(vertex)
+  val transactionMatching: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new FinancialTransactionsMatcher(vertex)
   val transactionAnnouncing: RepeatedAnalysisVertex[_] => VertexAlgorithm = vertex => new TransactionAnnouncer(vertex)
 
   "The pattern identifier" should {

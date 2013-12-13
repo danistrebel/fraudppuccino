@@ -6,9 +6,9 @@ excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
   cp filter {_.data.getName == "minlog-1.2.jar"}
 }
 
-name := "signal-collect-fraudppucchino"
+name := "signal-collect-fraudppuccino"
 
-version := "0.0.1-SNAPSHOT"
+version := "0.0.2-SNAPSHOT"
 
 scalacOptions ++= Seq("-optimize")
 
@@ -31,6 +31,6 @@ libraryDependencies ++= Seq(
  "org.mongodb" %% "casbah" % "2.5.0"
 )
 
-jarName in assembly := "fraudppucchino.jar"
+jarName in assembly := "fraudppuccino.jar"
 
 //test in assembly := {}// skips the tests
