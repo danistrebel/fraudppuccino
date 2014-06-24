@@ -25,3 +25,5 @@ src/main/scala/com/signalcollect/fraudppuccino/evaluation/btc/BTCTransactionMatc
 *.cache
 
 .settings
+
+project/project
